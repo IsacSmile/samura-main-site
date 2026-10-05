@@ -34,10 +34,10 @@ export async function generateMetadata({
   const primaryImage = product.images.find((i) => i.isPrimary)?.url || "/products/day-pads.svg";
 
   return {
-    title: `${product.name} | Organic & Rash-Free`,
+    title: `${product.name} | Gentle Cotton Care`,
     description:
       product.shortDescription ||
-      `Buy ${product.name} from Samaura Healthcare. 100% GOTS certified organic, rash-free, and delivered in plain discreet packaging.`,
+      `Buy ${product.name} from Samaura Healthcare. Soft breathable cotton, hypoallergenic comfort, and delivered in plain discreet packaging.`,
     openGraph: {
       title: `${product.name} | Samaura Healthcare`,
       description: product.shortDescription || undefined,
@@ -212,7 +212,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 )}
                 <span className="text-muted">•</span>
                 <span className="text-ink font-medium flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-success" /> Dermatologically Tested
+                  <ShieldCheck className="w-3.5 h-3.5 text-success" /> Gentle on Skin
                 </span>
               </div>
 

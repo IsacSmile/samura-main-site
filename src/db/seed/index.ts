@@ -73,7 +73,7 @@ export async function runSeed() {
       id: "cat_sanitary_pads",
       name: "Sanitary Pads",
       slug: "sanitary-pads",
-      description: "100% certified organic cotton, rash-free, ultra-absorbent pads for daytime and overnight flow.",
+      description: "Soft organic cotton, gentle comfort, and absorbent pads for daytime and overnight flow.",
       image: "/products/day-pads.svg",
       sortOrder: 1,
     },
@@ -89,7 +89,7 @@ export async function runSeed() {
       id: "cat_menstrual_cups",
       name: "Menstrual Cups",
       slug: "menstrual-cups",
-      description: "100% medical-grade silicone cups offering 12-hour leak-proof, zero-waste period freedom.",
+      description: "Medical-grade silicone cups offering 12-hour leak-resistant, zero-waste period freedom.",
       image: "/products/menstrual-cup.svg",
       sortOrder: 3,
     },
@@ -113,27 +113,27 @@ export async function runSeed() {
       categoryId: "cat_sanitary_pads",
       name: "Organic Cotton Ultra-Thin Day Pads",
       slug: "organic-cotton-ultra-thin-day-pads",
-      shortDescription: "Ultra-thin, rash-free daytime pads with 100% certified organic cotton topsheet.",
+      shortDescription: "Ultra-thin daytime pads with soft organic cotton topsheet.",
       description:
         "Designed specifically for sensitive skin, Samaura Organic Cotton Day Pads eliminate plastic chafing and chemical irritation. Features a super-absorbent core that locks moisture in seconds, flexible wings that stay in place, and a breathable bottom film that prevents humidity build-up.",
       basePricePaise: 29900, // ₹299.00
       salePricePaise: 24900, // ₹249.00
       isFeatured: true,
       isBestseller: true,
-      rating: 4.9,
-      reviewCount: 142,
+      rating: 0,
+      reviewCount: 0,
       badge: "Bestseller",
       flowType: "Regular to Moderate Flow",
       ingredients:
-        "100% GOTS Certified Organic Cotton (Topsheet), Chlorine-Free Elemental Wood Pulp (Absorbent Core), Super Absorbent Polymer (SAP), Plant-based Bioplastic Backing, Medical-Grade Non-Toxic Adhesive.",
+        "Organic Cotton (Topsheet), Chlorine-Free Elemental Wood Pulp (Absorbent Core), Super Absorbent Polymer (SAP), Plant-based Bioplastic Backing, Non-Toxic Adhesive.",
       absorptionGuide:
         "Absorbs up to 80ml. Ideal for regular to moderate daytime menstrual flow. Recommended change every 4–6 hours.",
       usageGuide:
         "1. Peel off the release paper from the back.\n2. Position the pad in the center of your underwear.\n3. Remove wing papers and wrap wings firmly underneath the panty gusset.\n4. Wrap used pad in wrapper and dispose in bin. Never flush.",
       features: JSON.stringify([
-        "100% GOTS Certified Organic Cotton Topsheet",
+        "Soft Organic Cotton Topsheet",
         "Zero Chlorine, Fragrance or Synthetic Dyes",
-        "Breathable plant-based backing prevents rashes",
+        "Breathable backing helps prevent irritation",
         "Dual-core quick absorption channels",
       ]),
       faq: JSON.stringify([
@@ -178,28 +178,28 @@ export async function runSeed() {
     {
       id: "prod_02_overnight_xxl_pads",
       categoryId: "cat_sanitary_pads",
-      name: "Overnight Heavy Flow Anion Chip Pads (XXL 320mm)",
-      slug: "overnight-heavy-flow-anion-pads-xxl",
-      shortDescription: "Extra-long 320mm night pads with wide back flare and antibacterial green anion strip.",
+      name: "Overnight Heavy Flow Pads (XXL 320mm)",
+      slug: "overnight-heavy-flow-pads-xxl",
+      shortDescription: "Extra-long 320mm night pads with wide back flare and breathable comfort strip.",
       description:
-        "Sleep uninterrupted through your heaviest nights. Samaura Overnight Pads feature a 320mm contoured shape with double-wide posterior wings that prevent back-leaks in all sleeping postures. Embedded tourmaline anion strip neutralizes odor naturally.",
+        "Sleep comfortably through heavy nights. Samaura Overnight Pads feature a 320mm contoured shape with double-wide posterior wings that prevent back-leaks in all sleeping postures. Embedded breathable freshness strip helps maintain odor neutrality.",
       basePricePaise: 34900,
       salePricePaise: 29900,
       isFeatured: true,
       isBestseller: true,
-      rating: 4.95,
-      reviewCount: 98,
-      badge: "Zero Leaks",
+      rating: 0,
+      reviewCount: 0,
+      badge: "Extra Coverage",
       flowType: "Heavy to Very Heavy Flow",
       ingredients:
-        "100% Organic Cotton Topsheet, Tourmaline Anion Strip, Super Absorbent Core with Japanese SAP, Breathable PE Film, Non-Toxic Adhesive.",
+        "Organic Cotton Topsheet, Breathable Freshness Strip, Super Absorbent Core with Japanese SAP, Breathable PE Film, Non-Toxic Adhesive.",
       absorptionGuide:
         "Absorbs up to 180ml. Designed for heavy flow, post-delivery, and uninterrupted 8-hour overnight sleep with 320mm wide rear coverage.",
       usageGuide:
         "1. Peel protective back strip.\n2. Align pad with the wider fan shape at the posterior (back) of underwear.\n3. Wrap both sets of wings securely underneath.\n4. Dispose thoughtfully in bin.",
       features: JSON.stringify([
         "320mm Extra-Long Profile with Wide Fan Back",
-        "Natural Green Tea & Tourmaline Anion Strip",
+        "Natural Green Tea Freshness Strip",
         "Locks up to 180ml of fluid without feeling wet",
         "Super-soft cotton wings with secure grip adhesive",
       ]),
@@ -250,12 +250,12 @@ export async function runSeed() {
       salePricePaise: 16900,
       isFeatured: false,
       isBestseller: false,
-      rating: 4.8,
+      rating: 0,
       reviewCount: 0,
       badge: "Daily Fresh",
       flowType: "Light Spotting & Daily Discharge",
       ingredients:
-        "100% Organic Cotton Surface, Air-Laid Micro-Porous Absorbent Core, Biodegradable Water-Proof Backsheet.",
+        "Organic Cotton Surface, Air-Laid Micro-Porous Absorbent Core, Water-Proof Backsheet.",
       absorptionGuide:
         "Absorbs 15–20ml. Perfect for daily vaginal discharge, spotting, pre/post period days, or cup backup.",
       usageGuide:
@@ -312,12 +312,12 @@ export async function runSeed() {
       salePricePaise: 18900,
       isFeatured: false,
       isBestseller: false,
-      rating: 4.85,
+      rating: 0,
       reviewCount: 0,
       badge: "Active Fit",
       flowType: "Light Spotting & Daily Discharge",
       ingredients:
-        "100% Pure Organic Cotton Topsheet, Plant Cellulose Core, Breathable Back Film.",
+        "Pure Organic Cotton Topsheet, Plant Cellulose Core, Breathable Back Film.",
       absorptionGuide:
         "Absorbs 25ml. Anatomical curve designed for active days, yoga, gym workouts, and contoured underwear.",
       usageGuide:
@@ -325,7 +325,7 @@ export async function runSeed() {
       features: JSON.stringify([
         "Anatomically shaped side curvature",
         "Hypoallergenic adhesive that won't twist",
-        "Dermatologically tested for zero itching",
+        "Formulated for breathable daily comfort",
       ]),
       faq: JSON.stringify([
         {
@@ -355,28 +355,28 @@ export async function runSeed() {
       categoryId: "cat_menstrual_cups",
       name: "Medical-Grade Silicone Menstrual Cup",
       slug: "medical-grade-silicone-menstrual-cup",
-      shortDescription: "100% US-FDA approved biocompatible silicone cup with ribbed stem and travel pouch.",
+      shortDescription: "Biocompatible medical-grade silicone cup with ribbed stem and travel pouch.",
       description:
-        "Experience true period liberation with Samaura's bell-shaped menstrual cup. Made from biocompatible, velvety medical silicone that folds easily and pops open gently. Offers up to 12 consecutive hours of leak-proof protection.",
+        "Experience true period liberation with Samaura's bell-shaped menstrual cup. Made from biocompatible, velvety medical silicone that folds easily and pops open gently. Offers up to 12 consecutive hours of reliable protection.",
       basePricePaise: 49900,
       salePricePaise: 39900,
       isFeatured: true,
       isBestseller: true,
-      rating: 4.85,
-      reviewCount: 110,
-      badge: "Save 20%",
+      rating: 0,
+      reviewCount: 0,
+      badge: "Popular Choice",
       flowType: "All Flows (12hr Protection)",
       ingredients:
-        "100% US-FDA Approved Medical-Grade Liquid Silicone. Zero BPA, latex, phthalates, dioxins, or toxins.",
+        "Biocompatible Medical-Grade Silicone. Free of BPA, latex, and phthalates.",
       absorptionGuide:
         "Holds up to 25ml (Size Small) / 30ml (Size Medium) / 35ml (Size Large). Up to 12 hours continuous protection without changing.",
       usageGuide:
         "1. Sterilize in boiling water for 3–5 minutes before first use.\n2. Wash hands thoroughly and fold cup (C-Fold or Punch-Down Fold).\n3. Relax pelvic muscles and insert angled toward tailbone.\n4. Rotate gently to ensure full seal.\n5. Pinch base to release vacuum seal before removing.",
       features: JSON.stringify([
-        "100% US-FDA Approved Medical Grade Silicone",
+        "Biocompatible Medical Grade Silicone",
         "Velvety matte finish with easy-grip ribbed base",
         "Includes breathable organic cotton storage pouch",
-        "Reusable up to 10 years",
+        "Reusable and long-lasting",
       ]),
       faq: JSON.stringify([
         {
@@ -425,9 +425,9 @@ export async function runSeed() {
       salePricePaise: 74900,
       isFeatured: false,
       isBestseller: false,
-      rating: 4.9,
+      rating: 0,
       reviewCount: 0,
-      badge: "99.9% Sterile",
+      badge: "Electric Steam",
       flowType: "Cup Hygiene & Care",
       ingredients:
         "High-grade BPA-free heat-resistant polypropylene, food-grade stainless steel heating plate.",
@@ -475,8 +475,8 @@ export async function runSeed() {
       salePricePaise: 25900,
       isFeatured: true,
       isBestseller: false,
-      rating: 4.9,
-      reviewCount: 76,
+      rating: 0,
+      reviewCount: 0,
       badge: "pH 3.5 Balanced",
       flowType: "Daily Intimate Care",
       ingredients:
@@ -537,9 +537,9 @@ export async function runSeed() {
       salePricePaise: 24900,
       isFeatured: false,
       isBestseller: false,
-      rating: 4.75,
+      rating: 0,
       reviewCount: 0,
-      badge: "100% Herbal",
+      badge: "Herbal Blend",
       flowType: "Cramp Relief",
       ingredients:
         "Wintergreen Oil, Menthol, Eucalyptus Leaf Oil, Peppermint Essential Oil, Rosemary Oil, Lavender Oil, Caprylic/Capric Triglyceride (Coconut derived).",
@@ -721,11 +721,11 @@ export async function runSeed() {
   await db.insert(banners).values([
     {
       id: "ban_hero_01",
-      title: "Pure Comfort, Zero Rash. Period.",
-      subtitle: "Made with 100% certified organic cotton topsheet. No chlorine, perfumes, or synthetic plastics.",
+      title: "Pure Comfort, Mindful Care. Period.",
+      subtitle: "Made with soft organic cotton topsheet. No chlorine, perfumes, or synthetic plastics.",
       link: "/shop",
       imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=1200",
-      badge: "Dermatologist Approved",
+      badge: "Gentle Care",
       isActive: true,
       sortOrder: 1,
     },
@@ -746,7 +746,7 @@ export async function runSeed() {
     },
     {
       id: "post_02",
-      title: "Menstrual Cup Beginner Guide: 5 Steps to Zero Leaks",
+      title: "Menstrual Cup Beginner Guide: 5 Steps to Confident Comfort",
       slug: "menstrual-cup-guide-beginners",
       excerpt: "Everything you need to know about folding, insertion, and seal verification.",
       content: "Complete guide on transitioning to silicone cups.",

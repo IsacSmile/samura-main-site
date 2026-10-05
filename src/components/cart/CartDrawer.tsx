@@ -68,8 +68,8 @@ export function CartDrawer() {
       />
 
       {/* Drawer Container */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col border-l border-pink-light animate-in slide-in-from-right duration-300">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
+        <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-md bg-white shadow-2xl flex flex-col border-l border-pink-light animate-in slide-in-from-right duration-300">
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-blush flex items-center justify-between bg-blush/40">
             <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export function CartDrawer() {
                     Your bag is empty
                   </h3>
                   <p className="text-xs text-muted max-w-xs">
-                    Treat your intimate skin with gentle, rash-free organic care. Explore our bestsellers.
+                    Treat your intimate skin with gentle, breathable organic care. Explore our bestsellers.
                   </p>
                 </div>
                 <Link

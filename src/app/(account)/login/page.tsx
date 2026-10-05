@@ -72,28 +72,30 @@ function LoginForm() {
           </p>
         </div>
 
-        {/* Demo Credentials Box */}
-        <div className="bg-blush/70 border border-pink-light rounded-2xl p-3.5 space-y-2 text-xs">
-          <div className="flex items-center justify-between text-ink font-semibold">
-            <span>Quick Demo Sign-In:</span>
+        {/* Demo Credentials Box (Non-production only) */}
+        {process.env.NODE_ENV !== "production" && (
+          <div className="bg-blush/70 border border-pink-light rounded-2xl p-3.5 space-y-2 text-xs">
+            <div className="flex items-center justify-between text-ink font-semibold">
+              <span>Quick Demo Sign-In (Dev Only):</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setDemoCredentials("customer")}
+                className="flex-1 bg-white hover:bg-pink-light/40 border border-pink-light text-brand py-1.5 px-2 rounded-xl text-xs font-medium transition-colors"
+              >
+                Demo Customer
+              </button>
+              <button
+                type="button"
+                onClick={() => setDemoCredentials("admin")}
+                className="flex-1 bg-white hover:bg-pink-light/40 border border-pink-light text-ink py-1.5 px-2 rounded-xl text-xs font-medium transition-colors"
+              >
+                Demo Admin
+              </button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setDemoCredentials("customer")}
-              className="flex-1 bg-white hover:bg-pink-light/40 border border-pink-light text-brand py-1.5 px-2 rounded-xl text-xs font-medium transition-colors"
-            >
-              Demo Customer
-            </button>
-            <button
-              type="button"
-              onClick={() => setDemoCredentials("admin")}
-              className="flex-1 bg-white hover:bg-pink-light/40 border border-pink-light text-ink py-1.5 px-2 rounded-xl text-xs font-medium transition-colors"
-            >
-              Demo Admin
-            </button>
-          </div>
-        </div>
+        )}
 
         {error && (
           <div className="flex items-center gap-2 p-3 text-xs bg-red-50 text-red-700 border border-red-200 rounded-2xl">

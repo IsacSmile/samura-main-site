@@ -62,8 +62,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Reusable pill buttons and soft card utilities */
-.btn-brand {
+.btn-brand:not(.hidden) {
   display: inline-flex;
+}
+.btn-brand {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -84,8 +86,10 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(0.98);
 }
 
-.btn-secondary {
+.btn-secondary:not(.hidden) {
   display: inline-flex;
+}
+.btn-secondary {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -106,8 +110,10 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(0.98);
 }
 
-.btn-blush {
+.btn-blush:not(.hidden) {
   display: inline-flex;
+}
+.btn-blush {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "Special Offers & Coupon Codes | Samaura Healthcare",
-  description: "Exclusive discounts, bulk pack offers, and coupon codes for certified organic menstrual care.",
+  description: "Exclusive discounts, bulk pack offers, and coupon codes for gentle organic menstrual care.",
 };
 
 const OFFERS = [
@@ -52,7 +52,7 @@ export default function OffersPage() {
             Current Offers & Promo Codes
           </h1>
           <p className="text-muted text-sm sm:text-base leading-relaxed">
-            Apply these coupon codes at checkout to unlock savings on toxin-free, dermatologist-approved menstrual care.
+            Apply these coupon codes at checkout to unlock savings on gentle, thoughtfully formulated menstrual care.
           </p>
         </div>
 
@@ -115,7 +115,7 @@ export default function OffersPage() {
         <div className="bg-blush border border-pink-light rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center sm:text-left">
             <h3 className="font-heading font-bold text-xl sm:text-2xl text-ink">
-              Ready to experience rash-free comfort?
+              Ready to experience soothing comfort?
             </h3>
             <p className="text-xs sm:text-sm text-muted max-w-xl">
               All orders are packed in 100% plain, unmarked biodegradable boxes for complete confidentiality.

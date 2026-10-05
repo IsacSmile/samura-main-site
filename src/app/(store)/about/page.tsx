@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 const PILLARS = [
   {
     icon: Heart,
-    title: "100% Skin-First Care",
-    description: "Every product is made with certified organic cotton or medical-grade silicone. No artificial perfumes, chlorine bleach, or toxic dyes that trigger contact dermatitis.",
+    title: "Skin-First Care",
+    description: "Every product is made with soft organic cotton or pure silicone. No artificial perfumes, harsh chlorine bleach, or artificial dyes.",
   },
   {
     icon: PackageCheck,
@@ -26,8 +26,8 @@ const PILLARS = [
   },
   {
     icon: ShieldCheck,
-    title: "Dermatologist Tested",
-    description: "Rigorous ISO & biocompatibility testing ensuring zero cytotoxicity, zero irritation, and balanced pH compatibility for sensitive intimate flora.",
+    title: "Skin-Friendly Design",
+    description: "Thoughtfully selected materials prioritizing breathability, comfort, and balanced care for intimate skin.",
   },
 ];
 
@@ -42,7 +42,7 @@ export default function AboutPage() {
             <span>Our Origin & Promise</span>
           </div>
           <h1 className="font-heading font-extrabold text-3xl sm:text-5xl text-ink leading-tight">
-            Menstrual hygiene made gentle, thoughtful, and rash-free.
+            Menstrual hygiene made gentle, thoughtful, and comfortable.
           </h1>
           <p className="text-muted text-base sm:text-lg leading-relaxed">
             Samaura Healthcare was founded to replace synthetic, plasticky commercial sanitary products with breathable organic materials that treat your body with the kindness it deserves.
@@ -82,10 +82,10 @@ export default function AboutPage() {
           </h2>
           <div className="text-sm sm:text-base text-muted space-y-4 leading-relaxed">
             <p>
-              Over 70% of menstruators in India experience burning, friction rashes, or fungal infections from mass-market plastic topsheets and chlorine-bleached wood pulp.
+              Over 70% of menstruators in India experience burning, friction discomfort, or itching from mass-market plastic topsheets and chlorine-bleached wood pulp.
             </p>
             <p>
-              At Samaura, every pad begins with pure, unadulterated GOTS-certified organic cotton topsheets. We incorporate tourmaline anion strips to neutralize odor naturally without masking fragrances.
+              At Samaura, every pad begins with pure organic cotton topsheets. We incorporate breathable botanical layers to help maintain fresh comfort naturally without artificial masking fragrances.
             </p>
           </div>
 

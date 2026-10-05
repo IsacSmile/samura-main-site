@@ -100,7 +100,7 @@ export function ProductAccordion({
 
           {openSections.absorption && (
             <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-muted border-t border-blush leading-relaxed space-y-3">
-              <p>{absorptionGuide || "Designed with rapid fluid-wicking channels to keep your skin dry and rash-free."}</p>
+              <p>{absorptionGuide || "Designed with rapid fluid-wicking channels to keep your skin comfortably dry."}</p>
               {parsedFeatures.length > 0 && (
                 <div className="pt-2">
                   <span className="font-semibold text-ink block mb-2">Key Protection Features:</span>
@@ -151,13 +151,13 @@ export function ProductAccordion({
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-[11px] font-semibold text-emerald-800">
                 <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-success" /> GOTS Cotton
+                  <Sparkles className="w-3.5 h-3.5 text-success" /> Pure Cotton
                 </span>
                 <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-success" /> Dermatologist Tested
+                  <Sparkles className="w-3.5 h-3.5 text-success" /> Skin-Friendly
                 </span>
                 <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-success" /> Hypoallergenic
+                  <Sparkles className="w-3.5 h-3.5 text-success" /> Breathable
                 </span>
               </div>
             </div>

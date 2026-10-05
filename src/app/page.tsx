@@ -89,8 +89,8 @@ export default async function HomePage() {
       {/* --------------------------------------------------------------------- */}
       <section className="relative overflow-hidden bg-linear-to-b from-blush via-blush/70 to-white pt-10 pb-16 lg:pt-16 lg:pb-24">
         {/* Soft decorative background circles */}
-        <div className="absolute top-12 right-10 w-96 h-96 rounded-full bg-pink-light/40 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-4 left-10 w-80 h-80 rounded-full bg-rose/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-12 -right-10 w-96 h-96 rounded-full bg-pink-light/40 blur-3xl pointer-events-none hidden sm:block" />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 sm:left-10 sm:translate-x-0 w-64 sm:w-80 h-64 sm:h-80 rounded-full bg-rose/20 blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -126,7 +126,7 @@ export default async function HomePage() {
 
               {/* Body Subtitle */}
               <p className="text-base sm:text-lg text-muted leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Say goodbye to plastic chafing, synthetic perfumes, and painful friction rashes. Samaura delivers organic cotton pads and medical silicone cups designed for uninterrupted comfort.
+                Say goodbye to plastic chafing and synthetic perfumes. Samaura delivers organic cotton pads and silicone cups designed for gentle, breathable comfort.
               </p>
 
               {/* Action Buttons */}
@@ -162,7 +162,7 @@ export default async function HomePage() {
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-medium text-ink">
-                    Rash-Free Comfort
+                    Anti-Chafing Comfort
                   </span>
                 </div>
 
@@ -188,20 +188,17 @@ export default async function HomePage() {
                   priority
                 />
 
-                {/* Floating Social Proof Pill */}
+                {/* Floating Brand Promise Pill */}
                 <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-pink-light shadow-lg flex items-center gap-3.5">
                   <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-brand shrink-0">
                     <Heart className="w-5 h-5 fill-brand" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-1 text-xs">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      ))}
-                      <span className="font-bold text-ink ml-1">4.9/5</span>
-                    </div>
+                    <p className="font-semibold text-xs text-ink">
+                      Gentle Cotton Comfort
+                    </p>
                     <p className="text-xs text-muted mt-0.5">
-                      Loved by 5,000+ women across India
+                      Breathable and soothing for everyday peace of mind
                     </p>
                   </div>
                 </div>
@@ -304,7 +301,7 @@ export default async function HomePage() {
               <ul className="space-y-3 text-xs sm:text-sm text-muted">
                 <li className="flex items-start gap-2.5">
                   <XCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                  <span>Plastic mesh topsheet that traps heat, causing friction & painful rashes</span>
+                  <span>Plastic mesh topsheet that traps heat and causes skin friction</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <XCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
@@ -342,7 +339,7 @@ export default async function HomePage() {
               <ul className="space-y-3 text-xs sm:text-sm text-ink">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
-                  <span className="font-medium">GOTS certified organic cotton topsheet for velvety softness</span>
+                  <span className="font-medium">Soft breathable organic cotton topsheet for velvety comfort</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />

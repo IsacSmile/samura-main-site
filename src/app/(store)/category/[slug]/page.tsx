@@ -11,7 +11,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { ProductFilters } from "@/components/product/ProductFilters";
 import { Pagination } from "@/components/product/Pagination";
 import { ShopEmptyState } from "@/components/product/ShopEmptyState";
-import { ChevronRight, Sparkles, Tag } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -42,10 +42,10 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${category.name} - Organic & Rash-Free`,
+    title: `${category.name} - Gentle & Breathable Care`,
     description:
       category.description ||
-      `Explore Samaura's certified organic ${category.name}. Thoughtfully made for sensitive skin with zero chemicals.`,
+      `Explore Samaura's ${category.name}. Thoughtfully made for sensitive skin with mindful materials.`,
     openGraph: {
       title: `${category.name} | Samaura Healthcare`,
       description: category.description || undefined,
@@ -123,36 +123,6 @@ export default async function CategoryPage({
             </p>
           )}
 
-          {/* Subcategory / Sibling Category Pills */}
-          {categories.length > 1 && (
-            <div className="pt-2 flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
-              <span className="text-xs font-semibold text-muted uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
-                <Tag className="w-3.5 h-3.5 text-brand" /> Browse:
-              </span>
-              <Link
-                href="/shop"
-                className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blush text-ink hover:bg-pink-light transition-colors"
-              >
-                All Care
-              </Link>
-              {categories.map((c) => {
-                const isCurrent = c.slug === slug;
-                return (
-                  <Link
-                    key={c.id}
-                    href={`/category/${c.slug}`}
-                    className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                      isCurrent
-                        ? "bg-brand text-white shadow-xs"
-                        : "bg-blush text-ink hover:bg-pink-light"
-                    }`}
-                  >
-                    {c.name}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
         </div>
 
         {/* Filters, Search & Sort */}

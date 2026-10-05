@@ -311,8 +311,8 @@ export function ProductVariantSelector({
         <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-blush/30 border border-pink-light/50">
           <ShieldCheck className="w-4 h-4 text-brand shrink-0 mt-0.5" />
           <div>
-            <span className="font-semibold text-ink block">100% Organic Skin Care</span>
-            <span className="text-[11px] text-muted">Certified toxin &amp; rash-free</span>
+            <span className="font-semibold text-ink block">Gentle Skin Care</span>
+            <span className="text-[11px] text-muted">Thoughtful, breathable comfort</span>
           </div>
         </div>
       </div>

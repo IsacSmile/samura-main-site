@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  Settings,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -43,6 +44,12 @@ const NAV_ITEMS = [
     name: "Review Moderation",
     href: "/admin/reviews",
     icon: MessageSquareCheck,
+    exact: false,
+  },
+  {
+    name: "Settings & Compliance",
+    href: "/admin/settings",
+    icon: Settings,
     exact: false,
   },
 ];

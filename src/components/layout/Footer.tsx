@@ -24,8 +24,8 @@ export function Footer() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-semibold text-sm text-ink">100% Skin First</h4>
-                <p className="text-xs text-muted mt-0.5">Certified organic, zero harsh chemicals or rashes</p>
+                <h4 className="font-semibold text-sm text-ink">Skin-First Care</h4>
+                <p className="text-xs text-muted mt-0.5">Soft organic cotton, zero harsh artificial chemicals</p>
               </div>
             </div>
 

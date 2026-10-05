@@ -203,8 +203,18 @@ export async function getShopProducts(params: ShopFilterParams = {}) {
         .where(eq(categories.id, prod.categoryId))
         .limit(1);
 
+      const [reviewStats] = await db
+        .select({
+          avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+          reviewCount: count(),
+        })
+        .from(reviews)
+        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "approved")));
+
       return {
         ...prod,
+        rating: reviewStats ? Number(reviewStats.avgRating) : 0,
+        reviewCount: reviewStats ? Number(reviewStats.reviewCount) : 0,
         image: primaryImg?.url ?? "/products/day-pads.svg",
         category: cat ?? null,
         defaultVariant: defaultVar ?? null,
@@ -325,8 +335,18 @@ export async function getRelatedProducts(
         .orderBy(desc(productImages.isPrimary), asc(productImages.sortOrder))
         .limit(1);
 
+      const [reviewStats] = await db
+        .select({
+          avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+          reviewCount: count(),
+        })
+        .from(reviews)
+        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "approved")));
+
       return {
         ...prod,
+        rating: reviewStats ? Number(reviewStats.avgRating) : 0,
+        reviewCount: reviewStats ? Number(reviewStats.reviewCount) : 0,
         image: primaryImg?.url ?? "/products/day-pads.svg",
         defaultVariant: defaultVar ?? null,
       };

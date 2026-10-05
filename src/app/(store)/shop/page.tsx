@@ -12,11 +12,11 @@ export const revalidate = 60; // ISR cache revalidation
 export const metadata: Metadata = {
   title: "Shop All Organic Hygiene Care",
   description:
-    "Browse our complete catalog of certified organic cotton sanitary pads, daily panty liners, medical-grade menstrual cups, and pH 3.5 intimate wellness essentials.",
+    "Browse our complete catalog of soft organic cotton sanitary pads, daily panty liners, menstrual cups, and pH 3.5 intimate wellness essentials.",
   openGraph: {
     title: "Shop All Organic Hygiene Care | Samaura Healthcare",
     description:
-      "Rash-free, certified organic pads, cups & intimate hygiene delivered in 100% discreet packaging across India.",
+      "Soft, breathable organic cotton pads, cups & intimate hygiene delivered in 100% discreet packaging across India.",
     url: "/shop",
   },
 };
@@ -64,7 +64,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <div className="space-y-3">
           <div className="inline-flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>100% GOTS Certified Organic • Dermatologist Tested</span>
+            <span>Soft Breathable Cotton • Gentle Daily Care</span>
           </div>
 
           <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-ink tracking-tight">
@@ -73,7 +73,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
           <p className="text-xs sm:text-sm text-muted max-w-2xl leading-relaxed">
             {activeCategory?.description ||
-              "Thoughtfully engineered feminine hygiene essentials designed for supreme comfort, rash-free days, and uninterrupted sleep. Free discreet delivery on orders above ₹499."}
+              "Thoughtfully engineered feminine hygiene essentials designed for supreme comfort, easy movement, and uninterrupted sleep. Free discreet delivery on orders above ₹499."}
           </p>
         </div>
 

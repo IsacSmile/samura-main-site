@@ -88,7 +88,7 @@ export const products = sqliteTable("products", {
   isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
   isBestseller: integer("is_bestseller", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  rating: real("rating").notNull().default(4.9),
+  rating: real("rating").notNull().default(0),
   reviewCount: integer("review_count").notNull().default(0),
   badge: text("badge"),
   flowType: text("flow_type"),

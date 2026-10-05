@@ -372,7 +372,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
       ...prev,
       {
         question: "Is this product suitable for sensitive skin?",
-        answer: "Yes, our hypoallergenic formula is dermatologist tested and free of harsh chemicals.",
+        answer: "Yes, our gentle formula is formulated for sensitive skin and free of harsh chemicals.",
       },
     ]);
   };
@@ -1032,7 +1032,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
               </label>
               <textarea
                 rows={4}
-                placeholder="e.g. 100% GOTS Certified Organic Cotton cover, chlorine-free wood pulp core, biodegradable PLA film..."
+                placeholder="e.g. Soft organic cotton cover, chlorine-free wood pulp core, biodegradable PLA film..."
                 value={ingredients}
                 onChange={(e) => setIngredients(e.target.value)}
                 className="w-full p-3 rounded-xl border border-blush text-xs bg-white text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all resize-y"

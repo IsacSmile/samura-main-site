@@ -14,8 +14,8 @@ const FAQS = [
     a: "Yes, 100%. All orders arrive in plain brown cardboard boxes or opaque recyclable mailers without any brand logos, product names, or mentions of sanitary items on the outside label.",
   },
   {
-    q: "What makes Samaura pads rash-free?",
-    a: "Unlike conventional mass-market pads made with synthetic plastic covers, chlorine bleach, and chemical perfumes, Samaura pads use 100% GOTS-certified organic cotton topsheets and breathable plant-based backing.",
+    q: "What makes Samaura pads so comfortable?",
+    a: "Unlike conventional mass-market pads made with synthetic plastic covers, chlorine bleach, and chemical perfumes, Samaura pads use soft organic cotton topsheets and breathable plant-based backing.",
   },
   {
     q: "How do I choose the right menstrual cup size?",

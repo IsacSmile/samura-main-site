@@ -12,6 +12,7 @@ Last updated: Phase 1 (Foundation) Complete.
 | **Phase 1: Foundation** | Next.js 16 + TS + Tailwind tokens & fonts + ESLint + Prettier + strict folder structure + 17 Drizzle tables & migrations + Seed (4 categories, 8 products, 2 coupons, 1 admin) + Base UI Kit (Button, Input, Select, Badge, Card, Modal, Toast, Skeleton) + Responsive Layout (Sticky Header with Search/Cart/Account, Drawer Nav, Footer, Announcement Bar, Floating WhatsApp) + TRACKER.md + .env.example | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) |
 | **Phase 2: Storefront Catalog** | Applied Fixes A-D (env seed with bcrypt, Turso/local DB toggle, migration 0001 with ingredients/absorption/usage guide + reviews table, gitignore data/*.db). Built `/shop`, `/category/[slug]`, `/product/[slug]`, reusable `ProductCard`, money formatting `formatRupees`, SVG placeholder images, JSON-LD Product schema, approved reviews with moderation API, dynamic filters & pagination. | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Verified HTTP 200 SSR on all catalog routes |
 | **Phase 3: Admin Auth + Catalog Management** | Applied Fixes A-F (production seed env enforcement, no seeded reviews, server-calculated `isVerified` review validation + rate limiting & honeypot, conditional JSON-LD aggregateRating, neutral copy, gitignore verified). Built Auth.js (credentials) with bcrypt (customer/admin roles), proxy + server-side `requireAdmin()` gate on every action/route, admin layout shell, dashboard counts, Category CRUD, Product CRUD with variants (prices in ₹ / stored in paise), storage abstraction image upload (jpg/png/webp <= 2MB), review moderation, toast notifications, and path revalidations. | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Non-admin/logged-out users blocked |
+| **Phase 3.1: Responsiveness + Compliance Hotfix** | Fixed horizontal overflow sitewide across viewports (announcement bar, WhatsApp button, w-screen/negative margins removed, min-w-0 flex/grid). Navbar desktop nav at xl (>=1280px), drawer below, icons protected, cart badge inside viewport. Stacked mobile shop toolbar with 2-column filters+sort. ProductCard wrapping and consistent heights. Removed duplicate category pills. Compliance: 0 hardcoded ratings (ProductCard only renders rating when approved reviews exist in DB), neutral copy replacing unsubstantiated claims ("100% GOTS", "100% Rash-Free", "Zero Leaks", "Anion", "Dermatologist Tested"), admin-editable compliance trust badges and announcement text, demo login shown only when `NODE_ENV !== "production"`. | **DONE** | `scrollWidth === innerWidth` verified at 320, 375, 414, 768, 1024, 1280, 1536px across all routes (42/42 PASS) • `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • 0 hardcoded ratings confirmed by grep |
 | **Phase 4: Cart & Checkout Engine** | Cart page & drawer, persisted Zustand sync, coupon application, Zod checkout validation, and atomic stock lock + order transaction | *Next* | To build |
 | **Phase 5: Payments & Transactions** | Razorpay (cards/UPI/netbanking) + COD + idempotent server webhook signature verification + Resend email confirmations | *Pending* | To build |
 | **Phase 6: Customer Account** | Profile, saved addresses, order tracking history, and detailed receipts | *Pending* | To build |
@@ -262,5 +263,67 @@ Last updated: Phase 1 (Foundation) Complete.
   - Server actions directly invoke `requireAdmin()` and throw error if called without admin privileges.
 - [x] **Admin Authenticated Access**:
   - Admin login with `admin@samaura.com` / `Admin@123456` grants full access (HTTP 200) to `/admin`, `/admin/products`, `/admin/categories`, `/admin/reviews`, `/admin/products/new`, and `/admin/products/[id]/edit`.
+
+---
+
+## Detailed Phase 3.1 Checklist: Responsiveness & Compliance Hotfix
+
+### 1. Responsiveness Fixes
+- [x] **Sitewide Horizontal Overflow Fixes**:
+  - Root causes identified and resolved without using `overflow-x: hidden` on `body` as a crutch.
+  - **Announcement Bar (`AnnouncementBar.tsx`)**: Outer container constrained to `w-full max-w-full overflow-hidden`, inner ticker with `overflow-hidden min-w-0 truncate`.
+  - **WhatsApp Floating Button (`WhatsAppButton.tsx`)**: Fixed at `bottom-4 right-4`, container bounded with `max-w-[calc(100vw-2rem)]`, tooltip with `max-w-[calc(100vw-6rem)] truncate`. Never exceeds viewport.
+  - **Removed `w-screen` and negative margins**: Replaced viewport width overflows in `ProductFilters.tsx` and `CartDrawer.tsx` (`max-w-[calc(100vw-2rem)]`).
+  - **Hero Decorative Blur Orbs (`app/page.tsx`)**: Orbs constrained with `hidden sm:block` and centered on mobile viewports to eliminate horizontal protrusion.
+  - **Custom utility overrides in `globals.css`**: Updated `.btn-brand`, `.btn-secondary`, `.btn-blush` with `:not(.hidden)` so that utility classes like `hidden md:inline-flex` take proper precedence without being overridden by button styles.
+- [x] **Header & Navigation (`Navbar.tsx`)**:
+  - Nowrap links with tighter gaps (`gap-1 xl:gap-1.5 whitespace-nowrap`).
+  - Full desktop nav shown **only** at `xl` (>= 1280px); mobile hamburger drawer below 1280px.
+  - Desktop "Shop Now" quick button wrapped in `<div className="hidden md:block">` to prevent mobile layout stretch.
+  - Brand logo with `shrink min-w-0` and responsive text sizing (`text-sm sm:text-xl md:text-2xl`) allowing clean flex shrinking down to 320px.
+  - Logo, search, account, and cart icons always visible without clipping or overlapping.
+  - Cart counter badge positioned at `top-0 right-0` securely inside the icon boundary and viewport.
+- [x] **Shop & Category Toolbar (`ProductFilters.tsx`)**:
+  - Mobile layout stacked: search bar full-width, followed by a 2-column grid containing Filters toggle button and Sort select.
+  - Both elements have `w-full min-w-0 truncate`.
+  - Sort select never exceeds its container.
+  - Category chips strip given `w-full max-w-full min-w-0 overflow-x-auto` to scroll smoothly horizontally without forcing page expansion.
+- [x] **ProductCard (`ProductCard.tsx`)**:
+  - Flow type badge and rating placed on separate lines on narrow viewports (`flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 min-w-0`).
+  - Titles and descriptions wrap cleanly; cards maintain consistent height with flex column layout.
+- [x] **Category Page (`category/[slug]/page.tsx`)**:
+  - Removed duplicate category pills block; only the primary filter pills inside `ProductFilters` are rendered.
+
+### 2. Compliance Fixes
+- [x] **Removed All Hardcoded Ratings & Review Counts**:
+  - Product schema default rating updated to 0 in `src/db/schema/index.ts`.
+  - Database seed updated to initialize all demo products with `rating: 0` and `reviewCount: 0`.
+  - `ProductCard.tsx` displays star rating and count **only when approved reviews exist** (`product.reviewCount && product.reviewCount > 0`).
+  - Product detail page shows rating only when `reviewCount > 0 && avgRating`, otherwise displaying "No reviews yet • Be the first to review".
+  - Hero social proof badge in `app/page.tsx` replaced with authentic brand promise ("Gentle Cotton Comfort • Breathable and soothing for everyday peace of mind").
+  - Verified via global grep: 0 hardcoded ratings (e.g. 4.9, 4.8) remain in source code.
+- [x] **Neutralized Marketing Copy Sitewide**:
+  - Replaced unsubstantiated absolute claims ("100% GOTS Certified", "100% Certified Organic", "100% Rash-Free", "Zero Leaks", "Anion", "Dermatologist Tested") with neutral, legally compliant language ("Soft organic cotton", "Anti-chafing comfort", "Skin-friendly", "Breathable comfort").
+- [x] **Admin-Editable Compliance Trust Badges & Settings**:
+  - Created settings management infrastructure in `src/lib/services/settings.ts`, server action `saveSettingsAction` with `requireAdmin()`, and UI in `src/components/admin/SettingsForm.tsx` (`/admin/settings`).
+  - Trust badges (*100% GOTS Certified Organic Cotton*, *Dermatologically Tested*, *Zero Leaks Guarantee*) and announcement bar text are stored in the database settings table and disabled by default until verified certificates are on file.
+- [x] **Demo Login Guard (`login/page.tsx`)**:
+  - Demo login buttons and pre-filled credentials box rendered conditionally **only** when `process.env.NODE_ENV !== "production"`.
+
+### 3. ScrollWidth Verification Results
+
+Automated headless browser check executing `document.documentElement.scrollWidth === window.innerWidth` across all 7 breakpoints and 6 key routes:
+
+| Route | 320px | 375px | 414px | 768px | 1024px | 1280px | 1536px |
+|---|---|---|---|---|---|---|---|
+| **`/`** (Home) | PASS (320px) | PASS (375px) | PASS (414px) | PASS (768px) | PASS (1024px) | PASS (1280px) | PASS (1536px) |
+| **`/shop`** (Shop Catalog) | PASS (320px) | PASS (375px) | PASS (414px) | PASS (768px) | PASS (1024px) | PASS (1280px) | PASS (1536px) |
+| **`/category/[slug]`** (Category Listing) | PASS (320px) | PASS (375px) | PASS (414px) | PASS (768px) | PASS (1024px) | PASS (1280px) | PASS (1536px) |
+| **`/product/[slug]`** (Product Detail) | PASS (320px) | PASS (375px) | PASS (414px) | PASS (768px) | PASS (1024px) | PASS (1280px) | PASS (1536px) |
+| **`/login`** (Authentication) | PASS (320px) | PASS (375px) | PASS (414px) | PASS (768px) | PASS (1024px) | PASS (1280px) | PASS (1536px) |
+| **`/admin`** (Admin Dashboard) | PASS (320px) | PASS (375px) | PASS (414px) | PASS (768px) | PASS (1024px) | PASS (1280px) | PASS (1536px) |
+
+**Result**: 42/42 tests PASSED. Zero horizontal overflow across all required viewports.
+
 
 

@@ -89,20 +89,20 @@ export function ProductFilters({
   return (
     <>
       {/* Top Filter Bar (Sort, Search, Active Filter Tags, Mobile Drawer Trigger) */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-pink-light shadow-pink-xs mb-8 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-pink-light shadow-pink-xs mb-8 space-y-4 w-full max-w-full min-w-0 overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 w-full min-w-0">
           {/* Search bar */}
           <form
             onSubmit={handleSearchSubmit}
-            className="flex-1 max-w-md relative flex items-center"
+            className="w-full md:max-w-md relative flex items-center min-w-0"
           >
-            <Search className="w-4 h-4 text-muted absolute left-3.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-muted absolute left-3.5 pointer-events-none shrink-0" />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by pad, cup, wash, ingredients..."
-              className="w-full bg-blush/40 hover:bg-blush/70 focus:bg-white border border-pink-light rounded-full pl-10 pr-20 py-2.5 text-xs sm:text-sm text-ink placeholder:text-muted/60 transition-all focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className="w-full bg-blush/40 hover:bg-blush/70 focus:bg-white border border-pink-light rounded-full pl-10 pr-20 py-2.5 text-xs sm:text-sm text-ink placeholder:text-muted/60 transition-all focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand min-w-0"
             />
             {searchInput && (
               <button
@@ -111,7 +111,7 @@ export function ProductFilters({
                   setSearchInput("");
                   updateQuery({ q: null });
                 }}
-                className="absolute right-12 text-muted hover:text-brand p-1"
+                className="absolute right-12 text-muted hover:text-brand p-1 shrink-0"
                 aria-label="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
@@ -119,32 +119,33 @@ export function ProductFilters({
             )}
             <button
               type="submit"
-              className="absolute right-1.5 px-3 py-1 bg-brand text-white rounded-full text-xs font-semibold hover:bg-brand-dark transition-colors"
+              className="absolute right-1.5 px-3 py-1 bg-brand text-white rounded-full text-xs font-semibold hover:bg-brand-dark transition-colors shrink-0"
             >
               Go
             </button>
           </form>
 
           {/* Right: Results Count + Sort Dropdown + Mobile Filter Button */}
-          <div className="flex items-center justify-between md:justify-end gap-3">
-            <span className="text-xs text-muted font-medium">
-              Showing <strong className="text-ink">{totalProducts}</strong> products
-            </span>
-
+          <div className="grid grid-cols-2 md:flex md:items-center md:justify-end gap-2.5 sm:gap-3 w-full md:w-auto min-w-0">
             {/* Mobile Filter Toggle Button */}
             <button
               onClick={() => setIsOpenMobile(true)}
-              className="lg:hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-pink-light bg-blush text-ink text-xs font-semibold hover:bg-pink-light transition-colors"
+              className="lg:hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-pink-light bg-blush text-ink text-xs font-semibold hover:bg-pink-light transition-colors w-full md:w-auto min-w-0"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-brand" />
-              <span>Filters</span>
+              <SlidersHorizontal className="w-3.5 h-3.5 text-brand shrink-0" />
+              <span className="truncate">Filters</span>
               {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-brand" />
+                <span className="w-2 h-2 rounded-full bg-brand shrink-0" />
               )}
             </button>
 
-            {/* Sort Selector */}
-            <div className="flex items-center gap-1.5 bg-blush/40 border border-pink-light rounded-full px-3 py-1.5">
+            {/* Desktop product count */}
+            <span className="hidden md:inline-block text-xs text-muted font-medium shrink-0 whitespace-nowrap">
+              Showing <strong className="text-ink">{totalProducts}</strong> products
+            </span>
+
+            {/* Sort Selector: Bounded width and truncated text */}
+            <div className="flex items-center gap-1.5 bg-blush/40 border border-pink-light rounded-full px-2.5 sm:px-3 py-1.5 w-full md:w-auto min-w-0 overflow-hidden">
               <ArrowUpDown className="w-3.5 h-3.5 text-brand shrink-0" />
               <label htmlFor="shop-sort" className="sr-only">
                 Sort Products
@@ -153,19 +154,19 @@ export function ProductFilters({
                 id="shop-sort"
                 value={currentSort}
                 onChange={(e) => updateQuery({ sort: e.target.value })}
-                className="bg-transparent text-xs font-semibold text-ink focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-xs font-semibold text-ink focus:outline-none cursor-pointer w-full min-w-0 truncate"
               >
-                <option value="newest">Newest First</option>
-                <option value="popular">Popular &amp; Bestselling</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
+                <option value="newest">Newest</option>
+                <option value="popular">Popular</option>
+                <option value="price_asc">Price: Low-High</option>
+                <option value="price_desc">Price: High-Low</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* Quick Category Chips Strip */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none w-full max-w-full min-w-0">
           <button
             onClick={() => updateQuery({ category: null })}
             className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
@@ -209,8 +210,8 @@ export function ProductFilters({
             className="fixed inset-0 bg-black/40 backdrop-blur-xs animate-in fade-in"
             onClick={() => setIsOpenMobile(false)}
           />
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-xs sm:max-w-sm bg-white shadow-2xl p-6 flex flex-col justify-between overflow-y-auto border-l border-pink-light animate-in slide-in-from-right duration-300">
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
+            <div className="w-full max-w-[calc(100vw-2rem)] sm:max-w-sm bg-white shadow-2xl p-5 sm:p-6 flex flex-col justify-between overflow-y-auto border-l border-pink-light animate-in slide-in-from-right duration-300">
               <div className="space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-blush">
                   <div className="flex items-center gap-2">
