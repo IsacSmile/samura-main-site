@@ -67,18 +67,15 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Intro Column */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white p-1 border border-pink-light shadow-sm">
+            <Link href="/" className="inline-flex items-center">
+              <div className="relative h-10 w-44">
                 <Image
-                  src="/samaura-logo.png"
+                  src="/samura-main-site-logo.png"
                   alt="Samaura Healthcare"
                   fill
-                  className="object-contain p-1"
+                  className="object-contain object-left"
                 />
               </div>
-              <span className="font-heading font-bold text-xl text-ink tracking-tight">
-                Samaura<span className="text-brand">.</span>
-              </span>
             </Link>
 
             <p className="text-sm text-muted leading-relaxed max-w-sm">

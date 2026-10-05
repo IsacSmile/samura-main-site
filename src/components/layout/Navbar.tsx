@@ -85,23 +85,15 @@ export function Navbar() {
 
           {/* Brand Logo */}
           <div className="shrink min-w-0 flex items-center">
-            <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group min-w-0">
-              <div className="relative w-8 h-8 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-blush p-1 border border-pink-light transition-transform duration-300 group-hover:scale-105 shadow-sm shrink-0">
+            <Link href="/" className="inline-flex items-center group min-w-0">
+              <div className="relative h-8 sm:h-10 w-32 sm:w-40 transition-transform duration-300 group-hover:scale-102 shrink-0">
                 <Image
-                  src="/samaura-logo.png"
-                  alt="Samaura Healthcare Logo"
+                  src="/samura-main-site-logo.png"
+                  alt="Samaura Healthcare"
                   fill
-                  className="object-contain p-0.5 sm:p-1"
+                  className="object-contain object-left"
                   priority
                 />
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="font-heading font-bold text-sm sm:text-xl md:text-2xl text-ink tracking-tight group-hover:text-brand transition-colors truncate">
-                  Samaura<span className="text-brand">.</span>
-                </span>
-                <span className="text-[9px] sm:text-[10px] tracking-wider uppercase text-muted -mt-0.5 font-medium truncate hidden sm:block">
-                  Healthcare &amp; Hygiene
-                </span>
               </div>
             </Link>
           </div>

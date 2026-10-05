@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
@@ -70,18 +71,19 @@ export function AdminSidebar({ userEmail, userName }: AdminSidebarProps) {
       {/* Top Brand Logo */}
       <div className="space-y-8">
         <div className="flex items-center justify-between">
-          <Link href="/admin" className="flex items-center gap-2.5">
-            <span className="w-9 h-9 rounded-2xl bg-brand text-white flex items-center justify-center font-bold font-heading text-lg shadow-sm">
-              S
-            </span>
-            <div>
-              <div className="font-heading font-extrabold text-lg text-ink leading-tight">
-                Samaura<span className="text-brand">.</span>
-              </div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-muted -mt-0.5">
-                Admin Console
-              </div>
+          <Link href="/admin" className="flex items-center gap-2">
+            <div className="relative h-8 w-32">
+              <Image
+                src="/samura-main-site-logo.png"
+                alt="Samaura Healthcare Admin"
+                fill
+                className="object-contain object-left"
+                priority
+              />
             </div>
+            <span className="text-[9px] uppercase font-bold tracking-wider bg-blush text-brand px-1.5 py-0.5 rounded-md border border-pink-light">
+              Admin
+            </span>
           </Link>
           <button
             onClick={() => setIsOpen(false)}
