@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { reviews, products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/auth";
+import { recomputeProductRating } from "@/lib/services/products";
 
 export async function approveReviewAction(reviewId: string) {
   await requireAdmin();
@@ -29,6 +30,9 @@ export async function approveReviewAction(reviewId: string) {
       status: "approved",
     })
     .where(eq(reviews.id, reviewId));
+
+  // Recompute product rating and count from approved reviews only
+  await recomputeProductRating(rev.productId);
 
   // Find product slug for revalidation
   const [prod] = await db
@@ -73,6 +77,9 @@ export async function rejectReviewAction(reviewId: string) {
     })
     .where(eq(reviews.id, reviewId));
 
+  // Recompute product rating and count from approved reviews only
+  await recomputeProductRating(rev.productId);
+
   const [prod] = await db
     .select({ slug: products.slug })
     .from(products)
@@ -107,6 +114,9 @@ export async function deleteReviewAction(reviewId: string) {
   await db.delete(reviews).where(eq(reviews.id, reviewId));
 
   if (rev?.productId) {
+    // Recompute product rating and count from approved reviews only
+    await recomputeProductRating(rev.productId);
+
     const [prod] = await db
       .select({ slug: products.slug })
       .from(products)

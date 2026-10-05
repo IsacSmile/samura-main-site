@@ -10,13 +10,13 @@ import { Sparkles, ShieldCheck } from "lucide-react";
 export const revalidate = 60; // ISR cache revalidation
 
 export const metadata: Metadata = {
-  title: "Shop All Organic Hygiene Care",
+  title: "Shop All Cotton Hygiene Care",
   description:
-    "Browse our complete catalog of soft organic cotton sanitary pads, daily panty liners, menstrual cups, and pH 3.5 intimate wellness essentials.",
+    "Browse our complete catalog of soft cotton sanitary pads, daily panty liners, menstrual cups, and pH 3.5 intimate wellness essentials.",
   openGraph: {
-    title: "Shop All Organic Hygiene Care | Samaura Healthcare",
+    title: "Shop All Cotton Hygiene Care | Samaura Healthcare",
     description:
-      "Soft, breathable organic cotton pads, cups & intimate hygiene delivered in 100% discreet packaging across India.",
+      "Soft, breathable cotton pads, cups & intimate hygiene delivered in discreet plain packaging across India.",
     url: "/shop",
   },
 };
@@ -105,7 +105,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <div className="space-y-1">
             <div className="flex items-center justify-center sm:justify-start gap-2 text-brand font-semibold text-sm">
               <ShieldCheck className="w-5 h-5" />
-              <span>100% Confidential &amp; Discreet Packaging</span>
+              <span>Confidential &amp; Discreet Packaging</span>
             </div>
             <p className="text-xs text-muted max-w-xl">
               All Samaura shipments are delivered in completely plain exterior cardboard boxes with no product description, logo stamps, or mentions of feminine hygiene on the outside.

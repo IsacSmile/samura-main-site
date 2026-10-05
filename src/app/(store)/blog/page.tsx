@@ -18,9 +18,9 @@ const ARTICLES = [
     date: "October 2026",
   },
   {
-    slug: "why-organic-cotton-prevents-rashes",
-    title: "Why Plastic Sanitary Pads Cause Itching & How Organic Cotton Solves It",
-    excerpt: "Learn how non-breathable plastic topsheets trap heat and sweat, triggering chafing rashes and micro-tears during active periods.",
+    slug: "why-pure-cotton-prevents-chafing",
+    title: "Why Plastic Sanitary Pads Cause Itching & How Pure Cotton Solves It",
+    excerpt: "Learn how non-breathable plastic topsheets trap heat and sweat, triggering friction and discomfort during active periods.",
     category: "Skin Health",
     readTime: "4 min read",
     date: "September 2026",
@@ -98,7 +98,7 @@ export default function BlogPage() {
             Have a personal period or product query?
           </h3>
           <p className="text-xs sm:text-sm text-muted max-w-xl mx-auto">
-            Our certified women wellness advisors are available on WhatsApp for 100% confidential assistance.
+            Our knowledgeable women wellness advisors are available on WhatsApp for confidential assistance.
           </p>
           <Link href="/contact">
             <Button size="md" className="shadow-md">

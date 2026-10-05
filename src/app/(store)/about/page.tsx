@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "About Us | Samaura Healthcare",
-  description: "Learn about Samaura's mission to provide 100% skin-first, chlorine-free organic menstrual care with zero plastic rash.",
+  description: "Learn about Samaura's mission to provide gentle, skin-first, chlorine-free menstrual care with breathable comfort.",
 };
 
 const PILLARS = [
   {
     icon: Heart,
     title: "Skin-First Care",
-    description: "Every product is made with soft organic cotton or pure silicone. No artificial perfumes, harsh chlorine bleach, or artificial dyes.",
+    description: "Every product is made with soft pure cotton or biocompatible silicone. Free from artificial perfumes, harsh chlorine bleach, or artificial dyes.",
   },
   {
     icon: PackageCheck,
@@ -45,7 +45,7 @@ export default function AboutPage() {
             Menstrual hygiene made gentle, thoughtful, and comfortable.
           </h1>
           <p className="text-muted text-base sm:text-lg leading-relaxed">
-            Samaura Healthcare was founded to replace synthetic, plasticky commercial sanitary products with breathable organic materials that treat your body with the kindness it deserves.
+            Samaura Healthcare was founded to replace synthetic, plasticky commercial sanitary products with breathable pure cotton materials that treat your body with the kindness it deserves.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function AboutPage() {
               Over 70% of menstruators in India experience burning, friction discomfort, or itching from mass-market plastic topsheets and chlorine-bleached wood pulp.
             </p>
             <p>
-              At Samaura, every pad begins with pure organic cotton topsheets. We incorporate breathable botanical layers to help maintain fresh comfort naturally without artificial masking fragrances.
+              At Samaura, every pad begins with pure cotton topsheets. We incorporate breathable botanical layers to help maintain fresh comfort naturally without artificial masking fragrances.
             </p>
           </div>
 

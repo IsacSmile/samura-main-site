@@ -122,7 +122,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
   // Highlights / Features (list of bullet strings)
   const parseInitialFeatures = (): string[] => {
-    if (!initialData?.features) return ["Organic Cotton Cover", "Chlorine-Free", "Breathable Backsheet"];
+    if (!initialData?.features) return ["Pure Cotton Cover", "Chlorine-Free", "Breathable Backsheet"];
     try {
       const parsed = JSON.parse(initialData.features);
       if (Array.isArray(parsed)) return parsed;
@@ -545,7 +545,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                 Product Name <span className="text-brand">*</span>
               </label>
               <Input
-                placeholder="e.g. Ultra Thin Organic Cotton Day Pads"
+                placeholder="e.g. Ultra Thin Pure Cotton Day Pads"
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 required
@@ -557,7 +557,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                 URL Slug <span className="text-brand">*</span>
               </label>
               <Input
-                placeholder="e.g. ultra-thin-organic-cotton-day-pads"
+                placeholder="e.g. ultra-thin-pure-cotton-day-pads"
                 value={slug}
                 onChange={(e) => {
                   setIsSlugManuallyEdited(true);
@@ -593,7 +593,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
               <div>
                 <label className="block text-xs font-semibold text-ink mb-1.5">Badge / Tag</label>
                 <Input
-                  placeholder="e.g. Bestseller, 100% Organic"
+                  placeholder="e.g. Bestseller, Gentle Cotton"
                   value={badge}
                   onChange={(e) => setBadge(e.target.value)}
                 />
@@ -1033,7 +1033,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
               </label>
               <textarea
                 rows={4}
-                placeholder="e.g. Soft organic cotton cover, chlorine-free wood pulp core, biodegradable PLA film..."
+                placeholder="e.g. Soft pure cotton cover, chlorine-free wood pulp core, biodegradable PLA film..."
                 value={ingredients}
                 onChange={(e) => setIngredients(e.target.value)}
                 className="w-full p-3 rounded-xl border border-blush text-xs bg-white text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all resize-y"

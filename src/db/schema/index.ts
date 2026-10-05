@@ -175,15 +175,25 @@ export const carts = sqliteTable("carts", {
 export const orders = sqliteTable("orders", {
   id: text("id").primaryKey(),
   orderNumber: text("order_number").notNull().unique(),
+  publicAccessToken: text("public_access_token").notNull().unique(),
+  idempotencyKey: text("idempotency_key").unique(),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
   status: text("status", {
-    enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+    enum: [
+      "pending_payment",
+      "placed",
+      "confirmed",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "refunded",
+    ],
   })
     .notNull()
-    .default("pending"),
-  paymentMethod: text("payment_method", { enum: ["razorpay", "cod"] }).notNull(),
+    .default("pending_payment"),
+  paymentMethod: text("payment_method", { enum: ["razorpay", "cod", "mock"] }).notNull(),
   paymentStatus: text("payment_status", {
-    enum: ["pending", "paid", "failed", "refunded"],
+    enum: ["pending", "pending_cod", "paid", "failed", "refunded"],
   })
     .notNull()
     .default("pending"),
@@ -248,7 +258,7 @@ export const payments = sqliteTable("payments", {
   orderId: text("order_id")
     .notNull()
     .references(() => orders.id, { onDelete: "cascade" }),
-  paymentMethod: text("payment_method", { enum: ["razorpay", "cod"] }).notNull(),
+  paymentMethod: text("payment_method", { enum: ["razorpay", "cod", "mock"] }).notNull(),
   amountPaise: integer("amount_paise").notNull(),
   status: text("status", { enum: ["pending", "successful", "failed", "refunded"] }).notNull().default("pending"),
   gateway: text("gateway").notNull().default("razorpay"),

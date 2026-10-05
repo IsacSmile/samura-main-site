@@ -16,13 +16,20 @@ import { useCartStore } from "@/lib/cart/store";
 
 const emptySubscribe = () => () => {};
 
-const NAV_LINKS = [
+interface NavLinkItem {
+  name: string;
+  href: string;
+  badge?: string;
+  dropdown?: { name: string; href: string; desc: string }[];
+}
+
+const NAV_LINKS: NavLinkItem[] = [
   { name: "Shop All", href: "/shop" },
   {
     name: "Categories",
     href: "/shop",
     dropdown: [
-      { name: "Sanitary Pads", href: "/category/sanitary-pads", desc: "Day & night gentle organic pads" },
+      { name: "Sanitary Pads", href: "/category/sanitary-pads", desc: "Day & night gentle cotton pads" },
       { name: "Panty Liners", href: "/category/panty-liners", desc: "Everyday freshness & spotting care" },
       { name: "Menstrual Cups", href: "/category/menstrual-cups", desc: "12-hour reusable medical silicone" },
       { name: "Intimate Care", href: "/category/intimate-care", desc: "pH 3.5 soothing washes & wipes" },
@@ -30,13 +37,17 @@ const NAV_LINKS = [
       { name: "Combos & Kits", href: "/category/combos", desc: "Starter kits with canvas travel pouch" },
     ],
   },
-  { name: "Offers & Bundles", href: "/offers", badge: "Save 20%" },
+  { name: "Offers & Bundles", href: "/offers" },
   { name: "About Us", href: "/about" },
   { name: "Period Guide", href: "/blog" },
   { name: "Contact", href: "/contact" },
 ];
 
-export function Navbar() {
+export interface NavbarProps {
+  offersBadge?: string;
+}
+
+export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isMounted = useSyncExternalStore(
@@ -153,6 +164,8 @@ export function Navbar() {
 
               const isActive = pathname === link.href;
 
+              const badge = link.href === "/offers" ? offersBadge : link.badge;
+
               return (
                 <Link
                   key={link.name}
@@ -164,9 +177,9 @@ export function Navbar() {
                   }`}
                 >
                   {link.name}
-                  {link.badge && (
+                  {badge && (
                     <span className="bg-brand text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full ml-1">
-                      {link.badge}
+                      {badge}
                     </span>
                   )}
                 </Link>
@@ -322,9 +335,11 @@ export function Navbar() {
               className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-brand bg-blush"
             >
               <span>Offers & Value Packs</span>
-              <span className="bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                Save 20%
-              </span>
+              {offersBadge && (
+                <span className="bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {offersBadge}
+                </span>
+              )}
             </Link>
             <Link
               href="/about"

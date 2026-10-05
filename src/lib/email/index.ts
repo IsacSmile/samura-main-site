@@ -50,12 +50,12 @@ export async function sendOrderConfirmationEmail({
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #FFD9E2; border-radius: 16px; background-color: #FFFFFF;">
           <div style="text-align: center; padding-bottom: 20px;">
             <h1 style="color: #C8202F; margin: 0;">Samaura Healthcare</h1>
-            <p style="color: #6B5B62; font-size: 14px;">Gentle & Organic Female Hygiene</p>
+            <p style="color: #6B5B62; font-size: 14px;">Gentle & Pure Cotton Female Hygiene</p>
           </div>
           <div style="background-color: #FFF1F4; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
             <h2 style="color: #3B1F2B; font-size: 18px; margin-top: 0;">Thank you for your order, ${customerName}!</h2>
             <p style="color: #6B5B62; font-size: 14px; margin-bottom: 0;">
-              Your order <strong>${orderNumber}</strong> has been received and will be packaged in 100% discreet, plain exterior packaging.
+              Your order <strong>${orderNumber}</strong> has been received and will be packaged in discreet, plain exterior packaging.
             </p>
           </div>
           <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #3B1F2B;">

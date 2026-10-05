@@ -99,7 +99,7 @@ export default async function HomePage() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
                 <Sparkles className="w-4 h-4 text-brand" />
-                <span>Next Generation Organic Female Hygiene</span>
+                <span>Gentle & Breathable Female Hygiene</span>
               </div>
 
               {/* Main Headline */}
@@ -126,7 +126,7 @@ export default async function HomePage() {
 
               {/* Body Subtitle */}
               <p className="text-base sm:text-lg text-muted leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Say goodbye to plastic chafing and synthetic perfumes. Samaura delivers organic cotton pads and silicone cups designed for gentle, breathable comfort.
+                Say goodbye to plastic chafing and synthetic perfumes. Samaura delivers pure cotton pads and silicone cups designed for gentle, breathable comfort.
               </p>
 
               {/* Action Buttons */}
@@ -153,7 +153,7 @@ export default async function HomePage() {
                     <Leaf className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-medium text-ink">
-                    100% Organic Topsheet
+                    Pure Cotton Topsheet
                   </span>
                 </div>
 
@@ -171,7 +171,7 @@ export default async function HomePage() {
                     <Truck className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-medium text-ink">
-                    100% Discreet Box
+                    Discreet Box
                   </span>
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default async function HomePage() {
               <div className="relative mx-auto max-w-md lg:max-w-none rounded-3xl overflow-hidden shadow-2xl border-4 border-white aspect-4/5 bg-linear-to-tr from-blush to-pink-light">
                 <Image
                   src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=1000"
-                  alt="Samaura Organic Cotton Pads"
+                  alt="Samaura Pure Cotton Pads"
                   fill
                   sizes="(max-width: 1024px) 100vw, 42vw"
                   className="object-cover object-center"
@@ -280,7 +280,7 @@ export default async function HomePage() {
               The Samaura Difference
             </h2>
             <p className="text-sm text-muted leading-relaxed">
-              Why thousands of women have swapped synthetic drugstore pads for Samaura gentle organic care.
+              Why thousands of women have swapped synthetic drugstore pads for Samaura gentle cotton care.
             </p>
           </div>
 
@@ -333,14 +333,14 @@ export default async function HomePage() {
                   <h3 className="font-heading font-bold text-base text-ink">
                     Samaura Healthcare
                   </h3>
-                  <span className="text-xs text-emerald-700 font-semibold">Organic &amp; Breathable</span>
+                  <span className="text-xs text-emerald-700 font-semibold">Gentle &amp; Breathable</span>
                 </div>
               </div>
 
               <ul className="space-y-3 text-xs sm:text-sm text-ink">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
-                  <span className="font-medium">Soft breathable organic cotton topsheet for velvety comfort</span>
+                  <span className="font-medium">Soft breathable pure cotton topsheet for velvety comfort</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
@@ -491,7 +491,7 @@ export default async function HomePage() {
             </div>
             <div className="space-y-1">
               <h3 className="font-heading font-bold text-xl sm:text-2xl text-ink">
-                100% Confidential & Discreet Delivery
+                Strictly Confidential & Discreet Delivery
               </h3>
               <p className="text-sm text-muted max-w-xl">
                 Every order arrives in a completely plain brown cardboard box. No mentions of pads, female hygiene, or periods anywhere on the shipping label. Your privacy is sacred.

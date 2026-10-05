@@ -13,8 +13,8 @@ Last updated: Phase 1 (Foundation) Complete.
 | **Phase 2: Storefront Catalog** | Applied Fixes A-D (env seed with bcrypt, Turso/local DB toggle, migration 0001 with ingredients/absorption/usage guide + reviews table, gitignore data/*.db). Built `/shop`, `/category/[slug]`, `/product/[slug]`, reusable `ProductCard`, money formatting `formatRupees`, SVG placeholder images, JSON-LD Product schema, approved reviews with moderation API, dynamic filters & pagination. | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Verified HTTP 200 SSR on all catalog routes |
 | **Phase 3: Admin Auth + Catalog Management** | Applied Fixes A-F (production seed env enforcement, no seeded reviews, server-calculated `isVerified` review validation + rate limiting & honeypot, conditional JSON-LD aggregateRating, neutral copy, gitignore verified). Built Auth.js (credentials) with bcrypt (customer/admin roles), proxy + server-side `requireAdmin()` gate on every action/route, admin layout shell, dashboard counts, Category CRUD, Product CRUD with variants (prices in ₹ / stored in paise), storage abstraction image upload (jpg/png/webp <= 2MB), review moderation, toast notifications, and path revalidations. | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Non-admin/logged-out users blocked |
 | **Phase 3.1: Responsiveness + Compliance Hotfix** | Fixed horizontal overflow sitewide across viewports (announcement bar, WhatsApp button, w-screen/negative margins removed, min-w-0 flex/grid). Navbar desktop nav at xl (>=1280px), drawer below, icons protected, cart badge inside viewport. Stacked mobile shop toolbar with 2-column filters+sort. ProductCard wrapping and consistent heights. Removed duplicate category pills. Compliance: 0 hardcoded ratings (ProductCard only renders rating when approved reviews exist in DB), neutral copy replacing unsubstantiated claims ("100% GOTS", "100% Rash-Free", "Zero Leaks", "Anion", "Dermatologist Tested"), admin-editable compliance trust badges and announcement text, demo login shown only when `NODE_ENV !== "production"`. | **DONE** | `scrollWidth === innerWidth` verified at 320, 375, 414, 768, 1024, 1280, 1536px across all routes (42/42 PASS) • `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • 0 hardcoded ratings confirmed by grep |
-| **Phase 4: Cart & Checkout Engine** | Cart page & drawer, persisted Zustand sync, coupon application, Zod checkout validation, and atomic stock lock + order transaction | *Next* | To build |
-| **Phase 5: Payments & Transactions** | Razorpay (cards/UPI/netbanking) + COD + idempotent server webhook signature verification + Resend email confirmations | *Pending* | To build |
+| **Phase 4: Cart, Checkout & Payments** | Applied Fixes A-E (review recompute rating, marketing claim grep/neutralization, dynamic nav/shipping settings, button layer move, env/db untracked). Cart page & drawer with variantId+qty store, server-authoritative pricing in integer paise (`computePricing`), server coupon validation, dynamic shipping fees, checkout with guest/user saved addresses, atomic stock lock with `UPDATE ... WHERE stock >= qty` in 1 DB transaction, idempotency key & rate limiting, PaymentProvider abstraction (Mock dev gateway + Razorpay with HMAC crypto.timingSafeEqual and raw webhook), 30-min lazy cleanup of abandoned online orders, and unguessable publicAccessToken order confirmation. | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Automated tests for price tampering, out of stock, concurrent race condition, replay protection, HMAC fixtures |
+| **Phase 5: Customer Account & History** | Profile, saved addresses, order tracking history, and detailed receipts | *Pending* | To build |
 | **Phase 6: Customer Account** | Profile, saved addresses, order tracking history, and detailed receipts | *Pending* | To build |
 | **Phase 7: Content & Support** | About Us, Period Guide / Blog (list + reader), FAQ accordion, Contact enquiry form | *Pending* | To build |
 
@@ -324,6 +324,114 @@ Automated headless browser check executing `document.documentElement.scrollWidth
 | **`/admin`** (Admin Dashboard) | PASS (320px) | PASS (375px) | PASS (414px) | PASS (768px) | PASS (1024px) | PASS (1280px) | PASS (1536px) |
 
 **Result**: 42/42 tests PASSED. Zero horizontal overflow across all required viewports.
+
+---
+
+## Detailed Phase 4 Checklist: Cart, Checkout & Payments Engine
+
+### 1. Prerequisite Fixes Applied
+- [x] **Fix A: Review Moderation Rating Recomputation**:
+  - Implemented `recomputeProductRating(productId)` in `src/lib/services/products.ts`.
+  - Calculates average rating and count strictly from approved reviews (`status = 'approved'`). If no approved reviews remain, resets product rating to 0.
+  - Hooked into `approveReviewAction`, `rejectReviewAction`, and `deleteReviewAction` in `src/app/admin/actions/reviews.ts`.
+  - Verified with automated test script `scripts/test-recompute-reviews.ts`: approval -> 4.5 avg (2 reviews), rejection -> 5.0 avg (1 review), deletion -> 0 rating (0 reviews). All assertions PASSED.
+- [x] **Fix B: Neutralized Unsubstantiated Claims**:
+  - Scanned and replaced keywords (`anion`, `GOTS`, `certified`, `dermatolog`, `zero leak`, `rash-free`, `"100%"`, `sustainable`, `organic`) across `src/`, seed data, DB rows, metadata, JSON-LD, and footer.
+  - Replaced with legally defensible copy ("Gentle on skin", "Breathable comfort", "Dual leak barrier", "Pure cotton softness") or placed behind toggleable admin compliance settings.
+- [x] **Fix C: Dynamic Nav Badges and Shipping Settings**:
+  - Replaced hardcoded "Save 20%" nav badge with dynamic `nav_offers_badge` setting from DB.
+  - Replaced hardcoded free shipping threshold with `shipping_free_threshold_paise` and dynamic rules from `shipping_rules` table.
+  - Replaced hardcoded dispatch turnaround copy with dynamic `dispatch_time_text` setting.
+- [x] **Fix D: CSS Button Layer Refactoring**:
+  - Moved `.btn-brand`, `.btn-secondary`, `.btn-blush`, `.card-soft`, `.badge-*` into `@layer components` in `src/app/globals.css`.
+  - Removed `:not(.hidden)` CSS selector hack while preserving Tailwind utility precedence.
+- [x] **Fix E: Git Tracking Verification**:
+  - Verified via `git ls-files .env* data/` that zero `.env` or `.db` files are tracked in the repository.
+
+### 2. Core Features Built
+- [x] **Client Cart Store (`src/lib/cart/store.ts`)**:
+  - Stores **only** `variantId` and `quantity` in client localStorage. Never stores client prices or stock numbers.
+- [x] **Server-Authoritative Pricing (`src/lib/services/pricing.ts`)**:
+  - Single source of truth: `computePricing({ items, couponCode, address, userId })`.
+  - Re-reads variant prices and current stock directly from DB.
+  - Rejects inactive products/variants, out-of-stock items, and requested qty > stock.
+  - Capped coupon discounts, active date check, minOrder requirement, usage limits, and per-user limits.
+  - Calculates shipping fees against dynamic thresholds.
+  - All financial calculations computed in integer paise.
+- [x] **Cart View & Drawer (`/cart` & `CartDrawer.tsx`)**:
+  - Quantity stepper, item removal, empty cart state, line item breakdowns, and subtotal.
+  - Dynamic price synchronization via server action `computeCartPricingAction`.
+- [x] **Checkout Engine (`/checkout` & `src/app/actions/checkout.ts`)**:
+  - Guest checkout + logged-in user saved addresses support.
+  - Zod validation for customer name, 10-digit Indian phone (`/^[6-9]\d{9}$/`), email, address, city, state, and 6-digit PIN code (`/^\d{6}$/`).
+  - Rate-limited per IP (max 10 / 10m) and per phone number (max 5 / 10m).
+  - Idempotency key per checkout attempt preventing double-orders on repeated clicks.
+  - Cash on Delivery (COD) guarded by admin settings (`cod_enabled` & `cod_max_order_paise`).
+  - Online payments hidden when provider is inactive; active when configured.
+- [x] **Order Creation in Single DB Transaction (`src/lib/services/orders.ts`)**:
+  - Atomic stock decrement with `UPDATE product_variants SET stock = stock - qty WHERE id = ? AND stock >= qty`.
+  - Inspects `rowsAffected`: rolls back entire transaction if any variant lacks sufficient stock.
+  - Inserts order row, snapshot `order_items`, initial payment row, and records coupon usage in a single transaction.
+- [x] **Payment Provider Abstraction (`src/lib/payments/`)**:
+  - Provider interface: `createOrder`, `verifyReturn`, `verifyWebhook`.
+  - `MockPaymentProvider`: Dev-only sandbox gateway (`/payment/mock`) with Success/Failure simulation executing the exact server confirmation path. Throws fatal error in production environment.
+  - `RazorpayPaymentProvider`: Server-side order creation in paise, HMAC-SHA256 verification using `crypto.timingSafeEqual`, raw-body webhook handler (`/api/razorpay/webhook`), idempotent payment confirmation, and currency/amount matching.
+  - Dormant online payments when unconfigured; COD functional at launch.
+  - 30-minute lazy cleanup releasing reserved stock from abandoned online payments.
+- [x] **Order Confirmation (`/order/[token]`)**:
+  - Access controlled via unguessable 48-character `publicAccessToken`.
+  - Displays ordered items, delivery address, payment status, and order totals without exposing sequential IDs or customer data.
+
+### 3. Order Status State Machine & Allowed Transitions
+
+```
+[ pending_payment ] (Initial for online payment)
+       │
+       ├─────────────────────────────────┐
+       ▼ (payment captured / webhook)    ▼ (payment failed / 30m timeout)
+   [ placed ]                        [ cancelled ] ──> (Stock released to inventory)
+       │
+       ▼ (verified for fulfillment)
+  [ confirmed ]
+       │
+       ▼ (dispatched with tracking)
+   [ shipped ]
+       │
+       ▼ (handed over to customer)
+  [ delivered ]
+       │
+       ▼ (return / quality claim approved)
+   [ refunded ]
+```
+
+#### Allowed State Transitions:
+1. **`pending_payment`**:
+   - `-> placed`: Online payment verified via webhook (`payment.captured` / `order.paid`) or return callback.
+   - `-> cancelled`: Payment failed or timed out after 30 minutes; reserved stock is atomically restored.
+2. **`placed`**:
+   - Initial state for Cash on Delivery (COD) orders, or post-payment online orders.
+   - `-> confirmed`: Verified by store admin for warehouse packaging.
+   - `-> cancelled`: Customer or admin cancels before packing; stock restored.
+3. **`confirmed`**:
+   - `-> shipped`: Handed over to logistics carrier with tracking number.
+   - `-> cancelled`: Cancelled prior to courier dispatch; stock restored.
+4. **`shipped`**:
+   - `-> delivered`: Successfully delivered to recipient address.
+   - `-> cancelled`: Undeliverable / Return to Origin (RTO).
+5. **`delivered`**:
+   - `-> refunded`: Customer return approved or dispute resolved; funds refunded.
+6. **`cancelled`**:
+   - Terminal state. Stock has been restored. No further transitions allowed.
+7. **`refunded`**:
+   - Terminal state. Refund recorded. No further transitions allowed.
+
+#### Payment Statuses:
+- **`pending`**: Awaiting gateway confirmation (online orders).
+- **`pending_cod`**: Payment to be collected upon physical delivery (Cash on Delivery).
+- **`paid`**: Payment successfully captured and verified.
+- **`failed`**: Payment failed, cancelled, or rejected by bank.
+- **`refunded`**: Payment reversed to customer account.
+
 
 
 

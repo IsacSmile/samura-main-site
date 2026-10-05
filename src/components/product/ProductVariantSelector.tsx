@@ -144,7 +144,7 @@ export function ProductVariantSelector({
           )}
         </div>
         <p className="text-xs text-muted">
-          Inclusive of all taxes. Free 100% discreet delivery on orders above ₹499.
+          Inclusive of all taxes. Free discreet delivery on orders above ₹499.
         </p>
       </div>
 

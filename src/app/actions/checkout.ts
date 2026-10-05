@@ -1,0 +1,281 @@
+"use server";
+
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { z } from "zod";
+import { createOrder, confirmOrderPayment, cancelOrderPayment, cleanupAbandonedOrders } from "@/lib/services/orders";
+import { getUserAddresses, saveUserAddress } from "@/lib/services/addresses";
+import { isOnlinePaymentConfigured, getPaymentProvider } from "@/lib/payments";
+import { getSetting } from "@/lib/services/settings";
+
+// In-memory rate limiting maps
+const ipRateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const phoneRateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_PER_IP = 10;
+const MAX_PER_PHONE = 5;
+
+// Periodically purge expired buckets
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of ipRateLimitMap.entries()) {
+    if (val.resetAt <= now) ipRateLimitMap.delete(key);
+  }
+  for (const [key, val] of phoneRateLimitMap.entries()) {
+    if (val.resetAt <= now) phoneRateLimitMap.delete(key);
+  }
+}, 5 * 60 * 1000);
+
+const checkoutActionSchema = z.object({
+  customerName: z.string().min(2, "Full name must be at least 2 characters").max(100),
+  customerEmail: z.string().email("Please provide a valid email address"),
+  customerPhone: z
+    .string()
+    .regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"),
+  addressLine1: z.string().min(5, "Flat/House no. and street are required"),
+  addressLine2: z.string().optional().nullable(),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
+  postalCode: z.string().regex(/^\d{6}$/, "Please enter a valid 6-digit PIN code"),
+  paymentMethod: z.enum(["razorpay", "cod", "mock"], {
+    message: "Please choose a valid payment method",
+  }),
+  couponCode: z.string().optional().nullable(),
+  notes: z.string().max(300, "Notes cannot exceed 300 characters").optional().nullable(),
+  items: z
+    .array(
+      z.object({
+        variantId: z.string().min(1, "Variant ID is required"),
+        quantity: z.number().int().min(1, "Quantity must be at least 1"),
+      })
+    )
+    .min(1, "Your cart is empty"),
+  idempotencyKey: z.string().min(10, "Idempotency key is required"),
+  saveAddress: z.boolean().optional(),
+});
+
+export type CheckoutActionInput = z.infer<typeof checkoutActionSchema>;
+
+export async function processCheckoutAction(rawInput: unknown) {
+  try {
+    // 1. Zod Validation
+    const parsed = checkoutActionSchema.safeParse(rawInput);
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message || "Invalid checkout data provided.";
+      return { success: false, error: firstError };
+    }
+
+    const data = parsed.data;
+
+    // 2. Extract Client IP
+    const headerList = await headers();
+    const forwarded = headerList.get("x-forwarded-for");
+    const ip = forwarded ? forwarded.split(",")[0].trim() : headerList.get("x-real-ip") || "127.0.0.1";
+
+    const now = Date.now();
+
+    // 3. Rate Limit per IP
+    const ipEntry = ipRateLimitMap.get(ip);
+    if (ipEntry && ipEntry.resetAt > now) {
+      if (ipEntry.count >= MAX_PER_IP) {
+        return {
+          success: false,
+          error: "Too many checkout attempts from this IP address. Please wait a few minutes before trying again.",
+        };
+      }
+      ipEntry.count++;
+    } else {
+      ipRateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    }
+
+    // 4. Rate Limit per Phone Number
+    const phone = data.customerPhone.trim();
+    const phoneEntry = phoneRateLimitMap.get(phone);
+    if (phoneEntry && phoneEntry.resetAt > now) {
+      if (phoneEntry.count >= MAX_PER_PHONE) {
+        return {
+          success: false,
+          error: "Too many checkout attempts for this phone number. Please try again shortly.",
+        };
+      }
+      phoneEntry.count++;
+    } else {
+      phoneRateLimitMap.set(phone, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    }
+
+    // 5. Auth / Session Check
+    const session = await auth();
+    const userId = session?.user?.id || null;
+
+    // If user asked to save address and is logged in
+    if (userId && data.saveAddress) {
+      try {
+        await saveUserAddress(userId, {
+          fullName: data.customerName,
+          phone: data.customerPhone,
+          addressLine1: data.addressLine1,
+          addressLine2: data.addressLine2,
+          city: data.city,
+          state: data.state,
+          postalCode: data.postalCode,
+          isDefault: true,
+        });
+      } catch (err) {
+        console.error("Failed to save user address on checkout:", err);
+      }
+    }
+
+    // Lazy cleanup of abandoned orders in background
+    cleanupAbandonedOrders().catch((err) =>
+      console.error("Background abandoned orders cleanup error:", err)
+    );
+
+    // 6. Execute Order Creation in Single DB Transaction
+    const result = await createOrder({
+      items: data.items,
+      address: {
+        fullName: data.customerName,
+        phone: data.customerPhone,
+        email: data.customerEmail,
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2,
+        city: data.city,
+        state: data.state,
+        postalCode: data.postalCode,
+      },
+      paymentMethod: data.paymentMethod,
+      couponCode: data.couponCode,
+      notes: data.notes,
+      idempotencyKey: data.idempotencyKey,
+      userId,
+    });
+
+    return result;
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "An unexpected checkout error occurred.",
+    };
+  }
+}
+
+/**
+ * Client verification callback for Razorpay return modal.
+ */
+export async function verifyRazorpayPaymentAction(payload: {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}) {
+  const provider = getPaymentProvider();
+  if (!provider || provider.name !== "razorpay") {
+    return { success: false, error: "Razorpay provider is not active." };
+  }
+
+  const verifyResult = await provider.verifyReturn(payload);
+  if (!verifyResult.ok) {
+    // Tampered or invalid return
+    await cancelOrderPayment({
+      providerOrderId: payload.razorpay_order_id,
+      paymentId: payload.razorpay_payment_id,
+      reason: verifyResult.error || "Razorpay return signature verification failed.",
+    });
+    return { success: false, error: verifyResult.error || "Payment signature invalid." };
+  }
+
+  // Verification passed -> confirm order payment
+  const confirmResult = await confirmOrderPayment({
+    providerOrderId: payload.razorpay_order_id,
+    paymentId: payload.razorpay_payment_id,
+    signature: payload.razorpay_signature,
+    gateway: "razorpay",
+  });
+
+  if (!confirmResult.ok) {
+    return { success: false, error: confirmResult.error || "Failed to confirm payment." };
+  }
+
+  return {
+    success: true,
+    publicAccessToken: confirmResult.order?.publicAccessToken,
+    orderNumber: confirmResult.order?.orderNumber,
+  };
+}
+
+/**
+ * Server confirmation for Mock Gateway in dev/test.
+ */
+export async function confirmMockPaymentAction(payload: {
+  orderId: string;
+  publicAccessToken: string;
+  status: "success" | "fail";
+}) {
+  if (process.env.NODE_ENV === "production" && process.env.PAYMENT_PROVIDER === "mock") {
+    throw new Error("Mock payment confirmation forbidden in production.");
+  }
+
+  const provider = getPaymentProvider();
+  if (!provider || provider.name !== "mock") {
+    return { success: false, error: "Mock provider is not active." };
+  }
+
+  const mockPaymentId = `mock_pay_${Date.now()}`;
+  const verifyRes = await provider.verifyReturn({
+    status: payload.status,
+    paymentId: mockPaymentId,
+  });
+
+  if (!verifyRes.ok) {
+    await cancelOrderPayment({
+      orderId: payload.orderId,
+      paymentId: mockPaymentId,
+      reason: "Simulated payment cancellation in mock gateway.",
+    });
+    return { success: false, error: "Simulated payment failure." };
+  }
+
+  const confirmRes = await confirmOrderPayment({
+    orderId: payload.orderId,
+    paymentId: mockPaymentId,
+    gateway: "mock",
+  });
+
+  if (!confirmRes.ok) {
+    return { success: false, error: confirmRes.error || "Failed to confirm mock payment." };
+  }
+
+  return {
+    success: true,
+    publicAccessToken: confirmRes.order?.publicAccessToken,
+    orderNumber: confirmRes.order?.orderNumber,
+  };
+}
+
+/**
+ * Returns configuration settings and saved addresses for the checkout view.
+ */
+export async function getCheckoutConfigAction() {
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  const [savedAddresses, codEnabledSetting, codMaxOrderPaiseSetting] = await Promise.all([
+    userId ? getUserAddresses(userId) : [],
+    getSetting("cod_enabled", "true"),
+    getSetting("cod_max_order_paise", "250000"),
+  ]);
+
+  const onlineConfigured = isOnlinePaymentConfigured();
+  const provider = getPaymentProvider();
+
+  return {
+    isLoggedIn: Boolean(userId),
+    userEmail: session?.user?.email || "",
+    userName: session?.user?.name || "",
+    savedAddresses,
+    onlinePaymentAvailable: onlineConfigured,
+    providerName: provider?.name || null,
+    codEnabled: codEnabledSetting === "true",
+    codMaxOrderPaise: parseInt(codMaxOrderPaiseSetting, 10) || 250000,
+  };
+}

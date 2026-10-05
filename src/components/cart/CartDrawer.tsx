@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -12,35 +12,35 @@ import {
   ArrowRight,
   ShieldCheck,
   Sparkles,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { useCartStore } from "@/lib/cart/store";
+import { useCartPricing } from "@/lib/cart/useCartPricing";
 import { formatRupees } from "@/lib/utils/money";
 
 export function CartDrawer() {
+  const isOpen = useCartStore((s) => s.isOpen);
+  const closeCart = useCartStore((s) => s.closeCart);
+
   const {
     items,
-    isOpen,
-    closeCart,
-    updateQuantity,
+    pricing,
+    loading,
+    error,
     removeItem,
-    getSubtotalPaise,
-    getItemCount,
-  } = useCartStore();
+    updateQuantity,
+  } = useCartPricing();
 
-  const subtotalPaise = getSubtotalPaise();
-  const itemCount = getItemCount();
-
-  // Free shipping threshold is ₹499 (49900 paise)
-  const FREE_SHIPPING_THRESHOLD_PAISE = 49900;
-  const isFreeShipping = subtotalPaise >= FREE_SHIPPING_THRESHOLD_PAISE;
+  const subtotalPaise = pricing?.subtotalPaise ?? 0;
+  const itemCount = pricing?.itemCount ?? items.reduce((acc, i) => acc + (i.quantity || 0), 0);
+  const thresholdPaise = pricing?.freeShippingThresholdPaise ?? 49900;
+  const isFreeShipping = subtotalPaise >= thresholdPaise;
   const freeShippingProgress = Math.min(
     100,
-    Math.round((subtotalPaise / FREE_SHIPPING_THRESHOLD_PAISE) * 100)
+    Math.round((subtotalPaise / thresholdPaise) * 100)
   );
-  const remainingForFreeShipping = Math.max(
-    0,
-    FREE_SHIPPING_THRESHOLD_PAISE - subtotalPaise
-  );
+  const remainingForFreeShipping = Math.max(0, thresholdPaise - subtotalPaise);
 
   // Close on Escape key
   useEffect(() => {
@@ -58,6 +58,8 @@ export function CartDrawer() {
   }, [isOpen, closeCart]);
 
   if (!isOpen) return null;
+
+  const displayItems = pricing?.items ?? [];
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -77,6 +79,7 @@ export function CartDrawer() {
               <h2 className="font-heading font-semibold text-lg text-ink">
                 Your Bag ({itemCount})
               </h2>
+              {loading && <Loader2 className="w-4 h-4 animate-spin text-brand ml-2" />}
             </div>
             <button
               onClick={closeCart}
@@ -114,6 +117,14 @@ export function CartDrawer() {
             </div>
           </div>
 
+          {/* Error / Warning Notice */}
+          {error && (
+            <div className="mx-4 mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-2 text-xs text-amber-800">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
           {/* Cart Item List */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             {items.length === 0 ? (
@@ -126,7 +137,7 @@ export function CartDrawer() {
                     Your bag is empty
                   </h3>
                   <p className="text-xs text-muted max-w-xs">
-                    Treat your intimate skin with gentle, breathable organic care. Explore our bestsellers.
+                    Treat your intimate skin with gentle, breathable pure cotton care. Explore our bestsellers.
                   </p>
                 </div>
                 <Link
@@ -137,10 +148,18 @@ export function CartDrawer() {
                   Explore Products
                 </Link>
               </div>
+            ) : loading && displayItems.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-center py-12">
+                <div className="flex flex-col items-center gap-2 text-muted text-xs">
+                  <Loader2 className="w-6 h-6 animate-spin text-brand" />
+                  <span>Loading updated pricing...</span>
+                </div>
+              </div>
             ) : (
-              items.map((item) => {
-                const currentPrice = item.salePricePaise ?? item.pricePaise;
-                const hasSale = item.salePricePaise && item.salePricePaise < item.pricePaise;
+              displayItems.map((item) => {
+                const hasSale =
+                  item.salePricePaise !== null &&
+                  item.salePricePaise < item.pricePaise;
 
                 return (
                   <div
@@ -163,7 +182,7 @@ export function CartDrawer() {
                       <div className="space-y-1">
                         <div className="flex items-start justify-between gap-2">
                           <Link
-                            href={`/product/${item.productId}`}
+                            href={`/product/${item.productSlug}`}
                             onClick={closeCart}
                             className="font-medium text-sm text-ink hover:text-brand transition-colors line-clamp-1"
                           >
@@ -180,7 +199,7 @@ export function CartDrawer() {
                         <p className="text-xs text-muted">{item.variantName}</p>
                       </div>
 
-                      {/* Quantity & Price */}
+                      {/* Quantity Stepper & Price */}
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-center border border-pink-light rounded-full bg-blush/40 px-2 py-0.5">
                           <button
@@ -209,7 +228,7 @@ export function CartDrawer() {
 
                         <div className="text-right">
                           <div className="text-sm font-bold text-ink">
-                            {formatRupees(currentPrice * item.quantity)}
+                            {formatRupees(item.lineTotalPaise)}
                           </div>
                           {hasSale && (
                             <div className="text-[10px] text-muted line-through">
@@ -236,24 +255,27 @@ export function CartDrawer() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted">
-                  <span>Estimated Shipping</span>
+                  <span>Delivery</span>
                   <span>
                     {isFreeShipping ? (
                       <span className="text-emerald-700 font-semibold">FREE</span>
                     ) : (
-                      "Calculated at checkout"
+                      formatRupees(pricing?.shippingFeePaise ?? 5000)
                     )}
                   </span>
                 </div>
+                <p className="text-[11px] text-muted text-right">
+                  {pricing?.taxNote || "Inclusive of all taxes"}
+                </p>
               </div>
 
               {/* Discreet delivery badge */}
               <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-pink-light text-[11px] text-muted">
                 <ShieldCheck className="w-4 h-4 text-success shrink-0" />
-                <span>100% Discreet, plain packaging. Zero brand markings on the box.</span>
+                <span>Discreet plain packaging. Plain unmarked exterior.</span>
               </div>
 
-              {/* Checkout Button */}
+              {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <Link
                   href="/cart"

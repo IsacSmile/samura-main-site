@@ -383,3 +383,27 @@ export async function getCategoryBySlug(slug: string) {
     subcategories,
   };
 }
+
+export async function recomputeProductRating(productId: string) {
+  const [stats] = await db
+    .select({
+      avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+      reviewCount: count(),
+    })
+    .from(reviews)
+    .where(and(eq(reviews.productId, productId), eq(reviews.status, "approved")));
+
+  const avg = stats ? Math.round(Number(stats.avgRating) * 10) / 10 : 0;
+  const total = stats ? Number(stats.reviewCount) : 0;
+
+  await db
+    .update(products)
+    .set({
+      rating: avg,
+      reviewCount: total,
+      updatedAt: new Date(),
+    })
+    .where(eq(products.id, productId));
+
+  return { rating: avg, reviewCount: total };
+}

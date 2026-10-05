@@ -1,37 +1,35 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export interface CartItem {
+export interface CartItemReference {
   variantId: string;
-  productId: string;
-  productName: string;
-  variantName: string;
-  sku: string;
-  image: string;
-  pricePaise: number;
-  salePricePaise?: number | null;
   quantity: number;
-  stock: number;
 }
 
+// Backward-compatible alias
+export type CartItem = CartItemReference;
+
+export type AddItemInput = string | { variantId: string; [key: string]: unknown };
+
 interface CartState {
-  items: CartItem[];
+  items: CartItemReference[];
   isOpen: boolean;
   appliedCoupon: string | null;
 
   // Actions
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  addItem: (item: AddItemInput, quantity?: number) => void;
   removeItem: (variantId: string) => void;
   updateQuantity: (variantId: string, quantity: number) => void;
   clearCart: () => void;
   setCoupon: (code: string | null) => void;
+  setAppliedCoupon: (code: string | null) => void;
+  removeCoupon: () => void;
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
 
-  // Computed helpers
+  // Computed helper
   getItemCount: () => number;
-  getSubtotalPaise: () => number;
 }
 
 export const useCartStore = create<CartState>()(
@@ -41,34 +39,28 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
       appliedCoupon: null,
 
-      addItem: (item, quantity = 1) => {
+      addItem: (input, quantity = 1) => {
+        const variantId = typeof input === "string" ? input : input?.variantId;
+        if (!variantId) return;
+
+        const qtyToAdd = Math.max(1, Math.floor(quantity));
+
         set((state) => {
           const existingIndex = state.items.findIndex(
-            (i) => i.variantId === item.variantId
+            (i) => i.variantId === variantId
           );
 
           if (existingIndex > -1) {
             const updatedItems = [...state.items];
-            const currentItem = updatedItems[existingIndex];
-            const newQty = Math.min(
-              currentItem.quantity + quantity,
-              item.stock > 0 ? item.stock : 20
-            );
             updatedItems[existingIndex] = {
-              ...currentItem,
-              quantity: newQty,
+              variantId,
+              quantity: updatedItems[existingIndex].quantity + qtyToAdd,
             };
             return { items: updatedItems, isOpen: true };
           }
 
           return {
-            items: [
-              ...state.items,
-              {
-                ...item,
-                quantity: Math.min(quantity, item.stock > 0 ? item.stock : 20),
-              },
-            ],
+            items: [...state.items, { variantId, quantity: qtyToAdd }],
             isOpen: true,
           };
         });
@@ -89,10 +81,9 @@ export const useCartStore = create<CartState>()(
         set((state) => ({
           items: state.items.map((item) => {
             if (item.variantId === variantId) {
-              const maxAllowed = item.stock > 0 ? item.stock : 20;
               return {
-                ...item,
-                quantity: Math.min(quantity, maxAllowed),
+                variantId,
+                quantity: Math.floor(quantity),
               };
             }
             return item;
@@ -102,7 +93,13 @@ export const useCartStore = create<CartState>()(
 
       clearCart: () => set({ items: [], appliedCoupon: null }),
 
-      setCoupon: (code) => set({ appliedCoupon: code }),
+      setCoupon: (code) =>
+        set({ appliedCoupon: code ? code.trim().toUpperCase() : null }),
+
+      setAppliedCoupon: (code) =>
+        set({ appliedCoupon: code ? code.trim().toUpperCase() : null }),
+
+      removeCoupon: () => set({ appliedCoupon: null }),
 
       openCart: () => set({ isOpen: true }),
 
@@ -111,21 +108,18 @@ export const useCartStore = create<CartState>()(
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
 
       getItemCount: () => {
-        return get().items.reduce((total, item) => total + item.quantity, 0);
-      },
-
-      getSubtotalPaise: () => {
-        return get().items.reduce((total, item) => {
-          const effectivePrice = item.salePricePaise ?? item.pricePaise;
-          return total + effectivePrice * item.quantity;
-        }, 0);
+        return get().items.reduce((total, item) => total + (item.quantity || 0), 0);
       },
     }),
     {
       name: "samaura_cart",
       storage: createJSONStorage(() => localStorage),
+      // Only variantId, quantity and appliedCoupon are stored in client localStorage
       partialize: (state) => ({
-        items: state.items,
+        items: state.items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
         appliedCoupon: state.appliedCoupon,
       }),
     }

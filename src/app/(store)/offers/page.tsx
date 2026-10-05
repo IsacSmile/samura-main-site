@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "Special Offers & Coupon Codes | Samaura Healthcare",
-  description: "Exclusive discounts, bulk pack offers, and coupon codes for gentle organic menstrual care.",
+  description: "Exclusive discounts, bulk pack offers, and coupon codes for gentle pure cotton menstrual care.",
 };
 
 const OFFERS = [
@@ -13,7 +13,7 @@ const OFFERS = [
     code: "WELCOME15",
     discount: "15% OFF",
     title: "Welcome to Samaura",
-    description: "Get 15% off on your first purchase of organic cotton pads, panty liners, and wellness essentials.",
+    description: "Get 15% off on your first purchase of pure cotton pads, panty liners, and wellness essentials.",
     minOrder: "No minimum purchase",
     tag: "First Order Special",
     highlight: true,
@@ -118,7 +118,7 @@ export default function OffersPage() {
               Ready to experience soothing comfort?
             </h3>
             <p className="text-xs sm:text-sm text-muted max-w-xl">
-              All orders are packed in 100% plain, unmarked biodegradable boxes for complete confidentiality.
+              All orders are packed in plain, unmarked biodegradable boxes for complete confidentiality.
             </p>
           </div>
           <Link href="/shop">

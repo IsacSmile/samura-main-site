@@ -21,31 +21,33 @@ const inter = Inter({
   display: "swap",
 });
 
+import { getAllSettings } from "@/lib/services/settings";
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "Samaura Healthcare | Organic & Gentle Female Hygiene Products",
+    default: "Samaura Healthcare | Pure Cotton & Gentle Female Hygiene Care",
     template: "%s | Samaura Healthcare",
   },
   description:
-    "Premium, chemical-free sanitary pads, panty liners, menstrual cups, and intimate wellness products crafted for pure comfort and discreet care.",
+    "Premium, plant-derived sanitary pads, panty liners, menstrual cups, and intimate wellness products crafted for pure comfort and discreet care.",
   icons: {
     icon: "/samaura-logo.png",
   },
   keywords: [
     "sanitary pads",
-    "organic cotton pads",
+    "cotton sanitary pads",
     "panty liners",
     "menstrual cups",
     "intimate hygiene wash",
-    "rash free pads",
+    "anti-chafing pads",
     "female wellness",
     "Samaura Healthcare",
   ],
   openGraph: {
-    title: "Samaura Healthcare | Organic & Gentle Female Hygiene Products",
+    title: "Samaura Healthcare | Pure Cotton & Gentle Female Hygiene Care",
     description:
-      "Premium, chemical-free sanitary pads, panty liners, menstrual cups, and intimate wellness products.",
+      "Premium, plant-derived sanitary pads, panty liners, menstrual cups, and intimate wellness products.",
     url: "https://samaura.com",
     siteName: "Samaura Healthcare",
     images: [
@@ -60,11 +62,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getAllSettings();
+
   return (
     <html
       lang="en"
@@ -72,7 +76,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white text-muted font-body selection:bg-pink-light selection:text-ink">
         <AnnouncementBar />
-        <Navbar />
+        <Navbar offersBadge={settings.nav_offers_badge || "Offers"} />
         <main className="flex-1">{children}</main>
         <Footer />
         <CartDrawer />

@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions | Samaura Healthcare",
-  description: "Common questions about discreet delivery, organic cotton pads, menstrual cup sizing, and returns.",
+  description: "Common questions about discreet delivery, cotton pads, menstrual cup sizing, and returns.",
 };
 
 const FAQS = [
   {
     q: "Is the shipping packaging completely discreet?",
-    a: "Yes, 100%. All orders arrive in plain brown cardboard boxes or opaque recyclable mailers without any brand logos, product names, or mentions of sanitary items on the outside label.",
+    a: "Yes, absolutely. All orders arrive in plain brown cardboard boxes or opaque recyclable mailers without any brand logos, product names, or mentions of sanitary items on the outside label.",
   },
   {
     q: "What makes Samaura pads so comfortable?",
-    a: "Unlike conventional mass-market pads made with synthetic plastic covers, chlorine bleach, and chemical perfumes, Samaura pads use soft organic cotton topsheets and breathable plant-based backing.",
+    a: "Unlike conventional mass-market pads made with synthetic plastic covers, chlorine bleach, and chemical perfumes, Samaura pads use soft pure cotton topsheets and breathable plant-based backing.",
   },
   {
     q: "How do I choose the right menstrual cup size?",

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/Input";
 
 export const metadata: Metadata = {
   title: "Contact & Confidential Helpline | Samaura Healthcare",
-  description: "Get in touch with Samaura Healthcare. 100% confidential WhatsApp helpline, order enquiries, and medical product support.",
+  description: "Get in touch with Samaura Healthcare. Confidential WhatsApp helpline, order enquiries, and customer care support.",
 };
 
 export default function ContactPage() {
@@ -42,7 +42,7 @@ export default function ContactPage() {
                 WhatsApp Support
               </h3>
               <p className="text-xs text-muted mt-1">
-                Instant & 100% confidential chat with care specialists.
+                Instant & confidential chat with care specialists.
               </p>
             </div>
             <div className="text-sm font-semibold text-emerald-600">

@@ -116,7 +116,7 @@ export function ProductAccordion({
         </div>
       )}
 
-      {/* 2. 100% Honest Ingredients */}
+      {/* 2. Honest Ingredients */}
       {ingredients && (
         <div className="rounded-3xl border border-pink-light bg-white overflow-hidden shadow-xs transition-all">
           <button

@@ -15,6 +15,8 @@ export function formatRupees(paise: number): string {
   }).format(rupees);
 }
 
+export const formatPrice = formatRupees;
+
 export function paiseToRupees(paise: number): number {
   return Math.round(paise) / 100;
 }

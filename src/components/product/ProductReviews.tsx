@@ -155,7 +155,7 @@ export function ProductReviews({
 
             <div className="text-xs text-muted space-y-1 text-center sm:text-left">
               <span className="font-semibold text-ink flex items-center justify-center sm:justify-start gap-1">
-                <CheckCircle2 className="w-4 h-4 text-success" /> 100% Genuine Experiences
+                <CheckCircle2 className="w-4 h-4 text-success" /> Verified Experiences
               </span>
               <p>
                 Every review on Samaura is submitted by verified customers and strictly moderated for authentic product feedback.

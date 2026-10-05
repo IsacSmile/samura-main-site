@@ -1,12 +1,22 @@
 import { Metadata } from "next";
 import { Package, Truck, RefreshCw } from "lucide-react";
 
+import { getSetting, getFreeShippingThresholdPaise } from "@/lib/services/settings";
+import { formatPrice } from "@/lib/utils/money";
+
 export const metadata: Metadata = {
   title: "Shipping & Returns Policy | Samaura Healthcare",
   description: "Discreet shipping timelines, delivery coverage across India, and our hygiene return policy.",
 };
 
-export default function ShippingReturnsPage() {
+export default async function ShippingReturnsPage() {
+  const dispatchText = await getSetting(
+    "dispatch_time_text",
+    "Orders are dispatched within 24 hours of placement (excluding Sundays and national holidays)"
+  );
+  const freeThresholdPaise = await getFreeShippingThresholdPaise();
+  const thresholdFormatted = formatPrice(freeThresholdPaise);
+
   return (
     <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -15,7 +25,7 @@ export default function ShippingReturnsPage() {
             Shipping & Returns Policy
           </h1>
           <p className="text-xs sm:text-sm text-muted">
-            Reliable, 100% confidential dispatch to over 19,000 pincodes across India.
+            Reliable, strictly confidential dispatch to over 19,000 pincodes across India.
           </p>
         </div>
 
@@ -25,16 +35,16 @@ export default function ShippingReturnsPage() {
               <Truck className="w-5 h-5 text-brand" /> 1. Shipping Timelines & Rates
             </h2>
             <p className="text-xs sm:text-sm text-muted">
-              Orders are dispatched within 24 hours of placement (excluding Sundays and national holidays). Metro cities typically receive deliveries within 2–3 business days, while non-metro locations take 4–6 business days.
+              {dispatchText}. Metro cities typically receive deliveries within 2–3 business days, while non-metro locations take 4–6 business days.
             </p>
             <p className="text-xs sm:text-sm text-muted">
-              We offer <strong>Free Discreet Shipping</strong> on all orders of ₹499 and above. For orders below ₹499, a flat delivery fee of ₹49 is applied at checkout.
+              We offer <strong>Free Discreet Shipping</strong> on all orders of {thresholdFormatted} and above. For orders below {thresholdFormatted}, standard delivery fees apply at checkout.
             </p>
           </section>
 
           <section className="space-y-3 pt-6 border-t border-blush">
             <h2 className="font-heading font-bold text-lg text-ink flex items-center gap-2">
-              <Package className="w-5 h-5 text-brand" /> 2. 100% Discreet Packaging Guarantee
+              <Package className="w-5 h-5 text-brand" /> 2. Discreet Packaging Guarantee
             </h2>
             <p className="text-xs sm:text-sm text-muted">
               All Samaura shipments are packaged in unmarked, neutral cardboard boxes or opaque recyclable mailers. The shipping label only displays basic courier routing info and our registered entity name; it never mentions &quot;sanitary pads&quot;, &quot;menstrual cups&quot;, or hygiene products.

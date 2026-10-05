@@ -25,7 +25,7 @@ export function Footer() {
               </div>
               <div>
                 <h4 className="font-semibold text-sm text-ink">Skin-First Care</h4>
-                <p className="text-xs text-muted mt-0.5">Soft organic cotton, zero harsh artificial chemicals</p>
+                <p className="text-xs text-muted mt-0.5">Soft pure cotton, free from artificial perfumes</p>
               </div>
             </div>
 
@@ -34,7 +34,7 @@ export function Footer() {
                 <Truck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-semibold text-sm text-ink">100% Discreet Packaging</h4>
+                <h4 className="font-semibold text-sm text-ink">Discreet Packaging</h4>
                 <p className="text-xs text-muted mt-0.5">Plain exterior cardboard with zero product details</p>
               </div>
             </div>
@@ -44,7 +44,7 @@ export function Footer() {
                 <HeartHandshake className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-semibold text-sm text-ink">Sustainable & Mindful</h4>
+                <h4 className="font-semibold text-sm text-ink">Eco-Conscious & Mindful</h4>
                 <p className="text-xs text-muted mt-0.5">Biodegradable wrappers and reusable alternatives</p>
               </div>
             </div>
@@ -80,7 +80,7 @@ export function Footer() {
             </Link>
 
             <p className="text-sm text-muted leading-relaxed max-w-sm">
-              Samaura Healthcare is dedicated to providing Indian women with gentle, organic, and toxin-free female hygiene care. Thoughtfully designed for pure comfort, dignity, and confidence.
+              Samaura Healthcare is dedicated to providing Indian women with gentle, plant-derived, and irritation-free female hygiene care. Thoughtfully designed for pure comfort, dignity, and confidence.
             </p>
 
             <div className="space-y-2 pt-2 text-xs text-muted">
@@ -109,7 +109,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted">
               <li>
                 <Link href="/category/sanitary-pads" className="hover:text-brand transition-colors">
-                  Organic Sanitary Pads
+                  Cotton Sanitary Pads
                 </Link>
               </li>
               <li>
@@ -212,7 +212,7 @@ export function Footer() {
           </p>
 
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-muted">100% Encrypted & Safe Checkout:</span>
+            <span className="text-[11px] text-muted">Encrypted & Safe Checkout:</span>
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 bg-white rounded border border-pink-light font-semibold text-[10px] text-ink">
                 Razorpay

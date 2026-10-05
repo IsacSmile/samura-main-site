@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
             1. Information We Collect
           </h2>
           <p>
-            When you place an order, we collect your name, shipping address, contact phone number, and email address solely for fulfilling your purchase and sending order notifications. We do not store your complete payment card or UPI numbers on our servers; all payment transactions are processed securely through certified PCI-DSS compliant gateways (Razorpay).
+            When you place an order, we collect your name, shipping address, contact phone number, and email address solely for fulfilling your purchase and sending order notifications. We do not store your complete payment card or UPI numbers on our servers; all payment transactions are processed securely through PCI-DSS compliant gateways (Razorpay).
           </p>
 
           <h2 className="font-heading font-bold text-base text-ink pt-2">

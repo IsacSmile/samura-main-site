@@ -73,7 +73,7 @@ export async function runSeed() {
       id: "cat_sanitary_pads",
       name: "Sanitary Pads",
       slug: "sanitary-pads",
-      description: "Soft organic cotton, gentle comfort, and absorbent pads for daytime and overnight flow.",
+      description: "Soft pure cotton, gentle comfort, and absorbent pads for daytime and overnight flow.",
       image: "/products/day-pads.svg",
       sortOrder: 1,
     },
@@ -111,11 +111,11 @@ export async function runSeed() {
     {
       id: "prod_01_organic_day_pads",
       categoryId: "cat_sanitary_pads",
-      name: "Organic Cotton Ultra-Thin Day Pads",
-      slug: "organic-cotton-ultra-thin-day-pads",
-      shortDescription: "Ultra-thin daytime pads with soft organic cotton topsheet.",
+      name: "Pure Cotton Ultra-Thin Day Pads",
+      slug: "pure-cotton-ultra-thin-day-pads",
+      shortDescription: "Ultra-thin daytime pads with soft pure cotton topsheet.",
       description:
-        "Designed specifically for sensitive skin, Samaura Organic Cotton Day Pads eliminate plastic chafing and chemical irritation. Features a super-absorbent core that locks moisture in seconds, flexible wings that stay in place, and a breathable bottom film that prevents humidity build-up.",
+        "Designed specifically for sensitive skin, Samaura Pure Cotton Day Pads eliminate plastic chafing and chemical irritation. Features a super-absorbent core that locks moisture in seconds, flexible wings that stay in place, and a breathable bottom film that prevents humidity build-up.",
       basePricePaise: 29900, // ₹299.00
       salePricePaise: 24900, // ₹249.00
       isFeatured: true,
@@ -125,13 +125,13 @@ export async function runSeed() {
       badge: "Bestseller",
       flowType: "Regular to Moderate Flow",
       ingredients:
-        "Organic Cotton (Topsheet), Chlorine-Free Elemental Wood Pulp (Absorbent Core), Super Absorbent Polymer (SAP), Plant-based Bioplastic Backing, Non-Toxic Adhesive.",
+        "Pure Cotton (Topsheet), Chlorine-Free Elemental Wood Pulp (Absorbent Core), Super Absorbent Polymer (SAP), Plant-based Bioplastic Backing, Non-Toxic Adhesive.",
       absorptionGuide:
         "Absorbs up to 80ml. Ideal for regular to moderate daytime menstrual flow. Recommended change every 4–6 hours.",
       usageGuide:
         "1. Peel off the release paper from the back.\n2. Position the pad in the center of your underwear.\n3. Remove wing papers and wrap wings firmly underneath the panty gusset.\n4. Wrap used pad in wrapper and dispose in bin. Never flush.",
       features: JSON.stringify([
-        "Soft Organic Cotton Topsheet",
+        "Soft Pure Cotton Topsheet",
         "Zero Chlorine, Fragrance or Synthetic Dyes",
         "Breathable backing helps prevent irritation",
         "Dual-core quick absorption channels",
@@ -143,7 +143,7 @@ export async function runSeed() {
         },
         {
           q: "Are these pads biodegradable?",
-          a: "The organic cotton topsheet and plant cellulose core are biodegradable. Outer wrapper is recyclable.",
+          a: "The pure cotton topsheet and plant cellulose core are biodegradable. Outer wrapper is recyclable.",
         },
       ]),
       variants: [
@@ -192,7 +192,7 @@ export async function runSeed() {
       badge: "Extra Coverage",
       flowType: "Heavy to Very Heavy Flow",
       ingredients:
-        "Organic Cotton Topsheet, Breathable Freshness Strip, Super Absorbent Core with Japanese SAP, Breathable PE Film, Non-Toxic Adhesive.",
+        "Pure Cotton Topsheet, Breathable Freshness Strip, Super Absorbent Core with Japanese SAP, Breathable PE Film, Non-Toxic Adhesive.",
       absorptionGuide:
         "Absorbs up to 180ml. Designed for heavy flow, post-delivery, and uninterrupted 8-hour overnight sleep with 320mm wide rear coverage.",
       usageGuide:
@@ -255,7 +255,7 @@ export async function runSeed() {
       badge: "Daily Fresh",
       flowType: "Light Spotting & Daily Discharge",
       ingredients:
-        "Organic Cotton Surface, Air-Laid Micro-Porous Absorbent Core, Water-Proof Backsheet.",
+        "Pure Cotton Surface, Air-Laid Micro-Porous Absorbent Core, Water-Proof Backsheet.",
       absorptionGuide:
         "Absorbs 15–20ml. Perfect for daily vaginal discharge, spotting, pre/post period days, or cup backup.",
       usageGuide:
@@ -303,8 +303,8 @@ export async function runSeed() {
     {
       id: "prod_04_curved_liners",
       categoryId: "cat_panty_liners",
-      name: "Curved Flex Organic Cotton Liners",
-      slug: "curved-flex-organic-cotton-liners",
+      name: "Curved Flex Cotton Liners",
+      slug: "curved-flex-cotton-liners",
       shortDescription: "Anatomically contoured 180mm cotton liners designed for active lifestyles and yoga.",
       description:
         "Active, flexible, and zero bunching. Specially curved to mirror your body's movements without shifting. Great for workouts, travel, and non-period discharge days.",
@@ -317,7 +317,7 @@ export async function runSeed() {
       badge: "Active Fit",
       flowType: "Light Spotting & Daily Discharge",
       ingredients:
-        "Pure Organic Cotton Topsheet, Plant Cellulose Core, Breathable Back Film.",
+        "Pure Cotton Topsheet, Plant Cellulose Core, Breathable Back Film.",
       absorptionGuide:
         "Absorbs 25ml. Anatomical curve designed for active days, yoga, gym workouts, and contoured underwear.",
       usageGuide:
@@ -375,7 +375,7 @@ export async function runSeed() {
       features: JSON.stringify([
         "Biocompatible Medical Grade Silicone",
         "Velvety matte finish with easy-grip ribbed base",
-        "Includes breathable organic cotton storage pouch",
+        "Includes breathable cotton storage pouch",
         "Reusable and long-lasting",
       ]),
       faq: JSON.stringify([
@@ -722,7 +722,7 @@ export async function runSeed() {
     {
       id: "ban_hero_01",
       title: "Pure Comfort, Mindful Care. Period.",
-      subtitle: "Made with soft organic cotton topsheet. No chlorine, perfumes, or synthetic plastics.",
+      subtitle: "Made with soft pure cotton topsheet. No chlorine, perfumes, or synthetic plastics.",
       link: "/shop",
       imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=1200",
       badge: "Gentle Care",
@@ -737,7 +737,7 @@ export async function runSeed() {
       title: "How to Choose the Right Sanitary Pad for Your Flow",
       slug: "choose-right-sanitary-pad-flow",
       excerpt: "Navigating pad lengths, absorbency ratings, and cotton vs synthetic fabrics.",
-      content: "Full guide on choosing the best organic pad for daytime and nighttime flow.",
+      content: "Full guide on choosing the best cotton pad for daytime and nighttime flow.",
       coverImage: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=800",
       category: "Period Health",
       readTime: "4 min read",
@@ -751,7 +751,7 @@ export async function runSeed() {
       excerpt: "Everything you need to know about folding, insertion, and seal verification.",
       content: "Complete guide on transitioning to silicone cups.",
       coverImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800",
-      category: "Sustainable Periods",
+      category: "Eco-Conscious Periods",
       readTime: "5 min read",
       author: "Samaura Health Desk",
       isPublished: true,
@@ -763,13 +763,13 @@ export async function runSeed() {
       id: "page_about",
       slug: "about",
       title: "About Samaura Healthcare",
-      content: "Samaura Healthcare is dedicated to providing Indian women with gentle, organic, toxin-free female hygiene products.",
+      content: "Samaura Healthcare is dedicated to providing Indian women with gentle, plant-derived, toxin-free female hygiene products.",
     },
     {
       id: "page_faq",
       slug: "faq",
       title: "Frequently Asked Questions",
-      content: "Answers about discreet shipping, organic certification, and product care.",
+      content: "Answers about discreet shipping, quality standards, and product care.",
     },
     {
       id: "page_privacy",
