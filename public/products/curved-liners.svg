@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2F8F6" />
+      <stop offset="50%" stop-color="#FAFCFB" />
+      <stop offset="100%" stop-color="#E2F2ED" />
+    </linearGradient>
+    <linearGradient id="packGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F8FBF9" />
+    </linearGradient>
+    <linearGradient id="mintGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#349377" />
+      <stop offset="100%" stop-color="#5BBF9F" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="20" stdDeviation="25" flood-color="#349377" flood-opacity="0.2" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="800" fill="url(#bg)" />
+  <circle cx="680" cy="140" r="180" fill="#D3EDE4" opacity="0.4" filter="blur(40px)" />
+  <circle cx="120" cy="680" r="160" fill="#FFD9E2" opacity="0.3" filter="blur(40px)" />
+
+  <g transform="translate(180, 140)" filter="url(#shadow)">
+    <rect width="440" height="520" rx="36" fill="url(#packGrad)" stroke="#C2E6DB" stroke-width="2" />
+    
+    <path d="M0 36 C0 16 16 0 36 0 L404 0 C424 0 440 16 440 36 L440 120 L0 120 Z" fill="url(#mintGrad)" />
+    
+    <text x="220" y="65" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="3">SAMAURA</text>
+    <text x="220" y="92" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#E2F5EF" text-anchor="middle" letter-spacing="2">ACTIVE ANATOMIC FIT</text>
+
+    <!-- Curved Outline -->
+    <g transform="translate(220, 260)">
+      <path d="M -55 -100 C -35 -50 -35 50 -55 100 C 0 110 0 110 55 100 C 35 50 35 -50 55 -100 C 0 -110 0 -110 -55 -100 Z" fill="#EEF7F4" stroke="#A7DAC9" stroke-width="2" stroke-dasharray="3 3" />
+      <path d="M -30 -60 C -15 -30 -15 30 -30 60 C 0 65 0 65 30 60 C 15 30 15 -30 30 -60 C 0 -65 0 -65 -30 -60 Z" fill="#FFFFFF" stroke="#C2E6DB" stroke-width="1.5" />
+    </g>
+
+    <text x="220" y="415" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#3B1F2B" text-anchor="middle">Curved Flex Cotton Liners</text>
+    <text x="220" y="440" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#6B5B62" text-anchor="middle">180mm • Anatomical Contoured Edge</text>
+
+    <g transform="translate(220, 480)">
+      <rect x="-160" y="-14" width="95" height="28" rx="14" fill="#E8F8F3" stroke="#A7E4D3" stroke-width="1" />
+      <text x="-112" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#2D7A61" text-anchor="middle">ZERO SHIFT</text>
+
+      <rect x="-50" y="-14" width="100" height="28" rx="14" fill="#FFF1F4" stroke="#FFD9E2" stroke-width="1" />
+      <text x="0" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#C8202F" text-anchor="middle">BREATHABLE</text>
+
+      <rect x="65" y="-14" width="95" height="28" rx="14" fill="#F4F4F6" stroke="#E2E2E6" stroke-width="1" />
+      <text x="112" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#4B4B52" text-anchor="middle">24 LINERS</text>
+    </g>
+  </g>
+</svg>

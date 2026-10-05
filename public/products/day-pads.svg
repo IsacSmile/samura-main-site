@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF1F4" />
+      <stop offset="50%" stop-color="#FFF8F9" />
+      <stop offset="100%" stop-color="#FFE4EB" />
+    </linearGradient>
+    <linearGradient id="packGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#FFF5F7" />
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C8202F" />
+      <stop offset="100%" stop-color="#E84855" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="20" stdDeviation="25" flood-color="#F5A3B7" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="800" fill="url(#bg)" />
+  <circle cx="680" cy="140" r="180" fill="#FFD9E2" opacity="0.3" filter="blur(40px)" />
+  <circle cx="120" cy="680" r="160" fill="#F5A3B7" opacity="0.25" filter="blur(40px)" />
+
+  <!-- Packaging Card / Box -->
+  <g transform="translate(180, 140)" filter="url(#shadow)">
+    <rect width="440" height="520" rx="36" fill="url(#packGrad)" stroke="#FFD9E2" stroke-width="2" />
+    
+    <!-- Top Brand Ribbon -->
+    <path d="M0 36 C0 16 16 0 36 0 L404 0 C424 0 440 16 440 36 L440 120 L0 120 Z" fill="url(#brandGrad)" />
+    
+    <!-- Brand Text -->
+    <text x="220" y="65" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="3">SAMAURA</text>
+    <text x="220" y="92" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#FFE4EB" text-anchor="middle" letter-spacing="2">HEALTHCARE &amp; HYGIENE</text>
+
+    <!-- Product Illustration: Organic Cotton Pad Symbol -->
+    <g transform="translate(220, 260)">
+      <!-- Outer Pad Silhouette -->
+      <ellipse cx="0" cy="0" rx="90" ry="110" fill="#FFF1F4" stroke="#F5A3B7" stroke-width="2" stroke-dasharray="4 4" />
+      <!-- Wings -->
+      <path d="M -90 -20 C -125 -15 -125 15 -90 20 Z" fill="#FFE4EB" stroke="#F5A3B7" stroke-width="1.5" />
+      <path d="M 90 -20 C 125 -15 125 15 90 20 Z" fill="#FFE4EB" stroke="#F5A3B7" stroke-width="1.5" />
+      <!-- Core Channels -->
+      <ellipse cx="0" cy="0" rx="55" ry="75" fill="#FFFFFF" stroke="#FFD9E2" stroke-width="2" />
+      <path d="M 0 -50 L 0 50" stroke="#F5A3B7" stroke-width="2" stroke-linecap="round" />
+      <path d="M -25 -25 C -20 0 -20 20 -25 25" stroke="#F5A3B7" stroke-width="1.5" stroke-linecap="round" fill="none" />
+      <path d="M 25 -25 C 20 0 20 20 25 25" stroke="#F5A3B7" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    </g>
+
+    <!-- Product Title -->
+    <text x="220" y="415" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#3B1F2B" text-anchor="middle">Ultra-Thin Day Pads</text>
+    <text x="220" y="440" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#6B5B62" text-anchor="middle">Regular (240mm) • With Wings</text>
+
+    <!-- Badges Row -->
+    <g transform="translate(220, 480)">
+      <rect x="-160" y="-14" width="95" height="28" rx="14" fill="#E8F8F3" stroke="#A7E4D3" stroke-width="1" />
+      <text x="-112" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#2D7A61" text-anchor="middle">100% ORGANIC</text>
+
+      <rect x="-50" y="-14" width="100" height="28" rx="14" fill="#FFF1F4" stroke="#FFD9E2" stroke-width="1" />
+      <text x="0" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#C8202F" text-anchor="middle">ZERO RASHES</text>
+
+      <rect x="65" y="-14" width="95" height="28" rx="14" fill="#F4F4F6" stroke="#E2E2E6" stroke-width="1" />
+      <text x="112" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#4B4B52" text-anchor="middle">12 PADS</text>
+    </g>
+  </g>
+</svg>
