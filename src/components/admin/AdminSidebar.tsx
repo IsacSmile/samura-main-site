@@ -77,6 +77,7 @@ export function AdminSidebar({ userEmail, userName }: AdminSidebarProps) {
                 src="/samura-main-site-logo.png"
                 alt="Samaura Healthcare Admin"
                 fill
+                sizes="128px"
                 className="object-contain object-left"
                 priority
               />

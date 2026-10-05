@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,6 +13,8 @@ import {
   Search,
 } from "lucide-react";
 import { useCartStore } from "@/lib/cart/store";
+
+const emptySubscribe = () => () => {};
 
 const NAV_LINKS = [
   { name: "Shop All", href: "/shop" },
@@ -37,6 +39,11 @@ const NAV_LINKS = [
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -91,6 +98,7 @@ export function Navbar() {
                   src="/samura-main-site-logo.png"
                   alt="Samaura Healthcare"
                   fill
+                  sizes="(max-width: 640px) 128px, 160px"
                   className="object-contain object-left"
                   priority
                 />
@@ -226,7 +234,7 @@ export function Navbar() {
               aria-label="View Shopping Cart"
             >
               <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:scale-110" />
-              {cartItemCount > 0 && (
+              {isMounted && cartItemCount > 0 && (
                 <span className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-full flex items-center justify-center shadow-xs pointer-events-none">
                   {cartItemCount > 99 ? "99+" : cartItemCount}
                 </span>

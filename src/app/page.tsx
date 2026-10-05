@@ -184,6 +184,7 @@ export default async function HomePage() {
                   src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=1000"
                   alt="Samaura Organic Cotton Pads"
                   fill
+                  sizes="(max-width: 1024px) 100vw, 42vw"
                   className="object-cover object-center"
                   priority
                 />
@@ -448,6 +449,7 @@ export default async function HomePage() {
                     src={article.coverImage}
                     alt={article.title}
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 )}

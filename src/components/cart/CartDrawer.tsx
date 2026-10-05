@@ -153,6 +153,7 @@ export function CartDrawer() {
                         src={item.image || "/samaura-logo.png"}
                         alt={item.productName}
                         fill
+                        sizes="80px"
                         className="object-cover"
                       />
                     </div>

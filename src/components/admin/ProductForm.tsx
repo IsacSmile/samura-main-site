@@ -813,6 +813,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                       src={img.url}
                       alt={img.alt || "Product image"}
                       fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                       className="object-cover"
                       unoptimized={img.url.startsWith("http")}
                     />

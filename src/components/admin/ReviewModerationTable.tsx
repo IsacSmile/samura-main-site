@@ -247,6 +247,7 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
                           src={rev.productImage}
                           alt={rev.productName}
                           fill
+                          sizes="44px"
                           className="object-cover"
                           unoptimized={rev.productImage.startsWith("http")}
                         />

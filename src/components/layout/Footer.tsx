@@ -73,6 +73,7 @@ export function Footer() {
                   src="/samura-main-site-logo.png"
                   alt="Samaura Healthcare"
                   fill
+                  sizes="176px"
                   className="object-contain object-left"
                 />
               </div>
