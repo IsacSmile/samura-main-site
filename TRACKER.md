@@ -14,7 +14,7 @@ Last updated: Phase 1 (Foundation) Complete.
 | **Phase 3: Admin Auth + Catalog Management** | Applied Fixes A-F (production seed env enforcement, no seeded reviews, server-calculated `isVerified` review validation + rate limiting & honeypot, conditional JSON-LD aggregateRating, neutral copy, gitignore verified). Built Auth.js (credentials) with bcrypt (customer/admin roles), proxy + server-side `requireAdmin()` gate on every action/route, admin layout shell, dashboard counts, Category CRUD, Product CRUD with variants (prices in ₹ / stored in paise), storage abstraction image upload (jpg/png/webp <= 2MB), review moderation, toast notifications, and path revalidations. | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Non-admin/logged-out users blocked |
 | **Phase 3.1: Responsiveness + Compliance Hotfix** | Fixed horizontal overflow sitewide across viewports (announcement bar, WhatsApp button, w-screen/negative margins removed, min-w-0 flex/grid). Navbar desktop nav at xl (>=1280px), drawer below, icons protected, cart badge inside viewport. Stacked mobile shop toolbar with 2-column filters+sort. ProductCard wrapping and consistent heights. Removed duplicate category pills. Compliance: 0 hardcoded ratings (ProductCard only renders rating when approved reviews exist in DB), neutral copy replacing unsubstantiated claims ("100% GOTS", "100% Rash-Free", "Zero Leaks", "Anion", "Dermatologist Tested"), admin-editable compliance trust badges and announcement text, demo login shown only when `NODE_ENV !== "production"`. | **DONE** | `scrollWidth === innerWidth` verified at 320, 375, 414, 768, 1024, 1280, 1536px across all routes (42/42 PASS) • `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • 0 hardcoded ratings confirmed by grep |
 | **Phase 4: Cart, Checkout & Payments** | Applied Fixes A-E (review recompute rating, marketing claim grep/neutralization, dynamic nav/shipping settings, button layer move, env/db untracked). Cart page & drawer with variantId+qty store, server-authoritative pricing in integer paise (`computePricing`), server coupon validation, dynamic shipping fees, checkout with guest/user saved addresses, atomic stock lock with `UPDATE ... WHERE stock >= qty` in 1 DB transaction, idempotency key & rate limiting, PaymentProvider abstraction (Mock dev gateway + Razorpay with HMAC crypto.timingSafeEqual and raw webhook), 30-min lazy cleanup of abandoned online orders, and unguessable publicAccessToken order confirmation. | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Automated tests for price tampering, out of stock, concurrent race condition, replay protection, HMAC fixtures |
-| **Phase 5: Customer Account & History** | Profile, saved addresses, order tracking history, and detailed receipts | *Pending* | To build |
+| **Phase 5: Orders Admin, Customer Account, Emails & Invoicing** | Applied Fixes A-E (`paid_after_cancel` flag, double-cancel idempotency & coupon release, `orders.idempotency_key` UNIQUE constraint, mock provider prod throw/404, isolated `data/test.db` test runner). Built Admin Orders list & detail with state machine enforcement (shipped courier/tracking, delivered COD auto-paid, manual refund notes), admin dashboard metrics (orders today, pending, flagged, net revenue), customer auth (register with bcrypt/rate-limit, forgot/reset password with 1h sha256 single-use token), My Account (profile, addresses CRUD with default, order history & detail with strict data isolation, auto-linking guest orders on registration), Resend email service abstraction (customer confirmation, admin alert, status update, password reset), printable tax invoices (`/order/[token]/invoice` & `/admin/orders/[id]/invoice` with seller settings & optional GST breakup). | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 30 routes) • 46 automated tests pass on isolated `data/test.db` |
 | **Phase 6: Customer Account** | Profile, saved addresses, order tracking history, and detailed receipts | *Pending* | To build |
 | **Phase 7: Content & Support** | About Us, Period Guide / Blog (list + reader), FAQ accordion, Contact enquiry form | *Pending* | To build |
 
@@ -429,8 +429,122 @@ Automated headless browser check executing `document.documentElement.scrollWidth
 - **`pending`**: Awaiting gateway confirmation (online orders).
 - **`pending_cod`**: Payment to be collected upon physical delivery (Cash on Delivery).
 - **`paid`**: Payment successfully captured and verified.
+- **`paid_after_cancel`**: Late payment arrived after order was cancelled/expired; flagged for manual review & refund; stock kept untouched.
 - **`failed`**: Payment failed, cancelled, or rejected by bank.
 - **`refunded`**: Payment reversed to customer account.
+
+---
+
+## Detailed Phase 5 Checklist (Definition of Done)
+
+### 1. Mandatory Pre-Fixes A–E
+- [x] **Fix A: Late Payment Webhook/Confirmation Handling**:
+  - In `confirmOrderPayment`, if a successful payment confirmation or webhook arrives for an order that is already in `cancelled` status, the order is **NOT** re-confirmed or reactivated.
+  - Payment status is set to `paid_after_cancel`.
+  - Admin review flag `isFlaggedForReview` is set to `true` with `flagReason` indicating late arrival.
+  - Inventory stock is left untouched (never decremented again).
+  - Automated test verified in `tests/phase5.test.ts`.
+- [x] **Fix B: Double-Cancel Idempotency & Coupon times_used Decrement**:
+  - Cancel, fail, and timeout paths decrement `coupons.times_used = MAX(0, times_used - 1)` and restock inventory exactly once.
+  - Calling cancel multiple times (double-cancel) is strictly idempotent: early exit returns `{ ok: true, alreadyCancelled: true }` without double-restocking or double-decrementing coupon usage.
+  - Automated tests verified in `tests/phase5.test.ts`.
+- [x] **Fix C: Unique Constraint on `orders.idempotency_key`**:
+  - Drizzle schema updated with `.unique()` on `orders.idempotencyKey`.
+  - Migration `0002_chemical_prism.sql` applied with `CREATE UNIQUE INDEX orders_idempotency_key_unique ON orders (idempotency_key)`.
+  - Automated test verified in `tests/phase5.test.ts` (violating duplicate key rejected by SQLite constraint).
+- [x] **Fix D: Mock Provider Production Safeguards**:
+  - `MockPaymentProvider` constructor unconditionally throws an error in `production` environment.
+  - Dedicated route `/payment/mock` immediately calls `notFound()` when `process.env.NODE_ENV === "production"`.
+- [x] **Fix E: Isolated Test Database & Dev DB Purity**:
+  - Test suites (`tests/phase5.test.ts`) run against isolated `data/test.db` and delete `data/test.db` after execution.
+  - Verified `data/samaura.db` contains 0 test rows (0 orders, 0 reset tokens, 0 extraneous addresses).
+
+### 2. Admin Orders Management & Dashboard Additions
+- [x] **Admin Orders List (`/admin/orders`)**:
+  - Search by Order Number, Customer Phone, Customer Email, Customer Name.
+  - Filter by Order Status (`all`, `placed`, `confirmed`, `shipped`, `delivered`, `cancelled`, `refunded`).
+  - Filter by Payment Method (`all`, `razorpay`, `cod`, `mock`).
+  - Filter by Payment Status (`all`, `pending`, `pending_cod`, `paid`, `paid_after_cancel`, `failed`, `refunded`).
+  - Pagination with configurable limit, previous/next controls, and page summary.
+  - Direct links to order details and printable tax invoice.
+  - Protected with `requireAdmin()` in page and server actions.
+- [x] **Admin Order Detail (`/admin/orders/[id]`)**:
+  - Items snapshot (product image, title, variant, SKU, unit rate, quantity, line total).
+  - Financial breakdown (subtotal, coupon discount, shipping fee, grand total).
+  - Shipping address card and customer phone/email.
+  - Payment gateway logs & transaction references.
+  - Review flag badge for `paid_after_cancel` orders with one-click review flag resolution.
+  - Fulfillment actions enforcing allowed state machine transitions:
+    - Dispatch with Courier Name & Tracking Number modal.
+    - Delivery confirmation (auto-marks COD payments as `paid` and stamps `deliveredAt`).
+    - Cancellation with stock restock and coupon usage restoration.
+    - Manual refund recording with mandatory notes (no gateway call yet).
+- [x] **Admin Dashboard Additions (`/admin`)**:
+  - Orders Today metric card.
+  - Pending Fulfillment Orders counter.
+  - Flagged "Paid After Cancel" review alert card with direct filter link.
+  - Net Revenue card (paid or delivered orders only).
+
+### 3. Customer Authentication & Account Management
+- [x] **Customer Authentication (`/register`, `/login`, `/forgot-password`, `/reset-password`)**:
+  - Customer registration with Zod validation (name, email, password >= 6 chars, Indian 10-digit phone), bcrypt (12 salt rounds), in-memory IP rate limiting, and automatic login on register.
+  - Auto-links previous guest orders matching verified customer email on registration.
+  - Password reset request generating single-use cryptographically secure random token (SHA-256 hashed in DB), 1-hour expiry, with rate-limiting.
+  - Password reset completion enforcing single-use (rejects reuse) and expiration validation.
+- [x] **My Account Dashboard (`/account`)**:
+  - Tabbed interface: Orders History, Saved Addresses, Profile & Security.
+  - Saved delivery addresses CRUD:
+    - List addresses with default shipping indicator.
+    - Add new address modal with Indian PIN code validation.
+    - Edit existing address modal.
+    - Delete address with confirmation.
+    - Set primary default address.
+  - Profile manager: edit customer name and phone.
+  - Security card: request password reset link dispatch.
+- [x] **Customer Order Detail (`/account/orders/[id]`)**:
+  - Strict data isolation: authenticated customer can only view orders where `userId === session.user.id` or `customerEmail === session.user.email`. Unauthorized or cross-customer access returns 404.
+  - Visual status progress stepper (Order Placed -> Confirmed -> Shipped -> Delivered).
+  - Courier tracking information badge when dispatched.
+  - Order items snapshot and totals breakdown.
+  - Direct link to print tax invoice.
+  - Online cancellation action for placed/pending orders.
+
+### 4. Email Service Abstraction & Notifications
+- [x] **Resend Email Service (`src/lib/email/index.ts`)**:
+  - Service abstraction over Resend SDK.
+  - Fallback in local development: logs clean formatted email summaries to the console when `RESEND_API_KEY` is missing.
+  - All customer inputs sanitized with `escapeHtml()` to eliminate HTML/script injection risks.
+  - Emails dispatched non-blockingly after DB transaction commits (`.catch()` handler prevents blocking checkout flow).
+  - Templates:
+    - Customer Order Confirmation (`sendOrderConfirmationEmail`).
+    - Admin New Order Notification Alert (`sendNewOrderAdminAlertEmail`).
+    - Order Status Updates: Shipped with courier/tracking, Delivered, Cancelled (`sendOrderStatusUpdateEmail`).
+    - Password Reset Link (`sendPasswordResetEmail`).
+
+### 5. Printable Invoices
+- [x] **Tax Invoice Component & Endpoints**:
+  - Reusable printable component: `src/components/orders/InvoiceView.tsx`.
+  - Customer route: `/order/[token]/invoice` (accessible via unguessable token).
+  - Admin route: `/admin/orders/[id]/invoice` (protected with `requireAdmin()`).
+  - Seller details and registered address from dynamic settings (`seller_name`, `seller_address`, `seller_email`, `seller_phone`).
+  - Explicit "Inclusive of all applicable taxes" notice.
+  - GST breakup hidden behind `show_gst_breakup` setting until client confirms GST registration (no invented tax numbers).
+  - Dedicated print styling: `@media print` layout, page margin rules, hidden navigation bars, and print/save-as-PDF trigger.
+
+### 6. Verification & Test Results
+- [x] **Linter**: `npm run lint` -> Passed with 0 errors and 0 warnings.
+- [x] **Typecheck**: `npx tsc --noEmit` -> Passed with 0 errors.
+- [x] **Production Build**: `npm run build` -> Passed, all 30 routes generated.
+- [x] **Automated Test Suite (`tests/phase5.test.ts`)**:
+  - **46 passed, 0 failed** against isolated `data/test.db`.
+  - Late payment flag (`paid_after_cancel`, stock untouched): PASS.
+  - Double-cancel idempotency (`coupons.times_used` decremented once, stock restocked once): PASS.
+  - `orders.idempotency_key` unique constraint: PASS.
+  - Status state machine transitions & tracking requirements: PASS.
+  - Customer data isolation & unauthorized order blocking: PASS.
+  - Reset token reuse & expiry rejection: PASS.
+  - Dev database purity verification (`data/samaura.db` untouched): PASS.
+
 
 
 

@@ -55,6 +55,30 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; description: stri
     value: "false",
     description: "Enable absolute leak guarantee badge once lab absorbency certificate exists",
   },
+  seller_name: {
+    value: "Samaura Healthcare",
+    description: "Official brand/business entity name printed on invoices",
+  },
+  seller_address: {
+    value: "No. 12, Wellness Avenue, HSR Layout, Bengaluru, Karnataka - 560102",
+    description: "Physical dispatch center address printed on tax invoices",
+  },
+  seller_email: {
+    value: "care@samaura.com",
+    description: "Support contact email for billing inquiries",
+  },
+  seller_phone: {
+    value: "+91 98765 43210",
+    description: "Support contact phone number",
+  },
+  seller_gstin: {
+    value: "",
+    description: "Goods and Services Tax Identification Number (empty until client confirms registration)",
+  },
+  show_gst_breakup: {
+    value: "false",
+    description: "Flag to display explicit CGST/SGST breakup lines on invoice (do not enable without verified GSTIN)",
+  },
 };
 
 export async function getActiveShippingRules() {

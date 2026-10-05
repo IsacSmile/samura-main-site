@@ -119,6 +119,12 @@ function LoginForm() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-ink">Password</label>
+              <Link
+                href="/forgot-password"
+                className="text-[11px] font-medium text-brand hover:underline"
+              >
+                Forgot password?
+              </Link>
             </div>
             <Input
               type="password"
@@ -137,6 +143,13 @@ function LoginForm() {
           >
             Sign In to Account <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
+
+          <p className="text-center text-xs text-muted pt-2">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="text-brand font-semibold hover:underline">
+              Create an account
+            </Link>
+          </p>
         </form>
 
         <div className="pt-4 border-t border-blush text-center space-y-2">

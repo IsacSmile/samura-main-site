@@ -3,10 +3,19 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
-import { createOrder, confirmOrderPayment, cancelOrderPayment, cleanupAbandonedOrders } from "@/lib/services/orders";
+import {
+  createOrder,
+  confirmOrderPayment,
+  cancelOrderPayment,
+  cleanupAbandonedOrders,
+  updateOrderStatus,
+} from "@/lib/services/orders";
 import { getUserAddresses, saveUserAddress } from "@/lib/services/addresses";
 import { isOnlinePaymentConfigured, getPaymentProvider } from "@/lib/payments";
 import { getSetting } from "@/lib/services/settings";
+import { db } from "@/db";
+import { orders } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 // In-memory rate limiting maps
 const ipRateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -278,4 +287,38 @@ export async function getCheckoutConfigAction() {
     codEnabled: codEnabledSetting === "true",
     codMaxOrderPaise: parseInt(codMaxOrderPaiseSetting, 10) || 250000,
   };
+}
+
+/**
+ * Allows an authenticated customer to cancel their own pending order.
+ */
+export async function customerCancelOrderAction(orderId: string, reason?: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Authentication required." };
+  }
+
+  const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  if (!order || (order.userId !== session.user.id && order.customerEmail !== session.user.email)) {
+    return { success: false, error: "Order not found or access denied." };
+  }
+
+  if (order.status !== "placed" && order.status !== "pending_payment") {
+    return {
+      success: false,
+      error: "Only placed or pending orders can be cancelled directly. Please contact customer care for orders in progress.",
+    };
+  }
+
+  const res = await updateOrderStatus({
+    orderId,
+    nextStatus: "cancelled",
+    cancelReason: reason || "Cancelled by customer via My Account",
+  });
+
+  if (!res.ok) {
+    return { success: false, error: res.error || "Failed to cancel order." };
+  }
+
+  return { success: true };
 }

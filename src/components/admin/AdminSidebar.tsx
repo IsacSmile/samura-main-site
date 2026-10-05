@@ -8,6 +8,7 @@ import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
+  ShoppingBag,
   Layers,
   MessageSquareCheck,
   ExternalLink,
@@ -28,6 +29,12 @@ const NAV_ITEMS = [
     href: "/admin",
     icon: LayoutDashboard,
     exact: true,
+  },
+  {
+    name: "Customer Orders",
+    href: "/admin/orders",
+    icon: ShoppingBag,
+    exact: false,
   },
   {
     name: "Products & Stock",

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { addresses } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import crypto from "node:crypto";
 
 export interface AddressInput {
@@ -57,6 +57,37 @@ export async function saveUserAddress(userId: string, data: AddressInput) {
     return inserted;
   } catch (error) {
     console.error("Error saving user address:", error);
+    throw error;
+  }
+}
+
+export async function updateUserAddress(userId: string, addressId: string, data: AddressInput) {
+  try {
+    if (data.isDefault) {
+      await db
+        .update(addresses)
+        .set({ isDefault: false })
+        .where(eq(addresses.userId, userId));
+    }
+
+    const [updated] = await db
+      .update(addresses)
+      .set({
+        fullName: data.fullName.trim(),
+        phone: data.phone.trim(),
+        addressLine1: data.addressLine1.trim(),
+        addressLine2: data.addressLine2 ? data.addressLine2.trim() : null,
+        city: data.city.trim(),
+        state: data.state.trim(),
+        postalCode: data.postalCode.trim(),
+        isDefault: data.isDefault ?? false,
+      })
+      .where(and(eq(addresses.id, addressId), eq(addresses.userId, userId)))
+      .returning();
+
+    return updated;
+  } catch (error) {
+    console.error("Error updating user address:", error);
     throw error;
   }
 }

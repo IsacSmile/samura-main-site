@@ -10,10 +10,7 @@ export class MockPaymentProvider implements PaymentProvider {
   readonly name = "mock";
 
   constructor() {
-    if (
-      process.env.NODE_ENV === "production" &&
-      process.env.PAYMENT_PROVIDER === "mock"
-    ) {
+    if (process.env.NODE_ENV === "production") {
       throw new Error(
         "CRITICAL: MockPaymentProvider cannot be initialized in production environment."
       );

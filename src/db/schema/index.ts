@@ -193,7 +193,7 @@ export const orders = sqliteTable("orders", {
     .default("pending_payment"),
   paymentMethod: text("payment_method", { enum: ["razorpay", "cod", "mock"] }).notNull(),
   paymentStatus: text("payment_status", {
-    enum: ["pending", "pending_cod", "paid", "failed", "refunded"],
+    enum: ["pending", "pending_cod", "paid", "failed", "refunded", "paid_after_cancel"],
   })
     .notNull()
     .default("pending"),
@@ -211,6 +211,13 @@ export const orders = sqliteTable("orders", {
   customerName: text("customer_name").notNull(),
   shippingAddress: text("shipping_address").notNull(), // JSON string
   notes: text("notes"),
+  courierName: text("courier_name"),
+  trackingNumber: text("tracking_number"),
+  deliveredAt: integer("delivered_at", { mode: "timestamp" }),
+  cancelledAt: integer("cancelled_at", { mode: "timestamp" }),
+  refundNotes: text("refund_notes"),
+  isFlaggedForReview: integer("is_flagged_for_review", { mode: "boolean" }).notNull().default(false),
+  flagReason: text("flag_reason"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
@@ -400,6 +407,28 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
+// -----------------------------------------------------------------------------
+// 19. Password Reset Tokens
+// -----------------------------------------------------------------------------
+export const passwordResetTokens = sqliteTable("password_reset_tokens", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  usedAt: integer("used_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetTokens.userId],
+    references: [users.id],
+  }),
+}));
+
 // Legacy aliases for backward compatibility if needed
 export const blogPosts = posts;
 export const staticPages = pages;
+

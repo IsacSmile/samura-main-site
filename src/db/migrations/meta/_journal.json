@@ -15,6 +15,13 @@
       "when": 1791221246698,
       "tag": "0001_oval_susan_delgado",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791230942040,
+      "tag": "0002_chemical_prism",
+      "breakpoints": true
     }
   ]
 }
