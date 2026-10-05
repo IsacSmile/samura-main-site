@@ -31,6 +31,7 @@ export function ProductReviews({
   const [formRating, setFormRating] = useState(5);
   const [formTitle, setFormTitle] = useState("");
   const [formBody, setFormBody] = useState("");
+  const [hpWebsite, setHpWebsite] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -65,6 +66,7 @@ export function ProductReviews({
           rating: formRating,
           title: formTitle.trim() || undefined,
           body: formBody.trim(),
+          hp_website: hpWebsite,
         }),
       });
 
@@ -79,6 +81,7 @@ export function ProductReviews({
         setFormName("");
         setFormTitle("");
         setFormBody("");
+        setHpWebsite("");
         setFormRating(5);
       }, 2500);
     } catch {
@@ -327,6 +330,18 @@ export function ProductReviews({
                     className="w-full bg-blush/40 border border-pink-light rounded-xl px-3.5 py-2 text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                   />
                 </div>
+
+                {/* Honeypot anti-spam field */}
+                <input
+                  type="text"
+                  name="hp_website"
+                  value={hpWebsite}
+                  onChange={(e) => setHpWebsite(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  style={{ display: "none" }}
+                  aria-hidden="true"
+                />
 
                 {/* Review Body */}
                 <div className="space-y-1">

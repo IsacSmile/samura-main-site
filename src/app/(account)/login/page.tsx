@@ -50,7 +50,7 @@ function LoginForm() {
       setPassword("Admin@123456");
     } else {
       setEmail("priya@example.com");
-      setPassword("Priya@123456");
+      setPassword("Customer@123456");
     }
     setError(null);
   };

@@ -11,7 +11,6 @@ import {
   pages,
   settings,
   shippingRules,
-  reviews,
 } from "../schema";
 import bcrypt from "bcryptjs";
 
@@ -20,8 +19,25 @@ export async function runSeed() {
 
   // 1. Seed Admin User & (non-prod) Demo Customer
   console.log("1. Seeding Admin User...");
-  const adminEmail = process.env.SEED_ADMIN_EMAIL || "admin@samaura.com";
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "Admin@123456";
+  if (process.env.NODE_ENV === "production") {
+    if (!process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD) {
+      throw new Error(
+        "CRITICAL SECURITY: SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD environment variables are required in production. No default passwords are permitted."
+      );
+    }
+  }
+
+  const adminEmail =
+    process.env.SEED_ADMIN_EMAIL ||
+    (process.env.NODE_ENV !== "production" ? "admin@samaura.com" : "");
+  const adminPassword =
+    process.env.SEED_ADMIN_PASSWORD ||
+    (process.env.NODE_ENV !== "production" ? "Admin@123456" : "");
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error("Admin email and password must not be empty.");
+  }
+
   const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
 
   const initialUsers: Array<typeof users.$inferInsert> = [
@@ -615,58 +631,7 @@ export async function runSeed() {
     }
   }
 
-  // 3b. Seed Approved Product Reviews
-  console.log("3b. Seeding Approved Product Reviews...");
-  const reviewSeeds = [
-    {
-      id: "rev_01",
-      productId: "prod_01_organic_day_pads",
-      userId: null,
-      userName: "Ananya Deshmukh",
-      rating: 5,
-      title: "Best organic pads I have used in India",
-      body: "Super soft, no rash or chafing even after long days at college. Absorbs quickly and doesn't feel bulky. The blush packaging was delivered completely unmarked too!",
-      status: "approved" as const,
-      isVerified: true,
-    },
-    {
-      id: "rev_02",
-      productId: "prod_01_organic_day_pads",
-      userId: null,
-      userName: "Kavita Reddy",
-      rating: 5,
-      title: "Game changer for sensitive skin",
-      body: "Switched from commercial plastic pads and the difference is day and night. The wings stay firmly stuck to cotton panties without tearing.",
-      status: "approved" as const,
-      isVerified: true,
-    },
-    {
-      id: "rev_03",
-      productId: "prod_02_overnight_xxl_pads",
-      userId: null,
-      userName: "Simran Kaur",
-      rating: 5,
-      title: "Finally, zero back leaks!",
-      body: "The wide fan back is huge. I can sleep peacefully on my back without constantly worrying about stained sheets. Highly recommend for heavy nights.",
-      status: "approved" as const,
-      isVerified: true,
-    },
-    {
-      id: "rev_04",
-      productId: "prod_05_menstrual_cup",
-      userId: null,
-      userName: "Rhea Sen",
-      rating: 5,
-      title: "Soft and super easy to fold",
-      body: "First time cup user. The medical silicone is very smooth and popped open easily. Lasted through my entire 8 hour shift with zero leaks.",
-      status: "approved" as const,
-      isVerified: true,
-    },
-  ];
 
-  for (const rev of reviewSeeds) {
-    await db.insert(reviews).values(rev).onConflictDoNothing();
-  }
 
   // 4. Seed 2 Coupons
   console.log("4. Seeding 2 Coupons...");

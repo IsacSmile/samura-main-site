@@ -126,7 +126,7 @@ export default async function HomePage() {
 
               {/* Body Subtitle */}
               <p className="text-base sm:text-lg text-muted leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Say goodbye to plastic chafing, synthetic perfumes, and painful friction rashes. Samaura delivers 100% certified organic cotton pads and medical silicone cups designed for uninterrupted comfort.
+                Say goodbye to plastic chafing, synthetic perfumes, and painful friction rashes. Samaura delivers organic cotton pads and medical silicone cups designed for uninterrupted comfort.
               </p>
 
               {/* Action Buttons */}
@@ -162,7 +162,7 @@ export default async function HomePage() {
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-medium text-ink">
-                    Zero Rash Guaranteed
+                    Rash-Free Comfort
                   </span>
                 </div>
 
@@ -335,14 +335,14 @@ export default async function HomePage() {
                   <h3 className="font-heading font-bold text-base text-ink">
                     Samaura Healthcare
                   </h3>
-                  <span className="text-xs text-emerald-700 font-semibold">100% Certified Organic</span>
+                  <span className="text-xs text-emerald-700 font-semibold">Organic &amp; Breathable</span>
                 </div>
               </div>
 
               <ul className="space-y-3 text-xs sm:text-sm text-ink">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
-                  <span className="font-medium">100% GOTS certified organic cotton topsheet for velvety softness</span>
+                  <span className="font-medium">GOTS certified organic cotton topsheet for velvety softness</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />

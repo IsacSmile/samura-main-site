@@ -188,22 +188,31 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
               {/* Star Rating & Review Link */}
               <div className="flex items-center gap-2 text-xs">
-                <div className="flex items-center gap-1 text-amber-500 font-bold">
-                  <span>★</span>
-                  <span>{avgRating ? avgRating : "4.9"}</span>
-                </div>
+                {reviewCount > 0 && avgRating ? (
+                  <>
+                    <div className="flex items-center gap-1 text-amber-500 font-bold">
+                      <span>★</span>
+                      <span>{avgRating}</span>
+                    </div>
+                    <span className="text-muted">•</span>
+                    <a
+                      href="#reviews"
+                      className="text-muted hover:text-brand underline decoration-dotted transition-colors"
+                    >
+                      {reviewCount} verified {reviewCount === 1 ? "review" : "reviews"}
+                    </a>
+                  </>
+                ) : (
+                  <a
+                    href="#reviews"
+                    className="text-muted hover:text-brand underline decoration-dotted transition-colors"
+                  >
+                    No reviews yet • Be the first to review
+                  </a>
+                )}
                 <span className="text-muted">•</span>
-                <a
-                  href="#reviews"
-                  className="text-muted hover:text-brand underline decoration-dotted transition-colors"
-                >
-                  {reviewCount > 0
-                    ? `${reviewCount} verified ${reviewCount === 1 ? "review" : "reviews"}`
-                    : "No reviews yet (Be first)"}
-                </a>
-                <span className="text-muted">•</span>
-                <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-success" /> Certified Safe
+                <span className="text-ink font-medium flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-success" /> Dermatologically Tested
                 </span>
               </div>
 
@@ -215,16 +224,20 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               )}
             </div>
 
-            {/* Key Quality Pillars Badges */}
+            {/* Dynamic Product Badges from database */}
             <div className="flex flex-wrap gap-2 pt-1">
-              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-semibold border border-emerald-100 flex items-center gap-1">
-                <Leaf className="w-3 h-3 text-success" /> 100% GOTS Cotton
-              </span>
-              <span className="px-3 py-1 rounded-full bg-blush text-brand text-[11px] font-semibold border border-pink-light flex items-center gap-1">
-                <Heart className="w-3 h-3 text-brand" /> Zero Irritation
-              </span>
-              <span className="px-3 py-1 rounded-full bg-gray-50 text-gray-700 text-[11px] font-semibold border border-gray-200 flex items-center gap-1">
-                <Award className="w-3 h-3 text-gray-600" /> Toxin-Free
+              {product.badge && (
+                <span className="px-3 py-1 rounded-full bg-blush text-brand text-[11px] font-semibold border border-pink-light flex items-center gap-1">
+                  <Award className="w-3 h-3 text-brand" /> {product.badge}
+                </span>
+              )}
+              {product.flowType && (
+                <span className="px-3 py-1 rounded-full bg-pink-light/30 text-ink text-[11px] font-medium border border-pink-light flex items-center gap-1">
+                  <Heart className="w-3 h-3 text-brand" /> {product.flowType}
+                </span>
+              )}
+              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-medium border border-emerald-100 flex items-center gap-1">
+                <Leaf className="w-3 h-3 text-success" /> Skin-Friendly Composition
               </span>
             </div>
 

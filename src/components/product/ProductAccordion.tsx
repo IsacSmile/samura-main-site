@@ -130,7 +130,7 @@ export function ProductAccordion({
               </div>
               <div>
                 <h3 className="font-heading font-semibold text-base text-ink">
-                  100% Certified Ingredients &amp; Skin First
+                  Carefully Selected Ingredients &amp; Materials
                 </h3>
                 <span className="text-xs font-medium text-emerald-700">
                   Zero Chlorine • Zero Phthalates • Zero Artificial Perfume

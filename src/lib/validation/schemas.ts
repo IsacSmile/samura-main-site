@@ -85,6 +85,57 @@ export const adminProductSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+export const adminProductUpsertSchema = z.object({
+  id: z.string().optional(),
+  categoryId: z.string().min(1, "Category is required"),
+  name: z.string().min(2, "Product name is required"),
+  slug: z
+    .string()
+    .min(2, "Slug is required")
+    .regex(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and hyphens"),
+  shortDescription: z.string().optional().nullable(),
+  description: z.string().min(5, "Description is required"),
+  basePriceRupees: z.number().min(0, "Price must be positive"),
+  salePriceRupees: z.number().optional().nullable(),
+  badge: z.string().optional().nullable(),
+  flowType: z.string().optional().nullable(),
+  ingredients: z.string().optional().nullable(),
+  absorptionGuide: z.string().optional().nullable(),
+  usageGuide: z.string().optional().nullable(),
+  features: z.string().optional().nullable(),
+  faq: z.string().optional().nullable(),
+  isFeatured: z.boolean().default(false),
+  isBestseller: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+  variants: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        name: z.string().min(1, "Variant name is required"),
+        sku: z.string().min(1, "SKU is required"),
+        size: z.string().optional().nullable(),
+        packQty: z.number().int().min(1).default(1),
+        priceRupees: z.number().min(0, "Price must be non-negative"),
+        salePriceRupees: z.number().optional().nullable(),
+        stock: z.number().int().min(0, "Stock cannot be negative").default(0),
+        isDefault: z.boolean().default(false),
+        sortOrder: z.number().int().default(0),
+      })
+    )
+    .min(1, "At least one product variant is required"),
+  images: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        url: z.string().min(1),
+        alt: z.string().optional().nullable(),
+        isPrimary: z.boolean().default(false),
+        sortOrder: z.number().int().default(0),
+      })
+    )
+    .optional(),
+});
+
 export const adminVariantSchema = z.object({
   productId: z.string().min(1),
   name: z.string().min(1, "Variant name is required (e.g. Pack of 24)"),
@@ -100,9 +151,13 @@ export const adminVariantSchema = z.object({
 
 export const adminCategorySchema = z.object({
   name: z.string().min(2, "Name is required"),
-  slug: z.string().min(2, "Slug is required").regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(2, "Slug is required")
+    .regex(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and hyphens"),
+  parentId: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  image: z.string().url("Must be a valid URL").optional().nullable(),
+  image: z.string().optional().nullable(),
   sortOrder: z.number().int().default(0),
   isActive: z.boolean().default(true),
 });
