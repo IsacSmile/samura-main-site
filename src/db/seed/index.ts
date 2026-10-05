@@ -58,7 +58,7 @@ export async function runSeed() {
       name: "Sanitary Pads",
       slug: "sanitary-pads",
       description: "100% certified organic cotton, rash-free, ultra-absorbent pads for daytime and overnight flow.",
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=800",
+      image: "/products/day-pads.svg",
       sortOrder: 1,
     },
     {
@@ -66,7 +66,7 @@ export async function runSeed() {
       name: "Panty Liners",
       slug: "panty-liners",
       description: "Feather-light, breathable daily cotton liners for spotting, ovulation discharge, and cup backup.",
-      image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=800",
+      image: "/products/daily-liners.svg",
       sortOrder: 2,
     },
     {
@@ -74,7 +74,7 @@ export async function runSeed() {
       name: "Menstrual Cups",
       slug: "menstrual-cups",
       description: "100% medical-grade silicone cups offering 12-hour leak-proof, zero-waste period freedom.",
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800",
+      image: "/products/menstrual-cup.svg",
       sortOrder: 3,
     },
     {
@@ -82,7 +82,7 @@ export async function runSeed() {
       name: "Intimate Care",
       slug: "intimate-care",
       description: "pH 3.5 balanced washes, soothing cramp roll-ons, and delicate botanical care.",
-      image: "https://images.unsplash.com/photo-1608248597359-7b3b7e056d68?auto=format&fit=crop&q=80&w=800",
+      image: "/products/intimate-wash.svg",
       sortOrder: 4,
     },
   ];

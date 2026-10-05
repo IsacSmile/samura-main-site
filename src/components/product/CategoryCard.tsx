@@ -26,8 +26,9 @@ export function CategoryCard({ category }: CategoryCardProps) {
             src={category.image}
             alt={category.name}
             fill
-            className="object-cover object-center opacity-85 group-hover:scale-105 transition-transform duration-500"
+            className="object-contain p-6 opacity-90 group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            unoptimized={category.image.endsWith(".svg")}
           />
         )}
         <div className="absolute inset-0 bg-linear-to-t from-white via-white/80 to-transparent" />

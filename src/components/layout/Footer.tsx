@@ -125,7 +125,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/category/intimate-hygiene" className="hover:text-brand transition-colors">
+                <Link href="/category/intimate-care" className="hover:text-brand transition-colors">
                   pH 3.5 Intimate Washes
                 </Link>
               </li>

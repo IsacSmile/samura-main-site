@@ -23,7 +23,7 @@ const NAV_LINKS = [
       { name: "Sanitary Pads", href: "/category/sanitary-pads", desc: "Day & night organic rash-free pads" },
       { name: "Panty Liners", href: "/category/panty-liners", desc: "Everyday freshness & spotting care" },
       { name: "Menstrual Cups", href: "/category/menstrual-cups", desc: "12-hour reusable medical silicone" },
-      { name: "Intimate Hygiene", href: "/category/intimate-hygiene", desc: "pH 3.5 soothing washes & wipes" },
+      { name: "Intimate Care", href: "/category/intimate-care", desc: "pH 3.5 soothing washes & wipes" },
       { name: "Period Wellness", href: "/category/wellness", desc: "Cramp relief roll-ons & herbal care" },
       { name: "Combos & Kits", href: "/category/combos", desc: "Starter kits with canvas travel pouch" },
     ],
@@ -290,11 +290,11 @@ export function Navbar() {
                 Menstrual Cups
               </Link>
               <Link
-                href="/category/intimate-hygiene"
+                href="/category/intimate-care"
                 onClick={closeMobileMenu}
                 className="px-3 py-2 rounded-xl text-sm text-ink hover:bg-blush"
               >
-                Intimate Hygiene
+                Intimate Care
               </Link>
               <Link
                 href="/category/wellness"

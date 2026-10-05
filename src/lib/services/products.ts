@@ -90,10 +90,17 @@ export async function getShopProducts(params: ShopFilterParams = {}) {
   let activeCategory = null;
 
   if (params.category && params.category !== "all") {
+    const normalizedCatSlug =
+      params.category === "intimate-hygiene" || params.category === "wellness"
+        ? "intimate-care"
+        : params.category === "combos"
+        ? "sanitary-pads"
+        : params.category;
+
     const foundCat = await db
       .select()
       .from(categories)
-      .where(or(eq(categories.slug, params.category), eq(categories.id, params.category)))
+      .where(or(eq(categories.slug, normalizedCatSlug), eq(categories.id, normalizedCatSlug)))
       .limit(1);
 
     if (foundCat.length > 0) {
@@ -328,10 +335,18 @@ export async function getRelatedProducts(
 }
 
 export async function getCategoryBySlug(slug: string) {
+  // Graceful alias mapping for navigation links
+  const normalizedSlug =
+    slug === "intimate-hygiene" || slug === "wellness"
+      ? "intimate-care"
+      : slug === "combos"
+      ? "sanitary-pads"
+      : slug;
+
   const [category] = await db
     .select()
     .from(categories)
-    .where(and(eq(categories.slug, slug), eq(categories.isActive, true)))
+    .where(and(eq(categories.slug, normalizedSlug), eq(categories.isActive, true)))
     .limit(1);
 
   if (!category) return null;
