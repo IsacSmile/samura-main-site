@@ -149,9 +149,9 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
           type="submit"
           size="lg"
           disabled={isPending}
+          leftIcon={<Send className="w-4 h-4 shrink-0" />}
           className="w-full shadow-md text-xs sm:text-sm font-semibold py-3"
         >
-          <Send className="w-4 h-4 mr-2" />
           {isPending ? "Sending Message..." : "Send Confidential Message"}
         </Button>
       </form>

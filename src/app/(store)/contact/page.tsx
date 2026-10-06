@@ -58,92 +58,105 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
         </div>
 
         {/* Dynamic Contact Details from Settings */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {cleanWaNumber && (
-            <a
-              href={`https://wa.me/${cleanWaNumber}?text=Hi%20Samaura%20Team%2C%20I%20have%20an%20enquiry%20regarding%20hygiene%20products.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs hover:shadow-md transition-all group space-y-3"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <MessageCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-heading font-bold text-base text-ink">
-                  WhatsApp Helpline
-                </h3>
-                <p className="text-xs text-muted mt-0.5">
-                  Instant confidential chat.
-                </p>
-              </div>
-              <div className="text-xs font-semibold text-emerald-700">
-                +{cleanWaNumber}
-              </div>
-            </a>
-          )}
+        {(() => {
+          const activeCardsCount = [cleanWaNumber, contactPhone, contactEmail, helplineHours].filter(Boolean).length;
+          return (
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${activeCardsCount === 3 ? "md:grid-cols-3 max-w-4xl" : "lg:grid-cols-4 max-w-5xl"} gap-6 mx-auto`}>
+              {cleanWaNumber && (
+                <a
+                  href={`https://wa.me/${cleanWaNumber}?text=Hi%20Samaura%20Team%2C%20I%20have%20an%20enquiry%20regarding%20hygiene%20products.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-full bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs hover:shadow-md transition-all group flex flex-col justify-between space-y-3"
+                >
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <MessageCircle className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-base text-ink">
+                        WhatsApp Helpline
+                      </h3>
+                      <p className="text-xs text-muted mt-0.5">
+                        Instant confidential chat.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-xs font-semibold text-emerald-700">
+                    +{cleanWaNumber}
+                  </div>
+                </a>
+              )}
 
-          {contactPhone && (
-            <a
-              href={`tel:${contactPhone}`}
-              className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs hover:shadow-md transition-all group space-y-3"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Phone className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-heading font-bold text-base text-ink">
-                  Phone Assistance
-                </h3>
-                <p className="text-xs text-muted mt-0.5">
-                  Direct helpline support.
-                </p>
-              </div>
-              <div className="text-xs font-semibold text-brand">
-                {contactPhone}
-              </div>
-            </a>
-          )}
+              {contactPhone && (
+                <a
+                  href={`tel:${contactPhone}`}
+                  className="h-full bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs hover:shadow-md transition-all group flex flex-col justify-between space-y-3"
+                >
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Phone className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-base text-ink">
+                        Phone Assistance
+                      </h3>
+                      <p className="text-xs text-muted mt-0.5">
+                        Direct helpline support.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-xs font-semibold text-brand">
+                    {contactPhone}
+                  </div>
+                </a>
+              )}
 
-          {contactEmail && (
-            <a
-              href={`mailto:${contactEmail}`}
-              className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs hover:shadow-md transition-all group space-y-3"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Mail className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-heading font-bold text-base text-ink">
-                  Email Support
-                </h3>
-                <p className="text-xs text-muted mt-0.5">
-                  Orders &amp; enquiries.
-                </p>
-              </div>
-              <div className="text-xs font-semibold text-brand truncate">
-                {contactEmail}
-              </div>
-            </a>
-          )}
+              {contactEmail && (
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="h-full bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs hover:shadow-md transition-all group flex flex-col justify-between space-y-3"
+                >
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Mail className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-base text-ink">
+                        Email Support
+                      </h3>
+                      <p className="text-xs text-muted mt-0.5">
+                        Orders &amp; enquiries.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-xs font-semibold text-brand break-all sm:break-normal">
+                    {contactEmail}
+                  </div>
+                </a>
+              )}
 
-          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center">
-              <Clock className="w-6 h-6" />
+              <div className="h-full bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs flex flex-col justify-between space-y-3">
+                <div className="space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-base text-ink">
+                      Helpline Hours
+                    </h3>
+                    <p className="text-xs text-muted mt-0.5">
+                      Support schedule
+                    </p>
+                  </div>
+                </div>
+                <div className="text-xs font-medium text-ink">
+                  {helplineHours}
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-heading font-bold text-base text-ink">
-                Helpline Hours
-              </h3>
-              <p className="text-xs text-muted mt-0.5">
-                Support schedule
-              </p>
-            </div>
-            <div className="text-xs font-medium text-ink">
-              {helplineHours}
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Contact Form Component */}
         <ContactForm initialTopic={initialTopic} />
