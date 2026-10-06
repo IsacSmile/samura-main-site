@@ -17,24 +17,7 @@ import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-// In-memory rate limiting maps
-const ipRateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const phoneRateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_PER_IP = 10;
-const MAX_PER_PHONE = 5;
-
-// Periodically purge expired buckets
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, val] of ipRateLimitMap.entries()) {
-    if (val.resetAt <= now) ipRateLimitMap.delete(key);
-  }
-  for (const [key, val] of phoneRateLimitMap.entries()) {
-    if (val.resetAt <= now) phoneRateLimitMap.delete(key);
-  }
-}, 5 * 60 * 1000);
+import { checkRateLimit } from "@/lib/rateLimit";
 
 const checkoutActionSchema = z.object({
   customerName: z.string().min(2, "Full name must be at least 2 characters").max(100),
@@ -82,35 +65,23 @@ export async function processCheckoutAction(rawInput: unknown) {
     const forwarded = headerList.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0].trim() : headerList.get("x-real-ip") || "127.0.0.1";
 
-    const now = Date.now();
-
     // 3. Rate Limit per IP
-    const ipEntry = ipRateLimitMap.get(ip);
-    if (ipEntry && ipEntry.resetAt > now) {
-      if (ipEntry.count >= MAX_PER_IP) {
-        return {
-          success: false,
-          error: "Too many checkout attempts from this IP address. Please wait a few minutes before trying again.",
-        };
-      }
-      ipEntry.count++;
-    } else {
-      ipRateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    const ipCheck = await checkRateLimit(`checkout_ip:${ip}`, 10, 600);
+    if (!ipCheck.allowed) {
+      return {
+        success: false,
+        error: "Too many checkout attempts from this IP address. Please wait a few minutes before trying again.",
+      };
     }
 
     // 4. Rate Limit per Phone Number
     const phone = data.customerPhone.trim();
-    const phoneEntry = phoneRateLimitMap.get(phone);
-    if (phoneEntry && phoneEntry.resetAt > now) {
-      if (phoneEntry.count >= MAX_PER_PHONE) {
-        return {
-          success: false,
-          error: "Too many checkout attempts for this phone number. Please try again shortly.",
-        };
-      }
-      phoneEntry.count++;
-    } else {
-      phoneRateLimitMap.set(phone, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    const phoneCheck = await checkRateLimit(`checkout_phone:${phone}`, 5, 600);
+    if (!phoneCheck.allowed) {
+      return {
+        success: false,
+        error: "Too many checkout attempts for this phone number. Please try again shortly.",
+      };
     }
 
     // 5. Auth / Session Check

@@ -9,22 +9,7 @@ import { db } from "@/db";
 import { addresses, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 
-// In-memory rate limiting map
-const ipRateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-const MAX_ATTEMPTS = 5;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = ipRateLimitMap.get(ip);
-  if (entry && entry.resetAt > now) {
-    if (entry.count >= MAX_ATTEMPTS) return false;
-    entry.count++;
-  } else {
-    ipRateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-  }
-  return true;
-}
+import { checkRateLimit } from "@/lib/rateLimit";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(60),
@@ -42,7 +27,8 @@ export async function registerAction(data: unknown) {
   const headerList = await headers();
   const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() || headerList.get("x-real-ip") || "127.0.0.1";
 
-  if (!checkRateLimit(ip)) {
+  const limitRes = await checkRateLimit(`register:${ip}`, 5, 600);
+  if (!limitRes.allowed) {
     return { success: false, error: "Too many registration attempts. Please wait a few minutes." };
   }
 

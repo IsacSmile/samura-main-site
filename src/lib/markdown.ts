@@ -1,33 +1,35 @@
-/**
- * Markdown sanitization and rendering utilities for Samaura CMS and Blog.
- * Enforces zero script injection, strips dangerous HTML tags, and ensures clean output.
- */
+import sanitizeHtmlLib from "sanitize-html";
+
+export const SANITIZE_OPTIONS: sanitizeHtmlLib.IOptions = {
+  allowedTags: [
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "blockquote", "p", "a", "ul", "ol",
+    "li", "b", "i", "strong", "em", "strike", "code", "hr", "br",
+    "div", "span", "table", "thead", "tbody", "tr", "th", "td",
+    "pre", "img",
+  ],
+  allowedAttributes: {
+    a: ["href", "name", "target", "rel", "title", "class"],
+    img: ["src", "alt", "title", "width", "height", "class"],
+    "*": ["class", "id"],
+  },
+  allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedSchemesByTag: {
+    img: ["http", "https"],
+    a: ["http", "https", "mailto", "tel"],
+  },
+  allowProtocolRelative: false,
+  disallowedTagsMode: "discard",
+};
 
 /**
- * Strips script tags, style tags, iframes, embedded objects, and inline event handlers.
+ * Maintained HTML sanitizer powered by sanitize-html.
+ * Strips script tags, iframes, inline event handlers, style/link tags,
+ * dangerous URI schemes (data:, javascript:), and entity-encoded payloads.
  */
 export function sanitizeHtml(html: string): string {
   if (!html) return "";
-
-  let clean = html;
-
-  // 1. Strip <script>...</script> completely (case-insensitive, multi-line)
-  clean = clean.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
-  // Strip standalone or malformed script tags
-  clean = clean.replace(/<script\b[^>]*>/gi, "").replace(/<\/script>/gi, "");
-
-  // 2. Strip <iframe>, <object>, <embed>, <applet>, <base>, <link>, <style>
-  clean = clean.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "");
-  clean = clean.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
-  clean = clean.replace(/<\/?(iframe|object|embed|applet|base|link|style|meta|form|input|button)\b[^>]*>/gi, "");
-
-  // 3. Strip dangerous inline event handlers (onload, onerror, onclick, onmouseover, etc.)
-  clean = clean.replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
-
-  // 4. Neutralize javascript: or vbscript: or data: in href/src
-  clean = clean.replace(/\b(href|src)\s*=\s*["']?\s*(?:javascript|vbscript|data):[^"'>\s]*/gi, '$1="#"');
-
-  return clean;
+  return sanitizeHtmlLib(html, SANITIZE_OPTIONS);
 }
 
 /**

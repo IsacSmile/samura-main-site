@@ -16,6 +16,7 @@ Last updated: Phase 1 (Foundation) Complete.
 | **Phase 4: Cart, Checkout & Payments** | Applied Fixes A-E (review recompute rating, marketing claim grep/neutralization, dynamic nav/shipping settings, button layer move, env/db untracked). Cart page & drawer with variantId+qty store, server-authoritative pricing in integer paise (`computePricing`), server coupon validation, dynamic shipping fees, checkout with guest/user saved addresses, atomic stock lock with `UPDATE ... WHERE stock >= qty` in 1 DB transaction, idempotency key & rate limiting, PaymentProvider abstraction (Mock dev gateway + Razorpay with HMAC crypto.timingSafeEqual and raw webhook), 30-min lazy cleanup of abandoned online orders, and unguessable publicAccessToken order confirmation. | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Automated tests for price tampering, out of stock, concurrent race condition, replay protection, HMAC fixtures |
 | **Phase 5: Orders Admin, Customer Account, Emails & Invoicing** | Applied Fixes A-E (`paid_after_cancel` flag, double-cancel idempotency & coupon release, `orders.idempotency_key` UNIQUE constraint, mock provider prod throw/404, isolated `data/test.db` test runner). Built Admin Orders list & detail with state machine enforcement (shipped courier/tracking, delivered COD auto-paid, manual refund notes), admin dashboard metrics (orders today, pending, flagged, net revenue), customer auth (register with bcrypt/rate-limit, forgot/reset password with 1h sha256 single-use token), My Account (profile, addresses CRUD with default, order history & detail with strict data isolation, auto-linking guest orders on registration), Resend email service abstraction (customer confirmation, admin alert, status update, password reset), printable tax invoices (`/order/[token]/invoice` & `/admin/orders/[id]/invoice` with seller settings & optional GST breakup). | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 30 routes) • 46 automated tests pass on isolated `data/test.db` |
 | **Phase 6: Fixes, Content Pages, Remaining Admin & Verification** | Applied Fixes A-H (Email verification guest-order linking, Customer cancel of paid order -> refund_pending + flagged + stock release once, Forgot-password constant-time response & session revocation via passwordChangedAt + min len 8 + no-referrer, Dynamic Receipt vs Tax Invoice with sequential INV-YYYY-XXXXX, 'returned' status with single restock, revenue calculation exclusions, production RESEND_API_KEY startup alert, test suites for state machine & isolation). Built dynamic home page (banners, categories, featured/bestseller, neutral Why Samaura, zero newsletter, conditional real reviews), offers page, CMS-driven About & FAQ (accordion), Contact page (honeypot, IP rate-limit, emails admin, settings-driven contact info), Blog (/blog & /blog/[slug], JSON-LD Article, draft status, script-stripped Markdown, admin medical disclaimer), Policy pages with legal draft warning. Built remaining Admin modules: Customers (view orders, deactivate), Coupons CRUD, Banners CRUD with active dates, Blog CRUD, Pages CMS editor with live preview, Shipping rules UI, Enquiries inbox, Settings additions (COD, GSTIN, contacts, WhatsApp). | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 38 routes) • 52 Phase 6 automated tests pass • 0 horizontal overflow at 320–1536px |
+| **Phase 7: Hardening, SEO, Deployment Readiness & Handover** | Applied Fixes A-F (behavioural tests for invalidated session after password reset, deactivated user blocked from login/session, expired email token rejected; maintained `sanitize-html` library with complete sanitization; Zod safe URL validation allowing only https:// and relative paths; atomic sequential invoice numbering via `invoice_counters`; unpublish seeded blog & visible draft banners on policy/FAQ/about pages; concurrency test verifying returned/cancelled cannot double restock). Built CSP & security headers, auth hardening with generic errors & persistent DB rate limiter, startup env validation in instrumentation, upload magic-bytes signature verification & Cloudinary storage provider, dynamic sitemap & robots.txt, canonical URLs, Open Graph / Twitter cards, JSON-LD Organization/WebSite, custom not-found/error pages, next/image with sizes, font display swap, cookie consent notice, Turso prod DB scripts (db:migrate, db:seed, db:backup), comprehensive deployment documentation in README.md, and interactive admin handover manual at `/admin/help`. | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 41 routes) • 38 Phase 7 tests pass • 52 Phase 6 tests pass • 46 Phase 5 tests pass |
 
 
 ---
@@ -639,6 +640,102 @@ Automated headless browser check executing `document.documentElement.scrollWidth
   - `npm run build` -> Passed (38/38 routes generated in Turbopack).
   - `tests/phase6.test.ts` -> **52 passed, 0 failed**.
   - `tests/phase5.test.ts` -> **46 passed, 0 failed**.
+
+---
+
+## Detailed Phase 7 Checklist (Hardening, SEO, Deployment Readiness & Handover)
+
+### 1. Mandatory Fixes A–F
+- [x] **Fix A: Behavioural Security Tests**:
+  - (1) JWT sessions issued before a password reset are rejected afterwards (`token.authTime < user.passwordChangedAt`).
+  - (2) Deactivated user (`isActive: false`) cannot log in via credentials and existing active session is rejected.
+  - (3) Expired (>24h) email verification token is rejected with explicit expiration error message.
+- [x] **Fix B: Maintained Markdown Sanitizer**:
+  - Replaced hand-rolled regex sanitizer with industry-standard `sanitize-html`.
+  - Comprehensive protection tested against: `data:` URIs in links/images, `<img onerror>`, `<svg onload>`, mixed-case `JaVaScRiPt:`, HTML-entity encoded payloads, `<iframe>`, and `<style>`/`<link>` tags.
+- [x] **Fix C: Safe Banner and CMS URLs with Zod**:
+  - `safeUrlOrRelative` and `safeRequiredUrlOrRelative` schemas strictly enforce `https://` or relative `/...` paths.
+  - Explicitly rejects `javascript:`, `data:`, and insecure `http://` schemes.
+- [x] **Fix D: Concurrency-Safe Sequential Invoice Numbers**:
+  - Atomic sequence generation inside order transaction using `invoice_counters` table and LibSQL `RETURNING last_sequence`.
+  - Concurrency test with `Promise.all` confirms strictly unique, sequential `INV-YYYY-XXXXX` generation across 5 simultaneous orders.
+- [x] **Fix E: Content Pages Draft Warning & Seed Sanitization**:
+  - Seeded blog articles marked draft (`isPublished: false`).
+  - Prominent draft warning banner rendered on `/about`, `/faq`, `/privacy`, `/terms`, `/shipping-returns` (*"Replace with client content before production launch"*).
+- [x] **Fix F: Concurrency Restocking Guards**:
+  - Verified with `Promise.all` that 5 concurrent cancellation calls restock inventory exactly once.
+  - Verified with `Promise.all` that 5 concurrent 'returned' status updates restock inventory exactly once and transition exactly once.
+
+### 2. Security Hardening
+- [x] **Security Headers (`next.config.ts`)**:
+  - Strict Content-Security-Policy (CSP) allowing self, Razorpay checkout, Google Analytics (only if configured), and image sources.
+  - `X-Frame-Options: DENY` (and frame-ancestors 'none').
+  - `X-Content-Type-Options: nosniff`.
+  - `Referrer-Policy: strict-origin-when-cross-origin`.
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`.
+  - HSTS enabled in production (`max-age=63072000; includeSubDomains; preload`).
+- [x] **Auth Hardening (`src/lib/auth/index.ts`)**:
+  - `AUTH_SECRET` required in production (throws on startup if missing).
+  - Secure, httpOnly, sameSite cookies enforced in production.
+  - Generic login error messages prevent username enumeration.
+  - Persistent rate limiting on admin and customer login endpoints.
+- [x] **Startup Env Validation (`src/lib/env.ts` & `src/instrumentation.ts`)**:
+  - Zod validation runs on server startup via Next.js instrumentation hook.
+  - Fails fast in production if required variables (`DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_SITE_URL`) are missing.
+  - Secrets are never logged to console or stdout.
+- [x] **Persistent Database-Backed Rate Limiting (`src/lib/rateLimit.ts`)**:
+  - Replaced in-memory limiter with `rate_limits` table in database.
+  - Limits survive process restarts and horizontally scaled multi-instance deployments.
+- [x] **Upload Safety & Storage Abstraction (`src/lib/storage/index.ts`)**:
+  - File magic bytes verification (JPEG `FF D8 FF`, PNG `89 50 4E 47`, WebP `RIFF...WEBP`).
+  - `Content-Disposition: inline` and `X-Content-Type-Options: nosniff`.
+  - Storage abstraction supports `LocalStorageProvider` and `CloudinaryStorageProvider` selected via `STORAGE_PROVIDER=cloudinary`.
+
+### 3. SEO & Storefront Performance
+- [x] **Dynamic Sitemap & Robots (`app/sitemap.ts`, `app/robots.ts`)**:
+  - `app/sitemap.ts` dynamically indexes products, active categories, published blog posts, and core content pages.
+  - `app/robots.ts` allows public storefront pages while disallowing `/admin`, `/account`, `/cart`, `/checkout`, `/order`, `/api`.
+  - Robots `noindex, nofollow` metadata set on private and checkout pages.
+- [x] **Metadata & Structured Data (`src/app/layout.tsx`)**:
+  - Canonical URLs, Open Graph, and Twitter metadata cards configured.
+  - JSON-LD schemas for `Organization` and `WebSite` with SearchAction.
+- [x] **Custom Error Pages**:
+  - Dedicated custom `src/app/not-found.tsx` (404), `src/app/error.tsx` (500), and `src/app/global-error.tsx`.
+- [x] **Performance & Accessibility**:
+  - Optimized `next/image` with responsive `sizes` attribute across storefront.
+  - Font display `swap` for Poppins and Inter Google fonts.
+  - Route caching and revalidation configured (`revalidate = 60`).
+  - Accessible focus states, aria labels, role regions, and keyboard escape handling.
+
+### 4. Legal & Operational Handover
+- [x] **Cookie Consent Banner (`src/components/common/CookieNotice.tsx`)**:
+  - Rendered only when `NEXT_PUBLIC_GA_ID` is defined.
+  - Built with `useSyncExternalStore` for React 19 compliance without hydration waterfalls.
+- [x] **Production Database Scripts (`package.json`)**:
+  - `npm run db:migrate` -> Applies migrations to production Turso database.
+  - `npm run db:seed` -> Production-safe seed creating admin only from env variables.
+  - `npm run db:backup` -> SQLite database snapshot and backup utility.
+- [x] **Deployment Documentation (`README.md`)**:
+  - Step-by-step guides for Vercel + Turso and VPS Docker + Caddy deployments.
+  - Complete environment variable dictionary with secret handling instructions.
+  - DNS, Resend SPF/DKIM verification, Razorpay go-live checklist, post-deploy smoke tests, and rollback procedures.
+- [x] **Admin Handover Knowledge Base (`src/app/admin/help/page.tsx`)**:
+  - Built interactive `/admin/help` page with 6 comprehensive operating procedures:
+    1. Adding & Managing Products
+    2. Processing & Fulfilling Orders
+    3. Moderating Customer Reviews
+    4. Editing Content Pages & Banners
+    5. Managing Cash on Delivery & Limits
+    6. Customer Accounts & Security
+
+### 5. Final Quality Gates
+- `npm run lint` -> **PASSED (0 errors, 0 warnings)**
+- `npx tsc --noEmit` -> **PASSED (0 errors)**
+- `npm run build` -> **PASSED (41/41 routes optimized and generated)**
+- `tests/phase7.test.ts` -> **38 passed, 0 failed**
+- `tests/phase6.test.ts` -> **52 passed, 0 failed**
+- `tests/phase5.test.ts` -> **46 passed, 0 failed**
+
 
 
 

@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: CustomerOrderPageProps): Prom
   return {
     title: `Order Details | Samaura Healthcare`,
     description: `Track and view details for order ${id}.`,
+    robots: { index: false, follow: false },
   };
 }
 

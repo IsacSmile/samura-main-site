@@ -119,6 +119,14 @@ export default async function FAQPage() {
           </p>
         </div>
 
+        {/* Draft Template Notice Banner */}
+        <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-2xl flex items-center gap-3 text-xs sm:text-sm shadow-xs">
+          <span className="font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full text-[11px] uppercase tracking-wider shrink-0">
+            Draft Template
+          </span>
+          <span>Replace with client content before public launch.</span>
+        </div>
+
         {introHtml && (
           <div
             className="prose prose-sm max-w-none text-muted leading-relaxed"

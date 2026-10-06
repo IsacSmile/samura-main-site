@@ -60,7 +60,16 @@ export const metadata: Metadata = {
     locale: "en_IN",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Samaura Healthcare | Pure Cotton & Gentle Female Hygiene Care",
+    description:
+      "Premium, plant-derived sanitary pads, panty liners, menstrual cups, and intimate wellness products crafted for pure comfort and discreet care.",
+    images: ["/samaura-logo.png"],
+  },
 };
+
+import { CookieNotice } from "@/components/common/CookieNotice";
 
 export default async function RootLayout({
   children,
@@ -68,12 +77,47 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const settings = await getAllSettings();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://samaura.com";
+
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Samaura Healthcare",
+      url: siteUrl,
+      logo: `${siteUrl}/samaura-logo.png`,
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: settings.store_phone || "+91-9876543210",
+        contactType: "Customer Support",
+        areaServed: "IN",
+        availableLanguage: ["English", "Hindi"],
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Samaura Healthcare",
+      url: siteUrl,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${siteUrl}/shop?search={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ];
 
   return (
     <html
       lang="en"
       className={`${poppins.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-white text-muted font-body selection:bg-pink-light selection:text-ink">
         <AnnouncementBar />
         <Navbar offersBadge={settings.nav_offers_badge || "Offers"} />
@@ -81,6 +125,7 @@ export default async function RootLayout({
         <Footer />
         <CartDrawer />
         <WhatsAppButton />
+        <CookieNotice />
       </body>
     </html>
   );

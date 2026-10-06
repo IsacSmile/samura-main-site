@@ -11,6 +11,7 @@ import { AccountDashboard } from "@/components/account/AccountDashboard";
 export const metadata: Metadata = {
   title: "My Account | Samaura Healthcare",
   description: "Manage your profile, order history, and saved shipping addresses.",
+  robots: { index: false, follow: false },
 };
 
 export default async function AccountPage() {

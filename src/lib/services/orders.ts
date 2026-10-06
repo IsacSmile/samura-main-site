@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { orders, orderItems, payments } from "@/db/schema";
-import { eq, and, sql, lt, desc, count, sum, gte, or, like, notInArray, isNotNull } from "drizzle-orm";
+import { eq, and, sql, lt, desc, count, sum, gte, or, like, notInArray } from "drizzle-orm";
 import crypto from "node:crypto";
 import { computePricing, CartItemInput } from "@/lib/services/pricing";
 import { getPaymentProvider } from "@/lib/payments";
@@ -48,6 +48,34 @@ export interface CreateOrderResult {
 }
 
 /**
+ * Executes a database operation with exponential backoff on SQLITE_BUSY / locked database errors.
+ */
+export async function withDbRetry<T>(fn: () => Promise<T>, maxRetries = 15): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: unknown) {
+      const isBusy =
+        err &&
+        typeof err === "object" &&
+        (("code" in err && (err as { code: string }).code === "SQLITE_BUSY") ||
+          ("rawCode" in err && (err as { rawCode: number }).rawCode === 5) ||
+          ("message" in err &&
+            typeof (err as { message: string }).message === "string" &&
+            ((err as { message: string }).message.includes("database is locked") ||
+              (err as { message: string }).message.includes("SQLITE_BUSY"))));
+
+      if (isBusy && attempt < maxRetries - 1) {
+        await new Promise((r) => setTimeout(r, 25 + Math.floor(Math.random() * 50)));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error("Database retry limit reached");
+}
+
+/**
  * Creates an order in ONE atomic database transaction.
  */
 export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
@@ -58,11 +86,13 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   }
 
   // 1. Idempotency Check: if order with this key already exists, return existing order
-  const [existingOrder] = await db
-    .select()
-    .from(orders)
-    .where(eq(orders.idempotencyKey, idempotencyKey))
-    .limit(1);
+  const [existingOrder] = await withDbRetry(() =>
+    db
+      .select()
+      .from(orders)
+      .where(eq(orders.idempotencyKey, idempotencyKey))
+      .limit(1)
+  );
 
   if (existingOrder) {
     return {
@@ -134,79 +164,100 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
 
   try {
     // Run order creation and stock decrement in ONE DB transaction
-    await db.transaction(async (tx) => {
-      // Step A: Atomically decrement stock for each item
-      for (const item of pricing.items) {
-        const updateRes = await tx.run(
-          sql`UPDATE product_variants SET stock = stock - ${item.quantity} WHERE id = ${item.variantId} AND stock >= ${item.quantity}`
-        );
+    await withDbRetry(() =>
+      db.transaction(async (tx) => {
+        // Step A: Atomically decrement stock for each item
+        for (const item of pricing.items) {
+          const updateRes = await tx.run(
+            sql`UPDATE product_variants SET stock = stock - ${item.quantity} WHERE id = ${item.variantId} AND stock >= ${item.quantity}`
+          );
 
-        if (updateRes.rowsAffected === 0) {
-          throw new Error(
-            `Insufficient stock for "${item.productName} - ${item.variantName}". It may have just sold out.`
+          if (updateRes.rowsAffected === 0) {
+            throw new Error(
+              `Insufficient stock for "${item.productName} - ${item.variantName}". It may have just sold out.`
+            );
+          }
+        }
+
+        // Generate unique sequential invoice number atomically from invoice_counters
+        const currentYear = new Date().getFullYear();
+        await tx.run(
+          sql`INSERT OR IGNORE INTO invoice_counters (year, last_sequence) VALUES (${currentYear}, 0)`
+        );
+        const counterRes = await tx.run(
+          sql`UPDATE invoice_counters SET last_sequence = last_sequence + 1 WHERE year = ${currentYear} RETURNING last_sequence`
+        );
+        const row = counterRes.rows?.[0] as Record<string, unknown> | unknown[] | undefined;
+        const seq = Number(
+          row && typeof row === "object" && !Array.isArray(row) && "last_sequence" in row
+            ? row.last_sequence
+            : Array.isArray(row)
+            ? row[0]
+            : 1
+        );
+        const invoiceNumber = `INV-${currentYear}-${String(seq).padStart(5, "0")}`;
+
+        // Step B: Insert order
+        await tx.insert(orders).values({
+          id: orderId,
+          orderNumber,
+          invoiceNumber,
+          publicAccessToken,
+          idempotencyKey,
+          userId: userId || null,
+          status: initialStatus,
+          paymentMethod,
+          paymentStatus: initialPaymentStatus,
+          subtotalPaise: pricing.subtotalPaise,
+          discountPaise: pricing.couponDiscountPaise,
+          couponCode: pricing.couponCode,
+          shippingFeePaise: pricing.shippingFeePaise,
+          totalPaise: pricing.totalPaise,
+          currency: "INR",
+          customerEmail: address.email.trim().toLowerCase(),
+          customerPhone: address.phone.trim(),
+          customerName: address.fullName.trim(),
+          shippingAddress: JSON.stringify(address),
+          notes: notes ? notes.trim() : null,
+        });
+
+        // Step C: Insert order items snapshot
+        for (const item of pricing.items) {
+          const itemId = `item_${crypto.randomBytes(12).toString("hex")}`;
+          await tx.insert(orderItems).values({
+            id: itemId,
+            orderId,
+            productId: item.productId,
+            variantId: item.variantId,
+            productName: item.productName,
+            variantName: item.variantName,
+            sku: item.sku,
+            quantity: item.quantity,
+            unitPricePaise: item.effectivePricePaise,
+            totalPricePaise: item.lineTotalPaise,
+            image: item.image,
+          });
+        }
+
+        // Step D: Insert initial payment record
+        const paymentId = `pay_${crypto.randomBytes(12).toString("hex")}`;
+        await tx.insert(payments).values({
+          id: paymentId,
+          orderId,
+          paymentMethod,
+          amountPaise: pricing.totalPaise,
+          status: "pending",
+          gateway: paymentMethod,
+        });
+
+        // Step E: Update coupon usage
+        if (pricing.couponCode) {
+          await tx.run(
+            sql`UPDATE coupons SET times_used = times_used + 1 WHERE UPPER(code) = UPPER(${pricing.couponCode})`
           );
         }
-      }
-
-      // Step B: Insert order
-      await tx.insert(orders).values({
-        id: orderId,
-        orderNumber,
-        publicAccessToken,
-        idempotencyKey,
-        userId: userId || null,
-        status: initialStatus,
-        paymentMethod,
-        paymentStatus: initialPaymentStatus,
-        subtotalPaise: pricing.subtotalPaise,
-        discountPaise: pricing.couponDiscountPaise,
-        couponCode: pricing.couponCode,
-        shippingFeePaise: pricing.shippingFeePaise,
-        totalPaise: pricing.totalPaise,
-        currency: "INR",
-        customerEmail: address.email.trim().toLowerCase(),
-        customerPhone: address.phone.trim(),
-        customerName: address.fullName.trim(),
-        shippingAddress: JSON.stringify(address),
-        notes: notes ? notes.trim() : null,
-      });
-
-      // Step C: Insert order items snapshot
-      for (const item of pricing.items) {
-        const itemId = `item_${crypto.randomBytes(12).toString("hex")}`;
-        await tx.insert(orderItems).values({
-          id: itemId,
-          orderId,
-          productId: item.productId,
-          variantId: item.variantId,
-          productName: item.productName,
-          variantName: item.variantName,
-          sku: item.sku,
-          quantity: item.quantity,
-          unitPricePaise: item.effectivePricePaise,
-          totalPricePaise: item.lineTotalPaise,
-          image: item.image,
-        });
-      }
-
-      // Step D: Insert initial payment record
-      const paymentId = `pay_${crypto.randomBytes(12).toString("hex")}`;
-      await tx.insert(payments).values({
-        id: paymentId,
-        orderId,
-        paymentMethod,
-        amountPaise: pricing.totalPaise,
-        status: "pending",
-        gateway: paymentMethod,
-      });
-
-      // Step E: Update coupon usage
-      if (pricing.couponCode) {
-        await tx.run(
-          sql`UPDATE coupons SET times_used = times_used + 1 WHERE UPPER(code) = UPPER(${pricing.couponCode})`
-        );
-      }
-    });
+      })
+    );
 
     // If online payment provider is configured, create provider order
     let clientPayload: Record<string, unknown> | undefined;
@@ -465,11 +516,13 @@ export async function cancelOrderPayment(params: {
     return { ok: false, error: "Missing order identifier." };
   }
 
-  const [order] = providerOrderId
-    ? await db.select().from(orders).where(eq(orders.razorpayOrderId, providerOrderId)).limit(1)
-    : orderId
-    ? await db.select().from(orders).where(eq(orders.id, orderId)).limit(1)
-    : [];
+  const [order] = await withDbRetry(async () =>
+    providerOrderId
+      ? db.select().from(orders).where(eq(orders.razorpayOrderId, providerOrderId)).limit(1)
+      : orderId
+      ? db.select().from(orders).where(eq(orders.id, orderId)).limit(1)
+      : []
+  );
 
   if (!order) {
     return { ok: false, error: "Order not found." };
@@ -484,12 +537,19 @@ export async function cancelOrderPayment(params: {
     return { ok: true, alreadyCancelled: true };
   }
 
-  // Fetch all items for this order to restore stock
-  const items = await db.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+  return await withDbRetry(() =>
+    db.transaction(async (tx) => {
+      // FIX F & B: Re-check order status inside transaction to eliminate race conditions
+      const [freshOrder] = await tx.select().from(orders).where(eq(orders.id, order.id)).limit(1);
+      if (!freshOrder || freshOrder.status === "cancelled") {
+        return { ok: true, alreadyCancelled: true };
+      }
 
-  await db.transaction(async (tx) => {
-    // Release stock for each item
-    for (const item of items) {
+      // Fetch all items for this order inside transaction to restore stock
+      const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+
+      // Release stock for each item exactly once
+      for (const item of items) {
       if (item.variantId) {
         await tx.run(
           sql`UPDATE product_variants SET stock = stock + ${item.quantity} WHERE id = ${item.variantId}`
@@ -498,9 +558,9 @@ export async function cancelOrderPayment(params: {
     }
 
     // FIX B: Decrement coupons.times_used if coupon was applied
-    if (order.couponCode) {
+    if (freshOrder.couponCode) {
       await tx.run(
-        sql`UPDATE coupons SET times_used = MAX(0, times_used - 1) WHERE UPPER(code) = UPPER(${order.couponCode})`
+        sql`UPDATE coupons SET times_used = MAX(0, times_used - 1) WHERE UPPER(code) = UPPER(${freshOrder.couponCode})`
       );
     }
 
@@ -515,28 +575,28 @@ export async function cancelOrderPayment(params: {
       .set({
         status: "cancelled",
         paymentStatus: nextPaymentStatus,
-        isFlaggedForReview: isPaidOnline ? true : order.isFlaggedForReview,
-        flagReason: isPaidOnline ? flagReason : order.flagReason,
+        isFlaggedForReview: isPaidOnline ? true : freshOrder.isFlaggedForReview,
+        flagReason: isPaidOnline ? flagReason : freshOrder.flagReason,
         cancelledAt: new Date(),
         notes: reason
-          ? order.notes
-            ? `${order.notes} | Cancel reason: ${reason}`
+          ? freshOrder.notes
+            ? `${freshOrder.notes} | Cancel reason: ${reason}`
             : `Cancel reason: ${reason}`
-          : order.notes,
+          : freshOrder.notes,
         updatedAt: new Date(),
       })
-      .where(eq(orders.id, order.id));
+      .where(eq(orders.id, freshOrder.id));
 
     await tx
       .update(payments)
       .set({
         status: isPaidOnline ? "successful" : "failed",
-        transactionId: paymentId || order.razorpayOrderId || null,
+        transactionId: paymentId || freshOrder.razorpayOrderId || null,
       })
-      .where(eq(payments.orderId, order.id));
-  });
+      .where(eq(payments.orderId, freshOrder.id));
 
-  return { ok: true };
+    return { ok: true, alreadyCancelled: false };
+  }));
 }
 
 /**
@@ -552,7 +612,9 @@ export async function updateOrderStatus(params: {
 }): Promise<{ ok: boolean; order?: typeof orders.$inferSelect; error?: string }> {
   const { orderId, nextStatus, courierName, trackingNumber, refundNotes, cancelReason } = params;
 
-  const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  const [order] = await withDbRetry(() =>
+    db.select().from(orders).where(eq(orders.id, orderId)).limit(1)
+  );
 
   if (!order) {
     return { ok: false, error: "Order not found." };
@@ -658,39 +720,52 @@ export async function updateOrderStatus(params: {
 
   // 4. Transition to RETURNED: after shipped (for COD refusals/RTO), restocks exactly once
   if (nextStatus === "returned") {
-    if (currentStatus !== "shipped") {
-      return {
-        ok: false,
-        error: `Invalid status transition to "returned" from "${currentStatus}". Only shipped orders can be marked returned.`,
-      };
-    }
-
-    const items = await db.select().from(orderItems).where(eq(orderItems.orderId, order.id));
-
-    await db.transaction(async (tx) => {
-      // Restock items exactly once
-      for (const item of items) {
-        if (item.variantId) {
-          await tx.run(
-            sql`UPDATE product_variants SET stock = stock + ${item.quantity} WHERE id = ${item.variantId}`
-          );
+    const txRes = await withDbRetry(() =>
+      db.transaction(async (tx) => {
+        // Re-fetch order inside transaction to eliminate race conditions under concurrent calls
+        const [freshOrder] = await tx.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+        if (!freshOrder) {
+          return { ok: false, error: "Order not found." };
         }
-      }
 
-      await tx
-        .update(orders)
-        .set({
-          status: "returned",
-          paymentStatus: order.paymentMethod === "cod" ? "failed" : order.paymentStatus,
-          notes: cancelReason
-            ? order.notes
-              ? `${order.notes} | Return reason: ${cancelReason}`
-              : `Return reason: ${cancelReason}`
-            : order.notes,
-          updatedAt: new Date(),
-        })
-        .where(eq(orders.id, orderId));
-    });
+        if (freshOrder.status !== "shipped") {
+          return {
+            ok: false,
+            error: `Invalid status transition to "returned" from "${freshOrder.status}". Only shipped orders can be marked returned.`,
+          };
+        }
+
+        // Restock items exactly once
+        const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, freshOrder.id));
+        for (const item of items) {
+          if (item.variantId) {
+            await tx.run(
+              sql`UPDATE product_variants SET stock = stock + ${item.quantity} WHERE id = ${item.variantId}`
+            );
+          }
+        }
+
+        await tx
+          .update(orders)
+          .set({
+            status: "returned",
+            paymentStatus: freshOrder.paymentMethod === "cod" ? "failed" : freshOrder.paymentStatus,
+            notes: cancelReason
+              ? freshOrder.notes
+                ? `${freshOrder.notes} | Return reason: ${cancelReason}`
+                : `Return reason: ${cancelReason}`
+              : freshOrder.notes,
+            updatedAt: new Date(),
+          })
+          .where(eq(orders.id, orderId));
+
+        return { ok: true };
+      })
+    );
+
+    if (!txRes.ok) {
+      return txRes;
+    }
 
     const [returnedOrder] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
     return { ok: true, order: returnedOrder };
@@ -939,11 +1014,13 @@ export async function getAdminDashboardMetrics() {
  * Ensures an order has a sequential unique invoice number (Fix D).
  */
 export async function ensureOrderInvoiceNumber(orderId: string): Promise<string> {
-  const [existing] = await db
-    .select({ id: orders.id, invoiceNumber: orders.invoiceNumber })
-    .from(orders)
-    .where(eq(orders.id, orderId))
-    .limit(1);
+  const [existing] = await withDbRetry(() =>
+    db
+      .select({ id: orders.id, invoiceNumber: orders.invoiceNumber })
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .limit(1)
+  );
 
   if (!existing) {
     throw new Error("Order not found.");
@@ -953,7 +1030,8 @@ export async function ensureOrderInvoiceNumber(orderId: string): Promise<string>
     return existing.invoiceNumber;
   }
 
-  return await db.transaction(async (tx) => {
+  return await withDbRetry(() =>
+    db.transaction(async (tx) => {
     // Re-check inside transaction
     const [fresh] = await tx
       .select({ invoiceNumber: orders.invoiceNumber })
@@ -965,14 +1043,22 @@ export async function ensureOrderInvoiceNumber(orderId: string): Promise<string>
       return fresh.invoiceNumber;
     }
 
-    const countRes = await tx
-      .select({ c: count() })
-      .from(orders)
-      .where(isNotNull(orders.invoiceNumber));
-
-    const nextSeq = Number(countRes[0]?.c || 0) + 1;
     const year = new Date().getFullYear();
-    const sequentialInvoice = `INV-${year}-${String(nextSeq).padStart(5, "0")}`;
+    await tx.run(
+      sql`INSERT OR IGNORE INTO invoice_counters (year, last_sequence) VALUES (${year}, 0)`
+    );
+    const counterRes = await tx.run(
+      sql`UPDATE invoice_counters SET last_sequence = last_sequence + 1 WHERE year = ${year} RETURNING last_sequence`
+    );
+    const row = counterRes.rows?.[0] as Record<string, unknown> | unknown[] | undefined;
+    const seq = Number(
+      row && typeof row === "object" && !Array.isArray(row) && "last_sequence" in row
+        ? row.last_sequence
+        : Array.isArray(row)
+        ? row[0]
+        : 1
+    );
+    const sequentialInvoice = `INV-${year}-${String(seq).padStart(5, "0")}`;
 
     await tx
       .update(orders)
@@ -980,7 +1066,7 @@ export async function ensureOrderInvoiceNumber(orderId: string): Promise<string>
       .where(eq(orders.id, orderId));
 
     return sequentialInvoice;
-  });
+  }));
 }
 
 /**

@@ -93,6 +93,50 @@ export const adminProductSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+// Safe URL validator: permits only https:// or relative paths starting with '/'.
+// Rejects javascript:, data:, vbscript:, http://, file:, etc.
+export const safeUrlOrRelative = z
+  .string()
+  .trim()
+  .refine(
+    (val) => {
+      if (!val) return true;
+      if (val.startsWith("/") && !val.startsWith("//")) {
+        return true;
+      }
+      try {
+        const parsed = new URL(val);
+        return parsed.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: "Only https:// URLs or relative paths starting with '/' are permitted (javascript: and data: are forbidden)",
+    }
+  );
+
+export const safeRequiredUrlOrRelative = z
+  .string()
+  .trim()
+  .min(1, "URL is required")
+  .refine(
+    (val) => {
+      if (val.startsWith("/") && !val.startsWith("//")) {
+        return true;
+      }
+      try {
+        const parsed = new URL(val);
+        return parsed.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: "Only https:// URLs or relative paths starting with '/' are permitted (javascript: and data: are forbidden)",
+    }
+  );
+
 export const adminProductUpsertSchema = z.object({
   id: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
@@ -135,7 +179,7 @@ export const adminProductUpsertSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        url: z.string().min(1),
+        url: safeRequiredUrlOrRelative,
         alt: z.string().optional().nullable(),
         isPrimary: z.boolean().default(false),
         sortOrder: z.number().int().default(0),
@@ -165,7 +209,7 @@ export const adminCategorySchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and hyphens"),
   parentId: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
+  image: safeUrlOrRelative.optional().nullable(),
   sortOrder: z.number().int().default(0),
   isActive: z.boolean().default(true),
 });
@@ -186,8 +230,8 @@ export const adminBannerSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(2, "Title is required"),
   subtitle: z.string().optional().nullable(),
-  link: z.string().default("/shop"),
-  imageUrl: z.string().min(1, "Banner image URL is required"),
+  link: safeUrlOrRelative.default("/shop"),
+  imageUrl: safeRequiredUrlOrRelative,
   badge: z.string().optional().nullable(),
   sortOrder: z.number().int().default(0),
   isActive: z.boolean().default(true),
@@ -204,7 +248,7 @@ export const adminBlogPostSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and hyphens"),
   excerpt: z.string().min(5, "Excerpt is required"),
   content: z.string().min(10, "Content must be at least 10 characters"),
-  coverImage: z.string().optional().nullable(),
+  coverImage: safeUrlOrRelative.optional().nullable(),
   author: z.string().default("Samaura Health Desk"),
   category: z.string().default("Period Health"),
   readTime: z.string().default("4 min read"),

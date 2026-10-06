@@ -17,6 +17,14 @@ import {
   HelpCircle,
 } from "lucide-react";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Order Status | Samaura Healthcare",
+  description: "View details and status updates for your Samaura order.",
+  robots: { index: false, follow: false },
+};
+
 interface OrderConfirmationPageProps {
   params: Promise<{
     token: string;

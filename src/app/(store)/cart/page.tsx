@@ -4,6 +4,7 @@ import { CartView } from "@/components/cart/CartView";
 export const metadata: Metadata = {
   title: "Shopping Bag | Samaura Healthcare",
   description: "Review your selected female hygiene products, apply coupon codes, and proceed to secure checkout.",
+  robots: { index: false, follow: false },
 };
 
 export default function CartPage() {

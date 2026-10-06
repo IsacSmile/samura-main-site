@@ -5,6 +5,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 export const metadata = {
   title: "Admin Console | Samaura Healthcare",
   description: "Product catalog, category hierarchy, and review moderation management.",
+  robots: { index: false, follow: false },
 };
 
 export default async function AdminLayout({

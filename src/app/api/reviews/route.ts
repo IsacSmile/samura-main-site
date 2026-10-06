@@ -5,20 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 
-// In-memory rate limiting map: ip -> { count, resetAt }
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_REQUESTS_PER_WINDOW = 5;
-
-// Clean up stale rate limit entries every 15 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, entry] of rateLimitMap.entries()) {
-    if (entry.resetAt <= now) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}, 15 * 60 * 1000);
+import { checkRateLimit } from "@/lib/rateLimit";
 
 function sanitizeText(str: string): string {
   return str
@@ -55,24 +42,14 @@ export async function POST(req: NextRequest) {
       req.headers.get("x-real-ip") ||
       "127.0.0.1";
 
-    const now = Date.now();
-    const rateLimit = rateLimitMap.get(ip);
-
-    if (rateLimit && rateLimit.resetAt > now) {
-      if (rateLimit.count >= MAX_REQUESTS_PER_WINDOW) {
-        return NextResponse.json(
-          {
-            error: "Too many review submissions. Please wait a few minutes before trying again.",
-          },
-          { status: 429 }
-        );
-      }
-      rateLimit.count++;
-    } else {
-      rateLimitMap.set(ip, {
-        count: 1,
-        resetAt: now + RATE_LIMIT_WINDOW_MS,
-      });
+    const rateCheck = await checkRateLimit(`review:${ip}`, 5, 600);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many review submissions. Please wait a few minutes before trying again.",
+        },
+        { status: 429 }
+      );
     }
 
     // 2. Parse & Zod Validate Payload

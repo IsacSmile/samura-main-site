@@ -1,82 +1,171 @@
-# Samaura Healthcare — Storefront & E-Commerce Web Application
+# Samaura Healthcare — Production E-Commerce Platform
 
-Samaura Healthcare is a modern, high-performance e-commerce storefront for natural menstrual hygiene and intimate wellness essentials.
+Samaura Healthcare is an enterprise-grade e-commerce web application for gentle, plant-derived female hygiene care. Built on Next.js 16 (App Router), React 19, TypeScript strict mode, Tailwind CSS v4 tokens, LibSQL / SQLite with Drizzle ORM, NextAuth (Auth.js), and integrated with Razorpay and Resend.
 
 ---
 
-## Payment Gateway: Razorpay Go-Live Steps
+## 🚀 Deployment Options
 
-Online payments are built behind a unified `PaymentProvider` interface and stay completely dormant until valid Razorpay keys are configured. Cash on Delivery (COD) is active at launch.
+### Option A: Vercel + Turso Cloud (Recommended Serverless Architecture)
 
-Follow these exact steps to activate online payments (Cards, UPI, Netbanking):
+#### Step 1: Create a Turso Database
+1. Install Turso CLI or log in at [turso.tech](https://turso.tech).
+2. Create your database:
+   ```bash
+   turso db create samaura-prod
+   ```
+3. Generate a long-lived database auth token:
+   ```bash
+   turso db tokens create samaura-prod
+   ```
+4. Copy the database URL (e.g. `libsql://samaura-prod-yourorg.turso.io`) and auth token.
 
-### Step 1: Add Test API Keys to Environment
-In your `.env` or production environment variables, supply your Razorpay Test Key ID and Secret:
-```env
-PAYMENT_PROVIDER="razorpay"
-RAZORPAY_KEY_ID="rzp_test_YourTestKeyIdHere"
-RAZORPAY_KEY_SECRET="YourTestKeySecretHere"
-RAZORPAY_WEBHOOK_SECRET="YourTestWebhookSecretHere"
+#### Step 2: Push Database Migrations to Turso
+Run migrations against the remote Turso database:
+```bash
+DATABASE_URL="libsql://samaura-prod-yourorg.turso.io" \
+DATABASE_AUTH_TOKEN="<your-auth-token>" \
+npm run db:migrate
 ```
 
-### Step 2: Set Provider Flag
-Ensure `PAYMENT_PROVIDER="razorpay"` is set. If `PAYMENT_PROVIDER` is empty or unset, online payment options remain dormant and hidden from checkout, leaving COD as the active payment method.
+#### Step 3: Seed Initial Data
+Seed the production catalog, shipping rules, and admin user (without demo customers or coupons):
+```bash
+NODE_ENV="production" \
+DATABASE_URL="libsql://samaura-prod-yourorg.turso.io" \
+DATABASE_AUTH_TOKEN="<your-auth-token>" \
+SEED_ADMIN_EMAIL="admin@samaura.com" \
+SEED_ADMIN_PASSWORD="YourStrongAdminPassword123!" \
+npm run db:seed
+```
 
-### Step 3: Run a Test-Mode Payment
-1. Start the application (`npm run dev` or production server).
-2. Add any item to your cart and proceed to `/checkout`.
-3. Select "Pay Online via UPI, Cards, Netbanking".
-4. Submit the order and complete a test transaction using Razorpay's test credentials (e.g. test UPI ID or test card details).
-5. Verify that your order is confirmed, inventory stock is decremented, and you are redirected to `/order/[token]` with status `placed` and payment status `paid`.
-
-### Step 4: Register the Webhook URL
-1. Log in to the [Razorpay Dashboard](https://dashboard.razorpay.com).
-2. Navigate to **Settings** > **Webhooks** > **Add New Webhook**.
-3. Set the **Webhook URL** to:
-   ```
-   https://your-domain.com/api/razorpay/webhook
-   ```
-4. Enter the exact secret string that you configured in `RAZORPAY_WEBHOOK_SECRET`.
-5. Under **Active Events**, select:
-   - `payment.captured`
-   - `payment.failed`
-   - `order.paid`
-6. Save the webhook.
-
-### Step 5: Switch to Live Keys
-Once your business KYC verification is approved by Razorpay:
-1. In the Razorpay Dashboard, toggle from **Test Mode** to **Live Mode**.
-2. Generate Live API Keys under **Settings** > **API Keys**.
-3. Update your production environment variables:
-   ```env
-   PAYMENT_PROVIDER="razorpay"
-   RAZORPAY_KEY_ID="rzp_live_YourLiveKeyId"
-   RAZORPAY_KEY_SECRET="YourLiveKeySecret"
-   RAZORPAY_WEBHOOK_SECRET="YourLiveWebhookSecret"
-   ```
-4. Register the production webhook URL in the Live Mode dashboard settings with the matching `RAZORPAY_WEBHOOK_SECRET`.
-5. Restart or redeploy your application. Online payments are now live!
+#### Step 4: Deploy to Vercel
+1. Import the repository in [vercel.com](https://vercel.com).
+2. Configure Build & Development settings:
+   - Framework Preset: **Next.js**
+   - Build Command: `npm run build`
+   - Output Directory: `.next`
+3. Add Production Environment Variables in Vercel project settings (see Environment Variables Table below).
+4. Deploy!
 
 ---
 
-## Local Development & Mock Payment Sandbox
+### Option B: VPS Self-Hosting (Docker + Caddy + SQLite)
 
-To test the entire checkout and order lifecycle locally without Razorpay credentials:
-1. In `.env`, set:
-   ```env
-   PAYMENT_PROVIDER="mock"
-   ```
-2. Proceed through `/checkout` and select "Pay Online (Sandbox Dev Gateway)".
-3. You will be directed to the hosted mock gateway page at `/payment/mock`, where you can simulate successful payment or failure/cancellation.
-4. Note: The mock gateway throws a fatal error if executed in a `production` environment (`NODE_ENV=production`).
+#### Step 1: Dockerfile
+```dockerfile
+FROM node:20-alpine AS base
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+ENV NODE_ENV=production
+RUN npm run build
+
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+#### Step 2: Caddy Reverse Proxy & SSL (`Caddyfile`)
+```caddy
+samaura.com, www.samaura.com {
+    encode gzip zstd
+    reverse_proxy localhost:3000
+
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}
+```
 
 ---
 
-## Tech Stack & Architecture
+## 🔐 Environment Variables Reference Table
 
-- **Framework**: Next.js 16 (App Router), React 19, TypeScript
-- **Database**: SQLite / LibSQL with Drizzle ORM
-- **Authentication**: Auth.js (Credentials, bcrypt)
-- **State Management**: Zustand (client cart stores only `variantId` and `quantity`)
-- **Server Pricing**: Authoritative integer paise computation in `src/lib/services/pricing.ts`
-- **Transactions**: Atomic stock lock with rollback and idempotency protection
+| Variable Name | Required | Default / Description |
+|---|---|---|
+| `DATABASE_URL` | **Yes** | `file:data/samaura.db` for local SQLite or `libsql://...` for Turso |
+| `DATABASE_AUTH_TOKEN` | Turso only | Auth token generated via `turso db tokens create` |
+| `AUTH_SECRET` | **Yes in prod** | Random 64-char hex key: `openssl rand -hex 32` |
+| `NEXTAUTH_URL` | Optional | Canonical URL (e.g. `https://samaura.com`) |
+| `NEXT_PUBLIC_SITE_URL` | **Yes in prod** | Public storefront URL (e.g. `https://samaura.com`) |
+| `PAYMENT_PROVIDER` | Optional | `cod` (default), `mock` (dev only), or `razorpay` |
+| `RAZORPAY_KEY_ID` | When online enabled | Razorpay Key ID (`rzp_live_...` or `rzp_test_...`) |
+| `RAZORPAY_KEY_SECRET` | When online enabled | Razorpay Key Secret |
+| `RAZORPAY_WEBHOOK_SECRET` | When online enabled | Razorpay Webhook Secret for HMAC verification |
+| `RESEND_API_KEY` | Optional | Resend API Key (`re_...`). Logs to console if unset |
+| `RESEND_FROM_EMAIL` | Optional | Outbound verified sender (`orders@samaura.com`) |
+| `ADMIN_ALERT_EMAIL` | Optional | Recipient for new order admin alerts (`admin@samaura.com`) |
+| `STORAGE_PROVIDER` | Optional | `local` (default) or `cloudinary` |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary only | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary only | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary only | Cloudinary API secret |
+| `NEXT_PUBLIC_GA_ID` | Optional | Google Analytics Measurement ID (`G-XXXXXXXXXX`) |
+
+---
+
+## 🌐 Domain, DNS & Email Authentication
+
+### DNS Records (Cloudflare, Route53, Namecheap)
+- **Apex domain**: `A` record pointing to Vercel IP (`76.76.21.21`) or VPS IP.
+- **www subdomain**: `CNAME` pointing to `cname.vercel-dns.com` or apex.
+
+### Resend Email SPF / DKIM / DMARC Setup
+To ensure transactional emails reach the customer inbox:
+1. Verify domain in [resend.com/domains](https://resend.com/domains).
+2. Add DNS records:
+   - **DKIM**: `TXT` record with hostname `resend._domainkey.samaura.com`.
+   - **SPF**: `TXT` record for `bounces.samaura.com` with `v=spf1 include:amazonses.com ~all`.
+   - **DMARC**: `TXT` record for `_dmarc.samaura.com` with `v=DMARC1; p=none; rua=mailto:dmarc@samaura.com`.
+
+---
+
+## 💳 Razorpay Go-Live Checklist
+
+1. **KYC Approval**: Ensure business KYC is verified on Razorpay dashboard.
+2. **Switch to Live Mode**: Toggle switch from Test to Live.
+3. **Generate Live Keys**: Under Settings > API Keys, generate Live Key ID & Secret.
+4. **Register Webhook**:
+   - URL: `https://samaura.com/api/razorpay/webhook`
+   - Secret: Matches `RAZORPAY_WEBHOOK_SECRET`
+   - Active Events: `payment.captured`, `payment.failed`, `order.paid`
+5. **Set Environment Variables**: Set `PAYMENT_PROVIDER="razorpay"` and deploy.
+
+---
+
+## 🧪 Post-Deploy Smoke Test Checklist
+
+- [ ] **Home Page**: Verify hero banner, product grid, neutral copy, and footer links.
+- [ ] **Catalog & Filters**: Check `/shop` pagination, category filtering, and product details.
+- [ ] **Cart Flow**: Add variant to cart, check price calculation and free shipping threshold.
+- [ ] **Checkout (COD)**: Submit test COD order, verify order receipt number `INV-YYYY-XXXXX`.
+- [ ] **Checkout (Online)**: Complete test Razorpay payment, verify instant payment confirmation.
+- [ ] **Customer Account**: Register user, verify single-use email verification token.
+- [ ] **Admin Console**: Log in to `/admin` using admin credentials.
+- [ ] **Order Fulfillment**: Dispatch order with courier name & tracking number; verify customer update email.
+- [ ] **Security**: Verify `Content-Security-Policy`, `X-Frame-Options: DENY`, `no-referrer` on reset password.
+- [ ] **Responsive Audit**: Check on mobile (320px–414px) and desktop (1280px–1536px) for zero horizontal overflow.
+
+---
+
+## ⏪ Rollback Procedure
+
+### Rollback on Vercel
+1. Go to **Deployments** in Vercel.
+2. Locate the previous stable deployment.
+3. Click **...** > **Promote to Production** (Instant traffic switch).
+
+### Database Rollback
+1. Before running breaking migrations, create a backup:
+   ```bash
+   npm run db:backup
+   ```
+2. In case of issues, restore the SQLite backup or re-point Turso to a previous point-in-time branch:
+   ```bash
+   turso db restore samaura-prod --timestamp 2026-10-06T00:00:00Z
+   ```

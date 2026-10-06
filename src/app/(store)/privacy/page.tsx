@@ -30,7 +30,7 @@ export default async function PrivacyPolicyPage() {
         {/* Required Mandatory Legal Review Draft Banner */}
         <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs font-semibold text-amber-900 flex items-center gap-3 shadow-xs">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-          <span>Draft, review with a legal professional before launch.</span>
+          <span>Draft, review with a legal professional before launch. Replace with client content.</span>
         </div>
 
         <div className="text-center space-y-3">

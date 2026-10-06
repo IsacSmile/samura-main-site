@@ -457,7 +457,25 @@ export const emailVerificationTokensRelations = relations(emailVerificationToken
   }),
 }));
 
+// -----------------------------------------------------------------------------
+// 21. Rate Limits (Persistent DB-backed rate limiter)
+// -----------------------------------------------------------------------------
+export const rateLimits = sqliteTable("rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull().default(1),
+  resetAt: integer("reset_at", { mode: "timestamp" }).notNull(),
+});
+
+// -----------------------------------------------------------------------------
+// 22. Invoice Counters (Atomic sequential invoice generation)
+// -----------------------------------------------------------------------------
+export const invoiceCounters = sqliteTable("invoice_counters", {
+  year: integer("year").primaryKey(),
+  lastSequence: integer("last_sequence").notNull().default(0),
+});
+
 // Legacy aliases for backward compatibility if needed
 export const blogPosts = posts;
 export const staticPages = pages;
+
 

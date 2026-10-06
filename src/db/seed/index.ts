@@ -633,32 +633,36 @@ export async function runSeed() {
 
 
 
-  // 4. Seed 2 Coupons
-  console.log("4. Seeding 2 Coupons...");
-  await db.insert(coupons).values([
-    {
-      id: "cpn_welcome15",
-      code: "WELCOME15",
-      discountType: "percentage",
-      discountValue: 15, // 15%
-      minOrderPaise: 49900, // min ₹499
-      maxDiscountPaise: 15000, // max ₹150 off
-      usageLimit: 1000,
-      timesUsed: 14,
-      isActive: true,
-    },
-    {
-      id: "cpn_samaura10",
-      code: "SAMAURA10",
-      discountType: "percentage",
-      discountValue: 10, // 10%
-      minOrderPaise: 29900, // min ₹299
-      maxDiscountPaise: 10000, // max ₹100 off
-      usageLimit: 500,
-      timesUsed: 28,
-      isActive: true,
-    },
-  ]).onConflictDoNothing();
+  // 4. Seed 2 Coupons (Non-production only)
+  if (process.env.NODE_ENV !== "production") {
+    console.log("4. Seeding 2 Demo Coupons (WELCOME15, SAMAURA10)...");
+    await db.insert(coupons).values([
+      {
+        id: "cpn_welcome15",
+        code: "WELCOME15",
+        discountType: "percentage",
+        discountValue: 15, // 15%
+        minOrderPaise: 49900, // min ₹499
+        maxDiscountPaise: 15000, // max ₹150 off
+        usageLimit: 1000,
+        timesUsed: 14,
+        isActive: true,
+      },
+      {
+        id: "cpn_samaura10",
+        code: "SAMAURA10",
+        discountType: "percentage",
+        discountValue: 10, // 10%
+        minOrderPaise: 29900, // min ₹299
+        maxDiscountPaise: 10000, // max ₹100 off
+        usageLimit: 500,
+        timesUsed: 28,
+        isActive: true,
+      },
+    ]).onConflictDoNothing();
+  } else {
+    console.log("4. Production environment detected: skipping demo coupons.");
+  }
 
   // 5. Seed Shipping Rules & Store Settings
   console.log("5. Seeding Shipping Rules & Store Settings...");
@@ -802,7 +806,7 @@ export async function runSeed() {
       category: "Period Health",
       readTime: "4 min read",
       author: "Samaura Health Desk",
-      isPublished: true,
+      isPublished: false, // Seeded articles are draft by default
     },
     {
       id: "post_02",
@@ -814,7 +818,7 @@ export async function runSeed() {
       category: "Eco-Conscious Periods",
       readTime: "5 min read",
       author: "Samaura Health Desk",
-      isPublished: true,
+      isPublished: false, // Seeded articles are draft by default
     },
   ]).onConflictDoNothing();
 

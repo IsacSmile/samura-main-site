@@ -23,6 +23,7 @@ import {
   FileText,
   Truck,
   Inbox,
+  HelpCircle,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -107,6 +108,12 @@ const NAV_ITEMS = [
     name: "Settings & Store",
     href: "/admin/settings",
     icon: Settings,
+    exact: false,
+  },
+  {
+    name: "Help & Operations",
+    href: "/admin/help",
+    icon: HelpCircle,
     exact: false,
   },
 ];

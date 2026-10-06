@@ -6,26 +6,28 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { loginSchema } from "@/lib/validation/schemas";
 
-// In-memory rate limiting map for login attempts: email -> { attempts, lockUntil }
-const loginRateLimitMap = new Map<string, { attempts: number; lockUntil: number }>();
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+import { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
 
-function recordFailedAttempt(email: string) {
-  const now = Date.now();
-  const current = loginRateLimitMap.get(email);
-  if (!current) {
-    loginRateLimitMap.set(email, { attempts: 1, lockUntil: 0 });
-  } else {
-    const attempts = current.attempts + 1;
-    const lockUntil = attempts >= MAX_LOGIN_ATTEMPTS ? now + LOCKOUT_DURATION_MS : 0;
-    loginRateLimitMap.set(email, { attempts, lockUntil });
-  }
+// Fail-fast in production if AUTH_SECRET is missing
+if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
+  throw new Error("CRITICAL SECURITY ERROR: AUTH_SECRET environment variable is missing in production.");
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   session: { strategy: "jwt" },
+  useSecureCookies: process.env.NODE_ENV === "production",
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-authjs.session-token" : "authjs.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   providers: [
     Credentials({
       name: "Credentials",
@@ -42,10 +44,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const { email, password } = parsed.data;
         const normalizedEmail = email.toLowerCase().trim();
 
-        // Rate limit check: max 5 failed attempts per 15 minutes
-        const now = Date.now();
-        const attemptRecord = loginRateLimitMap.get(normalizedEmail);
-        if (attemptRecord && attemptRecord.lockUntil > now) {
+        // 1. Persistent rate limit: max 5 login attempts per 15 minutes
+        const rateCheck = await checkRateLimit(`login:${normalizedEmail}`, 5, 900);
+        if (!rateCheck.allowed) {
           throw new Error("Too many failed login attempts. Please try again after 15 minutes.");
         }
 
@@ -55,23 +56,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .where(eq(users.email, normalizedEmail))
           .limit(1);
 
+        // Generic error message: do not reveal whether user exists or is deactivated
         if (!user || !user.passwordHash) {
-          recordFailedAttempt(normalizedEmail);
           return null;
         }
 
+        // Deactivated user cannot log in
         if (user.isActive === false) {
-          throw new Error("This account has been deactivated. Please contact support.");
+          return null;
+        }
+
+        // Admin-specific rate limiting
+        if (user.role === "admin") {
+          const adminRate = await checkRateLimit(`admin_login:${normalizedEmail}`, 5, 900);
+          if (!adminRate.allowed) {
+            throw new Error("Too many failed admin login attempts. Please try again after 15 minutes.");
+          }
         }
 
         const passwordMatch = await bcrypt.compare(password, user.passwordHash);
         if (!passwordMatch) {
-          recordFailedAttempt(normalizedEmail);
           return null;
         }
 
-        // Reset failed attempts on success
-        loginRateLimitMap.delete(normalizedEmail);
+        // Reset rate limits on successful authentication
+        resetRateLimit(`login:${normalizedEmail}`);
+        if (user.role === "admin") {
+          resetRateLimit(`admin_login:${normalizedEmail}`);
+        }
 
         return {
           id: user.id,
