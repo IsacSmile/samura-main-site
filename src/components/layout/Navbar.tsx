@@ -276,15 +276,7 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
               )}
             </button>
 
-            {/* Quick Shop Button (Desktop) */}
-            <div className="hidden md:block">
-              <Link
-                href="/shop"
-                className="btn-brand text-xs font-semibold py-2 px-4 shadow-sm whitespace-nowrap min-h-10"
-              >
-                Shop Now
-              </Link>
-            </div>
+
           </div>
         </div>
       </div>
