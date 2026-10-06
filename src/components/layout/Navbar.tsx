@@ -106,14 +106,24 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
           <div className="flex items-center xl:hidden shrink-0">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-colors focus:outline-none"
+              className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-all duration-300 focus:outline-none"
               aria-label="Toggle Navigation Menu"
+              aria-expanded={isMobileMenuOpen}
             >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5" strokeWidth={1.75} />
-              ) : (
-                <Menu className="w-5 h-5" strokeWidth={1.75} />
-              )}
+              <div className="relative w-5 h-5 flex items-center justify-center">
+                <Menu
+                  className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
+                    isMobileMenuOpen ? "rotate-90 opacity-0 scale-75" : "rotate-0 opacity-100 scale-100"
+                  }`}
+                  strokeWidth={1.75}
+                />
+                <X
+                  className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
+                    isMobileMenuOpen ? "rotate-0 opacity-100 scale-100" : "-rotate-90 opacity-0 scale-75"
+                  }`}
+                  strokeWidth={1.75}
+                />
+              </div>
             </button>
           </div>
 
@@ -282,91 +292,99 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
       </div>
 
       {/* Mobile Drawer Menu (<1280px / xl) */}
-      {isMobileMenuOpen && (
-        <div className="xl:hidden border-t border-pink-light bg-white px-4 pt-4 pb-6 space-y-2 animate-in slide-in-from-top-4 duration-200 max-h-[calc(100vh-5rem)] overflow-y-auto">
-          {/* Quick Search in Mobile Menu */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (searchQuery.trim()) {
-                router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
-                closeMobileMenu();
-              }
-            }}
-            className="flex items-center bg-blush border border-pink-light rounded-2xl px-3.5 py-2.5 mb-3"
-          >
-            <Search className="w-4 h-4 text-ink-muted mr-2 shrink-0" strokeWidth={1.75} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search menstrual cups, gifts, guides..."
-              className="bg-transparent text-sm text-ink focus:outline-none w-full placeholder:text-muted"
-            />
-          </form>
+      <div
+        className={`xl:hidden grid transition-all duration-300 ease-in-out bg-white border-pink-light ${
+          isMobileMenuOpen
+            ? "grid-rows-[1fr] opacity-100 border-t pt-4 pb-6 px-4"
+            : "grid-rows-[0fr] opacity-0 border-t-0 pt-0 pb-0 px-4 pointer-events-none"
+        }`}
+      >
+        <div className="overflow-hidden min-h-0 space-y-2">
+          <div className="max-h-[calc(100vh-6rem)] overflow-y-auto space-y-2 pr-0.5">
+            {/* Quick Search in Mobile Menu */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim()) {
+                  router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                  closeMobileMenu();
+                }
+              }}
+              className="flex items-center bg-blush border border-pink-light rounded-2xl px-3.5 py-2.5 mb-3"
+            >
+              <Search className="w-4 h-4 text-ink-muted mr-2 shrink-0" strokeWidth={1.75} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search menstrual cups, gifts, guides..."
+                className="bg-transparent text-sm text-ink focus:outline-none w-full placeholder:text-muted"
+              />
+            </form>
 
-          <Link
-            href="/shop"
-            onClick={closeMobileMenu}
-            className="block px-3.5 py-3 rounded-2xl text-base font-semibold text-ink hover:bg-blush"
-          >
-            Shop
-          </Link>
+            <Link
+              href="/shop"
+              onClick={closeMobileMenu}
+              className="block px-3.5 py-3 rounded-2xl text-base font-semibold text-ink hover:bg-blush"
+            >
+              Shop
+            </Link>
 
-          <div className="pt-2 pb-1 border-t border-blush">
-            <span className="px-3 text-xs font-bold uppercase tracking-wider text-muted">
-              Explore
-            </span>
-            <div className="mt-2 space-y-1">
+            <div className="pt-2 pb-1 border-t border-blush">
+              <span className="px-3 text-xs font-bold uppercase tracking-wider text-muted">
+                Explore
+              </span>
+              <div className="mt-2 space-y-1">
+                <Link
+                  href="/learn"
+                  onClick={closeMobileMenu}
+                  className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
+                >
+                  Learn Before You Transition
+                </Link>
+                <Link
+                  href="/awareness"
+                  onClick={closeMobileMenu}
+                  className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
+                >
+                  Awareness & Support
+                </Link>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-blush space-y-1">
               <Link
-                href="/learn"
+                href="/gifts"
                 onClick={closeMobileMenu}
-                className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
+                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
               >
-                Learn Before You Transition
+                Gift Collections
               </Link>
               <Link
-                href="/awareness"
+                href="/about"
                 onClick={closeMobileMenu}
-                className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
+                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
               >
-                Awareness & Support
+                About Us
+              </Link>
+              <Link
+                href="/contact"
+                onClick={closeMobileMenu}
+                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
+              >
+                Contact
+              </Link>
+              <Link
+                href="/account"
+                onClick={closeMobileMenu}
+                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
+              >
+                My Account / Orders
               </Link>
             </div>
           </div>
-
-          <div className="pt-2 border-t border-blush space-y-1">
-            <Link
-              href="/gifts"
-              onClick={closeMobileMenu}
-              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-            >
-              Gift Collections
-            </Link>
-            <Link
-              href="/about"
-              onClick={closeMobileMenu}
-              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-            >
-              About Us
-            </Link>
-            <Link
-              href="/contact"
-              onClick={closeMobileMenu}
-              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-            >
-              Contact
-            </Link>
-            <Link
-              href="/account"
-              onClick={closeMobileMenu}
-              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-            >
-              My Account / Orders
-            </Link>
-          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }
