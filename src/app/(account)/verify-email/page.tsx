@@ -102,9 +102,10 @@ function VerifyEmailContent() {
                 router.push("/account");
                 router.refresh();
               }}
-              className="w-full shadow-md"
+              className="w-full shadow-md text-sm sm:text-base"
+              rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
             >
-              Continue to My Account <ArrowRight className="w-4 h-4 ml-1.5" />
+              Continue to My Account
             </Button>
           </div>
         )}

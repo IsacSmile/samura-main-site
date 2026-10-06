@@ -143,9 +143,10 @@ export default function RegisterPage() {
             type="submit"
             size="lg"
             isLoading={loading}
-            className="w-full shadow-md mt-2"
+            className="w-full shadow-md mt-2 text-sm sm:text-base"
+            rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
           >
-            Create Account <ArrowRight className="w-4 h-4 ml-2" />
+            Create Account
           </Button>
 
           <p className="text-center text-xs text-muted pt-2">
