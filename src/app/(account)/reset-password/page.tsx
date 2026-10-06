@@ -28,8 +28,8 @@ function ResetPasswordForm() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
 
@@ -104,15 +104,16 @@ function ResetPasswordForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <meta name="referrer" content="no-referrer" />
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-ink">New Password (min. 6 characters)</label>
+              <label className="text-xs font-semibold text-ink">New Password (min. 8 characters)</label>
               <Input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
 
@@ -124,7 +125,7 @@ function ResetPasswordForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
 

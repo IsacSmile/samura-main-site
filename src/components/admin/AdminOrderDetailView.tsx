@@ -84,9 +84,11 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
   const [trackingNumber, setTrackingNumber] = useState("");
   const [refundNotes, setRefundNotes] = useState("");
   const [cancelReason, setCancelReason] = useState("");
+  const [returnReason, setReturnReason] = useState("");
   const [showShippingModal, setShowShippingModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showReturnModal, setShowReturnModal] = useState(false);
 
   const currentStatus = order.status as OrderStatus;
   const allowed = ALLOWED_STATUS_TRANSITIONS[currentStatus] || [];
@@ -99,6 +101,11 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
 
     if (nextStatus === "cancelled") {
       setShowCancelModal(true);
+      return;
+    }
+
+    if (nextStatus === "returned") {
+      setShowReturnModal(true);
       return;
     }
 
@@ -190,6 +197,26 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
       setShowRefundModal(false);
     } else {
       setErrorMsg(res.error || "Failed to process refund.");
+    }
+    setLoading(false);
+  };
+
+  const submitReturn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg(null);
+
+    const res = await updateOrderStatusAdminAction({
+      orderId: order.id,
+      nextStatus: "returned",
+      cancelReason: returnReason.trim() || "COD Refused / Return to Origin",
+    });
+
+    if (res.success && res.order) {
+      setOrder({ ...order, ...res.order });
+      setShowReturnModal(false);
+    } else {
+      setErrorMsg(res.error || "Failed to mark order returned.");
     }
     setLoading(false);
   };
@@ -655,6 +682,52 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
                   className="px-4 py-2 text-xs rounded-xl bg-brand text-white font-semibold hover:bg-brand/90"
                 >
                   {loading ? "Saving..." : "Record Refund"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Return Dialog Modal */}
+      {showReturnModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <h3 className="font-heading font-bold text-base text-amber-700 flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-amber-600" /> Mark Order Returned (RTO)
+            </h3>
+            <p className="text-xs text-muted">
+              Marking this shipped order as returned will automatically restock the items back into inventory exactly once.
+            </p>
+
+            <form onSubmit={submitReturn} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1">
+                  Return / RTO Reason (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={returnReason}
+                  onChange={(e) => setReturnReason(e.target.value)}
+                  placeholder="e.g. COD refusal at doorstep / Customer unreachable / Return to origin"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 outline-none focus:border-brand"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReturnModal(false)}
+                  className="px-4 py-2 text-xs rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 text-xs rounded-xl bg-amber-600 text-white font-semibold hover:bg-amber-700"
+                >
+                  {loading ? "Processing..." : "Confirm & Restock Items"}
                 </button>
               </div>
             </form>

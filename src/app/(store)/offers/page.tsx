@@ -1,130 +1,204 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles, ArrowRight, Percent } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Sparkles, ArrowRight, Tag, Percent } from "lucide-react";
+import { db } from "@/lib/db";
+import { coupons, products, productVariants, productImages } from "@/lib/db/schema";
+import { eq, and, or, isNull, gte, desc, asc } from "drizzle-orm";
+import { formatPrice } from "@/lib/utils/money";
+import { ProductCard } from "@/components/product/ProductCard";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Special Offers & Coupon Codes | Samaura Healthcare",
-  description: "Exclusive discounts, bulk pack offers, and coupon codes for gentle pure cotton menstrual care.",
+  title: "Special Offers & Discounts | Samaura Healthcare",
+  description:
+    "Explore active promotional coupons and products with discounted sale prices for gentle menstrual care.",
 };
 
-const OFFERS = [
-  {
-    code: "WELCOME15",
-    discount: "15% OFF",
-    title: "Welcome to Samaura",
-    description: "Get 15% off on your first purchase of pure cotton pads, panty liners, and wellness essentials.",
-    minOrder: "No minimum purchase",
-    tag: "First Order Special",
-    highlight: true,
-  },
-  {
-    code: "SAMAURA10",
-    discount: "10% OFF",
-    title: "Eco Hygiene Savings",
-    description: "Save 10% on orders above ₹999 across all menstrual cups, sterilizers, and intimate foaming washes.",
-    minOrder: "Min order ₹999",
-    tag: "Sitewide Coupon",
-    highlight: false,
-  },
-  {
-    code: "FREESHIP",
-    discount: "FREE SHIPPING",
-    title: "Zero Delivery Fee",
-    description: "Enjoy complimentary discreet, unmarked delivery to any pincode across India on orders over ₹499.",
-    minOrder: "Min order ₹499",
-    tag: "Discreet Delivery",
-    highlight: false,
-  },
-];
+export default async function OffersPage() {
+  const now = new Date();
 
-export default function OffersPage() {
+  // 1. Fetch active coupons from database
+  const activeCoupons = await db
+    .select()
+    .from(coupons)
+    .where(
+      and(
+        eq(coupons.isActive, true),
+        or(isNull(coupons.expiresAt), gte(coupons.expiresAt, now))
+      )
+    )
+    .orderBy(desc(coupons.discountValue));
+
+  // 2. Fetch products that have a sale price
+  const allActiveProducts = await db
+    .select()
+    .from(products)
+    .where(eq(products.isActive, true));
+
+  const saleProductsWithDetails = await Promise.all(
+    allActiveProducts.map(async (prod) => {
+      const [defaultVar] = await db
+        .select()
+        .from(productVariants)
+        .where(eq(productVariants.productId, prod.id))
+        .orderBy(desc(productVariants.isDefault), asc(productVariants.sortOrder))
+        .limit(1);
+
+      const [primaryImg] = await db
+        .select()
+        .from(productImages)
+        .where(eq(productImages.productId, prod.id))
+        .orderBy(desc(productImages.isPrimary), asc(productImages.sortOrder))
+        .limit(1);
+
+      // Check if product or default variant has a sale price
+      const hasSale =
+        (prod.salePricePaise != null && prod.salePricePaise < prod.basePricePaise) ||
+        (defaultVar?.salePricePaise != null &&
+          defaultVar.salePricePaise < defaultVar.pricePaise);
+
+      return {
+        ...prod,
+        image: primaryImg?.url ?? null,
+        defaultVariant: defaultVar ?? null,
+        hasSale,
+      };
+    })
+  );
+
+  const discountedProducts = saleProductsWithDetails.filter((p) => p.hasSale);
+
   return (
     <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         {/* Header */}
         <div className="text-center space-y-4 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Exclusive Savings & Promos</span>
+            <span>Store Savings & Promos</span>
           </div>
           <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-ink">
-            Current Offers & Promo Codes
+            Current Offers & Promo Coupons
           </h1>
           <p className="text-muted text-sm sm:text-base leading-relaxed">
-            Apply these coupon codes at checkout to unlock savings on gentle, thoughtfully formulated menstrual care.
+            Apply active promotional coupons at checkout or shop curated essentials currently on sale.
           </p>
         </div>
 
-        {/* Coupon Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {OFFERS.map((offer) => (
-            <div
-              key={offer.code}
-              className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 ${
-                offer.highlight
-                  ? "bg-white border-2 border-brand shadow-lg relative"
-                  : "bg-white border border-pink-light shadow-xs hover:shadow-md"
-              }`}
-            >
-              {offer.highlight && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
-                  Most Popular
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-brand bg-blush px-3 py-1 rounded-full">
-                    {offer.tag}
-                  </span>
-                  <Percent className="w-4 h-4 text-brand" />
-                </div>
-
-                <div>
-                  <div className="text-3xl font-heading font-extrabold text-brand">
-                    {offer.discount}
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-ink mt-1">
-                    {offer.title}
-                  </h3>
-                </div>
-
-                <p className="text-xs text-muted leading-relaxed">
-                  {offer.description}
-                </p>
-              </div>
-
-              <div className="pt-6 border-t border-blush space-y-4 mt-6">
-                <div className="flex items-center justify-between bg-blush/60 border border-pink-light/80 rounded-2xl px-3.5 py-2.5">
-                  <div className="text-xs font-mono font-bold tracking-wider text-ink">
-                    {offer.code}
-                  </div>
-                  <span className="text-[11px] text-brand font-medium">Use at checkout</span>
-                </div>
-
-                <div className="text-[11px] text-muted text-center">
-                  {offer.minOrder}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA Banner */}
-        <div className="bg-blush border border-pink-light rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center sm:text-left">
-            <h3 className="font-heading font-bold text-xl sm:text-2xl text-ink">
-              Ready to experience soothing comfort?
-            </h3>
-            <p className="text-xs sm:text-sm text-muted max-w-xl">
-              All orders are packed in plain, unmarked biodegradable boxes for complete confidentiality.
+        {/* Active Coupons Section */}
+        <div className="space-y-6">
+          <div className="border-b border-blush pb-3">
+            <h2 className="font-heading font-bold text-xl text-ink flex items-center gap-2">
+              <Tag className="w-5 h-5 text-brand" /> Active Coupons
+            </h2>
+            <p className="text-xs text-muted mt-0.5">
+              Copy and enter these codes during checkout to apply discounts.
             </p>
           </div>
-          <Link href="/shop">
-            <Button size="lg" className="shadow-md whitespace-nowrap">
-              Shop Catalog Now <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+
+          {activeCoupons.length === 0 ? (
+            <div className="bg-white rounded-3xl p-8 border border-pink-light text-center text-muted text-sm">
+              There are no active public coupons right now. Check back soon for festive specials!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {activeCoupons.map((coupon) => (
+                <div
+                  key={coupon.id}
+                  className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-brand bg-blush px-3 py-1 rounded-full border border-pink-light">
+                        {coupon.discountType === "percentage" ? "Percentage Off" : "Fixed Discount"}
+                      </span>
+                      <Percent className="w-4 h-4 text-brand" />
+                    </div>
+
+                    <div>
+                      <div className="text-3xl font-heading font-extrabold text-brand">
+                        {coupon.discountType === "percentage"
+                          ? `${coupon.discountValue}% OFF`
+                          : `${formatPrice(coupon.discountValue)} OFF`}
+                      </div>
+                      <div className="text-xs text-muted mt-1">
+                        {coupon.minOrderPaise > 0
+                          ? `On orders above ${formatPrice(coupon.minOrderPaise)}`
+                          : "No minimum order requirement"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-blush space-y-2">
+                    <div className="flex items-center justify-between bg-blush/60 border border-pink-light/80 rounded-2xl px-4 py-2.5">
+                      <span className="text-xs font-mono font-bold tracking-wider text-ink">
+                        {coupon.code}
+                      </span>
+                      <span className="text-[11px] text-brand font-semibold">
+                        Coupon Code
+                      </span>
+                    </div>
+
+                    <div className="text-[10px] text-muted text-center">
+                      {coupon.expiresAt
+                        ? `Valid until ${new Date(coupon.expiresAt).toLocaleDateString()}`
+                        : "Limited time offer"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Discounted Products Section */}
+        <div className="space-y-6">
+          <div className="border-b border-blush pb-3 flex items-center justify-between">
+            <div>
+              <h2 className="font-heading font-bold text-xl text-ink">
+                Products On Sale
+              </h2>
+              <p className="text-xs text-muted mt-0.5">
+                Items currently available at special discounted prices.
+              </p>
+            </div>
+            <Link
+              href="/shop"
+              className="text-xs font-semibold text-brand hover:underline flex items-center gap-1"
+            >
+              Browse All Products <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {discountedProducts.length === 0 ? (
+            <div className="bg-white rounded-3xl p-8 border border-pink-light text-center text-muted text-sm">
+              All items are currently at their regular pricing. Explore our complete catalogue below.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {discountedProducts.map((prod) => (
+                <ProductCard key={prod.id} product={prod} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="bg-blush border border-pink-light rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5 text-center sm:text-left">
+            <h3 className="font-heading font-bold text-xl sm:text-2xl text-ink">
+              Ready for gentle, breathable cycle care?
+            </h3>
+            <p className="text-xs sm:text-sm text-muted max-w-xl">
+              All orders are packed in unmarked, confidential boxes and shipped discreetly across India.
+            </p>
+          </div>
+          <Link
+            href="/shop"
+            className="btn-brand whitespace-nowrap text-sm font-semibold py-3 px-8 shadow-md"
+          >
+            Explore Catalog →
           </Link>
         </div>
       </div>

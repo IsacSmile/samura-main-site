@@ -42,6 +42,7 @@ export default async function AccountPage() {
         email: userRecord.email,
         phone: userRecord.phone,
         role: userRecord.role,
+        emailVerified: userRecord.emailVerified,
       }}
       addresses={addresses}
       orders={orders.map((o) => ({

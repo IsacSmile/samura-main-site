@@ -2,6 +2,9 @@ import { Resend } from "resend";
 import { getSetting } from "@/lib/services/settings";
 
 const resendApiKey = process.env.RESEND_API_KEY || "";
+if (process.env.NODE_ENV === "production" && !resendApiKey) {
+  console.error("[CRITICAL ERROR] RESEND_API_KEY environment variable is missing in production! Email delivery will fail.");
+}
 export const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 /**
@@ -320,3 +323,107 @@ export async function sendPasswordResetEmail(props: PasswordResetEmailProps): Pr
     return { success: false, error };
   }
 }
+
+export interface EmailVerificationProps {
+  to: string;
+  name: string;
+  verifyUrl: string;
+}
+
+/**
+ * Sends customer email verification link.
+ */
+export async function sendEmailVerificationEmail(
+  props: EmailVerificationProps
+): Promise<{ success: boolean; simulated?: boolean; error?: unknown }> {
+  const { to, name, verifyUrl } = props;
+  const safeName = escapeHtml(name);
+
+  if (!resend || !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_test_placeholder") {
+    console.log(
+      `\n[DEV EMAIL LOG - EMAIL VERIFICATION]\nTo: ${to}\nName: ${safeName}\nVerification Link: ${verifyUrl}\n(Valid for 24 hours)\n`
+    );
+    return { success: true, simulated: true };
+  }
+
+  try {
+    const fromEmail = process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL || "Samaura Healthcare <security@samaura.com>";
+
+    await resend.emails.send({
+      from: fromEmail,
+      to,
+      subject: "Verify Your Email Address | Samaura Healthcare",
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 550px; margin: 0 auto; padding: 24px; border: 1px solid #FFD9E2; border-radius: 16px; background-color: #FFFFFF;">
+          <h2 style="color: #C8202F; margin-top: 0;">Samaura Healthcare</h2>
+          <h3 style="color: #3B1F2B; margin-top: 10px;">Please Verify Your Email</h3>
+          <p style="color: #6B5B62; font-size: 14px;">Hello ${safeName},</p>
+          <p style="color: #6B5B62; font-size: 14px;">Thank you for registering with Samaura. Please confirm your email address by clicking the button below. Once verified, any previous guest orders placed with this email address will be linked to your account.</p>
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${verifyUrl}" style="background-color: #C8202F; color: #FFFFFF; text-decoration: none; padding: 12px 26px; border-radius: 30px; font-size: 13px; font-weight: bold;">Verify Email Address</a>
+          </div>
+          <p style="color: #6B5B62; font-size: 12px;">This link is single-use and valid for 24 hours. If you did not create an account on Samaura, please disregard this email.</p>
+        </div>
+      `,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send email verification email:", error);
+    return { success: false, error };
+  }
+}
+
+export interface EnquiryEmailProps {
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject: string;
+  message: string;
+}
+
+/**
+ * Sends notification email to admin when a customer enquiry is submitted.
+ */
+export async function sendNewEnquiryAdminEmail(
+  props: EnquiryEmailProps
+): Promise<{ success: boolean; simulated?: boolean; error?: unknown }> {
+  const { name, email, phone, subject, message } = props;
+  const adminEmail = (await getSetting("contact_email")) || "admin@samaura.com";
+
+  if (!resend || !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_test_placeholder") {
+    console.log(
+      `\n[DEV EMAIL LOG - NEW ENQUIRY ADMIN ALERT]\nTo: ${adminEmail}\nFrom: ${name} (${email})\nPhone: ${phone || "N/A"}\nSubject: ${subject}\nMessage: ${message}\n`
+    );
+    return { success: true, simulated: true };
+  }
+
+  try {
+    const fromEmail = process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL || "Samaura Support <care@samaura.com>";
+
+    await resend.emails.send({
+      from: fromEmail,
+      to: adminEmail,
+      subject: `New Customer Enquiry: ${escapeHtml(subject)}`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #FFD9E2; border-radius: 16px; background-color: #FFFFFF;">
+          <h2 style="color: #C8202F; margin-top: 0;">Samaura Customer Care Desk</h2>
+          <h3 style="color: #3B1F2B;">New Store Enquiry Received</h3>
+          <p style="color: #6B5B62; font-size: 14px;"><strong>Customer:</strong> ${escapeHtml(name)}</p>
+          <p style="color: #6B5B62; font-size: 14px;"><strong>Email:</strong> ${escapeHtml(email)}</p>
+          <p style="color: #6B5B62; font-size: 14px;"><strong>Phone:</strong> ${escapeHtml(phone || "Not provided")}</p>
+          <p style="color: #6B5B62; font-size: 14px;"><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+          <div style="background-color: #FFF1F4; padding: 16px; border-radius: 12px; margin: 16px 0; color: #3B1F2B; font-size: 14px; white-space: pre-wrap;">
+            ${escapeHtml(message)}
+          </div>
+        </div>
+      `,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send admin enquiry alert:", error);
+    return { success: false, error };
+  }
+}
+

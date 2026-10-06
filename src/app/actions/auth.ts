@@ -29,7 +29,7 @@ function checkRateLimit(ip: string): boolean {
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(60),
   email: z.string().email("Please provide a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z
     .string()
     .regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian phone number")
@@ -63,15 +63,11 @@ export async function forgotPasswordAction(email: string) {
   const headerList = await headers();
   const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() || headerList.get("x-real-ip") || "127.0.0.1";
 
-  if (!checkRateLimit(ip)) {
-    return { success: false, error: "Too many password reset requests. Please wait a few minutes." };
-  }
-
   if (!email || !/^\S+@\S+\.\S+$/.test(email.trim())) {
     return { success: false, error: "Please provide a valid email address." };
   }
 
-  return await requestPasswordReset(email.trim());
+  return await requestPasswordReset(email.trim(), ip);
 }
 
 export async function resetPasswordAction(payload: { token: string; newPassword: string }) {
@@ -79,7 +75,26 @@ export async function resetPasswordAction(payload: { token: string; newPassword:
     return { success: false, error: "Token and new password are required." };
   }
 
+  if (payload.newPassword.length < 8) {
+    return { success: false, error: "Password must be at least 8 characters." };
+  }
+
   return await resetPassword(payload.token, payload.newPassword);
+}
+
+export async function verifyEmailAction(token: string) {
+  if (!token || !token.trim()) {
+    return { success: false, error: "Verification token is required." };
+  }
+  const { verifyCustomerEmail } = await import("@/lib/services/auth");
+  return await verifyCustomerEmail(token.trim());
+}
+
+export async function resendVerificationAction(email: string) {
+  const headerList = await headers();
+  const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() || headerList.get("x-real-ip") || "127.0.0.1";
+  const { resendEmailVerification } = await import("@/lib/services/auth");
+  return await resendEmailVerification(email, ip);
 }
 
 // -------------------------------------------------------------

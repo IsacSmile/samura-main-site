@@ -16,6 +16,13 @@ import {
   Menu,
   X,
   Settings,
+  Users,
+  Tag,
+  Image as ImageIcon,
+  BookOpen,
+  FileText,
+  Truck,
+  Inbox,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -37,6 +44,12 @@ const NAV_ITEMS = [
     exact: false,
   },
   {
+    name: "Customers",
+    href: "/admin/customers",
+    icon: Users,
+    exact: false,
+  },
+  {
     name: "Products & Stock",
     href: "/admin/products",
     icon: Package,
@@ -49,13 +62,49 @@ const NAV_ITEMS = [
     exact: false,
   },
   {
+    name: "Discount Coupons",
+    href: "/admin/coupons",
+    icon: Tag,
+    exact: false,
+  },
+  {
+    name: "Banners & Promos",
+    href: "/admin/banners",
+    icon: ImageIcon,
+    exact: false,
+  },
+  {
+    name: "Health Desk Blog",
+    href: "/admin/blog",
+    icon: BookOpen,
+    exact: false,
+  },
+  {
+    name: "Pages CMS",
+    href: "/admin/pages",
+    icon: FileText,
+    exact: false,
+  },
+  {
+    name: "Shipping Rules",
+    href: "/admin/shipping",
+    icon: Truck,
+    exact: false,
+  },
+  {
+    name: "Customer Enquiries",
+    href: "/admin/enquiries",
+    icon: Inbox,
+    exact: false,
+  },
+  {
     name: "Review Moderation",
     href: "/admin/reviews",
     icon: MessageSquareCheck,
     exact: false,
   },
   {
-    name: "Settings & Compliance",
+    name: "Settings & Store",
     href: "/admin/settings",
     icon: Settings,
     exact: false,

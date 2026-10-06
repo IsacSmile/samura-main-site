@@ -27,6 +27,9 @@ export default async function OrderInvoicePage({ params }: InvoicePageProps) {
     notFound();
   }
 
+  const { ensureOrderInvoiceNumber } = await import("@/lib/services/orders");
+  const invoiceNumber = await ensureOrderInvoiceNumber(order.id);
+
   const [sellerName, sellerAddress, sellerEmail, sellerPhone, sellerGstin, showGstBreakup] =
     await Promise.all([
       getSetting("seller_name", "Samaura Healthcare"),
@@ -44,6 +47,7 @@ export default async function OrderInvoicePage({ params }: InvoicePageProps) {
     <InvoiceView
       data={{
         orderNumber: order.orderNumber,
+        invoiceNumber,
         createdAt: order.createdAt,
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,

@@ -128,14 +128,14 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-ink">Password * (min. 6 characters)</label>
+            <label className="text-xs font-semibold text-ink">Password * (min. 8 characters)</label>
             <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
 

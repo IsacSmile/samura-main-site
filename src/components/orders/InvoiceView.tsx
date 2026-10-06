@@ -27,6 +27,7 @@ export interface InvoiceData {
   shippingFeePaise: number;
   totalPaise: number;
   couponCode?: string | null;
+  invoiceNumber?: string | null;
   items: InvoiceItem[];
   seller: {
     name: string;
@@ -62,6 +63,9 @@ export function InvoiceView({ data }: { data: InvoiceData }) {
   const handlePrint = () => {
     window.print();
   };
+
+  const isTaxInvoice = Boolean(data.seller.gstin) && Boolean(data.showGstBreakup);
+  const invoiceTitle = isTaxInvoice ? "Tax Invoice" : "Order Receipt";
 
   const invoiceDate = new Date(data.createdAt).toLocaleDateString("en-IN", {
     day: "numeric",
@@ -111,11 +115,12 @@ export function InvoiceView({ data }: { data: InvoiceData }) {
 
           <div className="text-left sm:text-right">
             <span className="inline-block bg-stone-100 text-stone-800 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-stone-200 mb-2">
-              Retail Tax Invoice
+              {invoiceTitle}
             </span>
             <div className="text-xs space-y-1 text-stone-600">
               <p>
-                <strong className="text-stone-900">Invoice No:</strong> INV-{data.orderNumber}
+                <strong className="text-stone-900">Invoice No:</strong>{" "}
+                {data.invoiceNumber || `INV-${data.orderNumber}`}
               </p>
               <p>
                 <strong className="text-stone-900">Order Ref:</strong> #{data.orderNumber}
@@ -247,7 +252,9 @@ export function InvoiceView({ data }: { data: InvoiceData }) {
 
         {/* Footer / Legal Notice */}
         <div className="mt-12 pt-6 border-t border-stone-200 text-center text-[11px] text-stone-500 space-y-1">
-          <p>This is a computer-generated tax invoice and requires no physical signature.</p>
+          <p>
+            This is a computer-generated {invoiceTitle.toLowerCase()} and requires no physical signature.
+          </p>
           <p>
             Questions about this bill? Contact support at{" "}
             <strong className="text-stone-700">{data.seller.email}</strong> or call{" "}

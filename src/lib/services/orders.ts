@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { orders, orderItems, payments } from "@/db/schema";
-import { eq, and, sql, lt, desc, count, sum, gte, or, like } from "drizzle-orm";
+import { eq, and, sql, lt, desc, count, sum, gte, or, like, notInArray, isNotNull } from "drizzle-orm";
 import crypto from "node:crypto";
 import { computePricing, CartItemInput } from "@/lib/services/pricing";
 import { getPaymentProvider } from "@/lib/payments";
@@ -475,10 +475,9 @@ export async function cancelOrderPayment(params: {
     return { ok: false, error: "Order not found." };
   }
 
-  // If already paid, do NOT cancel automatically
-  if (order.paymentStatus === "paid") {
-    return { ok: false, error: "Cannot cancel an order that has already been paid." };
-  }
+  // FIX B: Customer cancel of paid online order sets paymentStatus "refund_pending",
+  // flags it in admin, and keeps stock released once.
+  const isPaidOnline = order.paymentStatus === "paid" || order.paymentStatus === "refund_pending";
 
   // FIX B: If already cancelled, return early without restocking or decrementing coupon again!
   if (order.status === "cancelled") {
@@ -505,12 +504,19 @@ export async function cancelOrderPayment(params: {
       );
     }
 
-    // Mark order cancelled and payment failed
+    const nextPaymentStatus = isPaidOnline ? "refund_pending" : "failed";
+    const flagReason = isPaidOnline
+      ? (reason ? `Customer cancelled paid order: ${reason}. Manual refund required.` : "Customer cancelled paid order. Manual refund required.")
+      : null;
+
+    // Mark order cancelled
     await tx
       .update(orders)
       .set({
         status: "cancelled",
-        paymentStatus: "failed",
+        paymentStatus: nextPaymentStatus,
+        isFlaggedForReview: isPaidOnline ? true : order.isFlaggedForReview,
+        flagReason: isPaidOnline ? flagReason : order.flagReason,
         cancelledAt: new Date(),
         notes: reason
           ? order.notes
@@ -524,7 +530,7 @@ export async function cancelOrderPayment(params: {
     await tx
       .update(payments)
       .set({
-        status: "failed",
+        status: isPaidOnline ? "successful" : "failed",
         transactionId: paymentId || order.razorpayOrderId || null,
       })
       .where(eq(payments.orderId, order.id));
@@ -650,7 +656,47 @@ export async function updateOrderStatus(params: {
     return { ok: true, order: deliveredOrder };
   }
 
-  // 4. Transition to REFUNDED: requires refund note
+  // 4. Transition to RETURNED: after shipped (for COD refusals/RTO), restocks exactly once
+  if (nextStatus === "returned") {
+    if (currentStatus !== "shipped") {
+      return {
+        ok: false,
+        error: `Invalid status transition to "returned" from "${currentStatus}". Only shipped orders can be marked returned.`,
+      };
+    }
+
+    const items = await db.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+
+    await db.transaction(async (tx) => {
+      // Restock items exactly once
+      for (const item of items) {
+        if (item.variantId) {
+          await tx.run(
+            sql`UPDATE product_variants SET stock = stock + ${item.quantity} WHERE id = ${item.variantId}`
+          );
+        }
+      }
+
+      await tx
+        .update(orders)
+        .set({
+          status: "returned",
+          paymentStatus: order.paymentMethod === "cod" ? "failed" : order.paymentStatus,
+          notes: cancelReason
+            ? order.notes
+              ? `${order.notes} | Return reason: ${cancelReason}`
+              : `Return reason: ${cancelReason}`
+            : order.notes,
+          updatedAt: new Date(),
+        })
+        .where(eq(orders.id, orderId));
+    });
+
+    const [returnedOrder] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+    return { ok: true, order: returnedOrder };
+  }
+
+  // 5. Transition to REFUNDED: requires refund note (from delivered, cancelled, or returned)
   if (nextStatus === "refunded") {
     if (!refundNotes?.trim()) {
       return {
@@ -665,6 +711,7 @@ export async function updateOrderStatus(params: {
         status: "refunded",
         paymentStatus: "refunded",
         refundNotes: refundNotes.trim(),
+        isFlaggedForReview: false,
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));
@@ -867,11 +914,17 @@ export async function getAdminDashboardMetrics() {
       .select({ count: count() })
       .from(orders)
       .where(or(eq(orders.paymentStatus, "paid_after_cancel"), eq(orders.isFlaggedForReview, true))),
-    // Revenue (paid or delivered only)
+    // Fix F: Revenue excludes refunded, returned and cancelled-after-paid (or cancelled) orders
     db
       .select({ revenue: sum(orders.totalPaise) })
       .from(orders)
-      .where(or(eq(orders.paymentStatus, "paid"), eq(orders.status, "delivered"))),
+      .where(
+        and(
+          or(eq(orders.paymentStatus, "paid"), eq(orders.status, "delivered")),
+          notInArray(orders.status, ["refunded", "returned", "cancelled"]),
+          notInArray(orders.paymentStatus, ["refunded", "refund_pending", "paid_after_cancel", "failed"])
+        )
+      ),
   ]);
 
   return {
@@ -880,6 +933,54 @@ export async function getAdminDashboardMetrics() {
     flaggedOrders: flaggedRes[0]?.count || 0,
     totalRevenuePaise: Number(revenueRes[0]?.revenue || 0),
   };
+}
+
+/**
+ * Ensures an order has a sequential unique invoice number (Fix D).
+ */
+export async function ensureOrderInvoiceNumber(orderId: string): Promise<string> {
+  const [existing] = await db
+    .select({ id: orders.id, invoiceNumber: orders.invoiceNumber })
+    .from(orders)
+    .where(eq(orders.id, orderId))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error("Order not found.");
+  }
+
+  if (existing.invoiceNumber) {
+    return existing.invoiceNumber;
+  }
+
+  return await db.transaction(async (tx) => {
+    // Re-check inside transaction
+    const [fresh] = await tx
+      .select({ invoiceNumber: orders.invoiceNumber })
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .limit(1);
+
+    if (fresh?.invoiceNumber) {
+      return fresh.invoiceNumber;
+    }
+
+    const countRes = await tx
+      .select({ c: count() })
+      .from(orders)
+      .where(isNotNull(orders.invoiceNumber));
+
+    const nextSeq = Number(countRes[0]?.c || 0) + 1;
+    const year = new Date().getFullYear();
+    const sequentialInvoice = `INV-${year}-${String(nextSeq).padStart(5, "0")}`;
+
+    await tx
+      .update(orders)
+      .set({ invoiceNumber: sequentialInvoice })
+      .where(eq(orders.id, orderId));
+
+    return sequentialInvoice;
+  });
 }
 
 /**

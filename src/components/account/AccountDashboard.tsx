@@ -64,6 +64,7 @@ interface AccountDashboardProps {
     email: string;
     phone?: string | null;
     role: string;
+    emailVerified?: Date | string | null;
   };
   addresses: SavedAddress[];
   orders: CustomerOrder[];
@@ -78,6 +79,26 @@ export function AccountDashboard({
 
   // User state
   const [user, setUser] = useState(initialUser);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [verificationNotice, setVerificationNotice] = useState<string | null>(null);
+
+  const handleResendVerification = async () => {
+    setResendingVerification(true);
+    setVerificationNotice(null);
+    try {
+      const { resendVerificationAction } = await import("@/app/actions/auth");
+      const res = await resendVerificationAction(user.email);
+      if (res.success) {
+        setVerificationNotice("Verification link sent! Please check your email inbox.");
+      } else {
+        setVerificationNotice(res.error || "Failed to resend verification link.");
+      }
+    } catch {
+      setVerificationNotice("Error sending verification email.");
+    } finally {
+      setResendingVerification(false);
+    }
+  };
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileName, setProfileName] = useState(user.name);
   const [profilePhone, setProfilePhone] = useState(user.phone || "");
@@ -311,6 +332,35 @@ export function AccountDashboard({
             </Button>
           </div>
         </div>
+
+        {/* Fix A: Unverified Email Notice */}
+        {!user.emailVerified && (
+          <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-xs font-bold text-amber-900">Email Verification Required</h4>
+                <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                  Your email ({user.email}) is currently unverified. Check your inbox for the confirmation link. Previous guest orders placed with this email address will be linked to your account once verified.
+                </p>
+                {verificationNotice && (
+                  <p className="text-xs font-semibold text-amber-900 mt-2 bg-amber-100/80 p-2 rounded-xl">
+                    {verificationNotice}
+                  </p>
+                )}
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleResendVerification}
+              isLoading={resendingVerification}
+              className="shrink-0 bg-white border-amber-300 text-amber-900 hover:bg-amber-100"
+            >
+              Resend Verification Link
+            </Button>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b border-pink-light/60 pb-2 overflow-x-auto">

@@ -11,6 +11,9 @@ export const users = sqliteTable("users", {
   passwordHash: text("password_hash"),
   role: text("role", { enum: ["customer", "admin"] }).notNull().default("customer"),
   phone: text("phone"),
+  emailVerified: integer("email_verified", { mode: "timestamp" }),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  passwordChangedAt: integer("password_changed_at", { mode: "timestamp" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
@@ -175,6 +178,7 @@ export const carts = sqliteTable("carts", {
 export const orders = sqliteTable("orders", {
   id: text("id").primaryKey(),
   orderNumber: text("order_number").notNull().unique(),
+  invoiceNumber: text("invoice_number").unique(),
   publicAccessToken: text("public_access_token").notNull().unique(),
   idempotencyKey: text("idempotency_key").unique(),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
@@ -187,13 +191,14 @@ export const orders = sqliteTable("orders", {
       "delivered",
       "cancelled",
       "refunded",
+      "returned",
     ],
   })
     .notNull()
     .default("pending_payment"),
   paymentMethod: text("payment_method", { enum: ["razorpay", "cod", "mock"] }).notNull(),
   paymentStatus: text("payment_status", {
-    enum: ["pending", "pending_cod", "paid", "failed", "refunded", "paid_after_cancel"],
+    enum: ["pending", "pending_cod", "paid", "failed", "refunded", "paid_after_cancel", "refund_pending"],
   })
     .notNull()
     .default("pending"),
@@ -310,6 +315,8 @@ export const banners = sqliteTable("banners", {
   badge: text("badge"),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
+  startDate: integer("start_date", { mode: "timestamp" }),
+  endDate: integer("end_date", { mode: "timestamp" }),
 });
 
 // -----------------------------------------------------------------------------
@@ -424,6 +431,28 @@ export const passwordResetTokens = sqliteTable("password_reset_tokens", {
 export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
   user: one(users, {
     fields: [passwordResetTokens.userId],
+    references: [users.id],
+  }),
+}));
+
+// -----------------------------------------------------------------------------
+// 20. Email Verification Tokens
+// -----------------------------------------------------------------------------
+export const emailVerificationTokens = sqliteTable("email_verification_tokens", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  usedAt: integer("used_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const emailVerificationTokensRelations = relations(emailVerificationTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [emailVerificationTokens.userId],
     references: [users.id],
   }),
 }));

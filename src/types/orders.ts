@@ -5,14 +5,16 @@ export type OrderStatus =
   | "shipped"
   | "delivered"
   | "cancelled"
-  | "refunded";
+  | "refunded"
+  | "returned";
 
 export const ALLOWED_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending_payment: ["placed", "cancelled"],
   placed: ["confirmed", "cancelled"],
   confirmed: ["shipped", "cancelled"],
-  shipped: ["delivered", "cancelled"],
+  shipped: ["delivered", "returned", "cancelled"],
   delivered: ["refunded"],
-  cancelled: [],
+  cancelled: ["refunded"], // Fix B: allows customer-cancelled paid orders to be refunded by admin with notes
+  returned: ["refunded"],  // Fix E: COD refusal/RTO or returned items can transition to refunded if paid
   refunded: [],
 };

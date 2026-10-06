@@ -1,67 +1,54 @@
 import { Metadata } from "next";
-import { Package, Truck, RefreshCw } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { db } from "@/lib/db";
+import { pages } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { renderMarkdownToHtml } from "@/lib/markdown";
 
-import { getSetting, getFreeShippingThresholdPaise } from "@/lib/services/settings";
-import { formatPrice } from "@/lib/utils/money";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Shipping & Returns Policy | Samaura Healthcare",
-  description: "Discreet shipping timelines, delivery coverage across India, and our hygiene return policy.",
+  description:
+    "Discreet delivery coverage across India, shipping timelines, and intimate hygiene returns policy.",
 };
 
 export default async function ShippingReturnsPage() {
-  const dispatchText = await getSetting(
-    "dispatch_time_text",
-    "Orders are dispatched within 24 hours of placement (excluding Sundays and national holidays)"
-  );
-  const freeThresholdPaise = await getFreeShippingThresholdPaise();
-  const thresholdFormatted = formatPrice(freeThresholdPaise);
+  const [page] = await db
+    .select()
+    .from(pages)
+    .where(eq(pages.slug, "shipping-returns"))
+    .limit(1);
+
+  const title = page?.title || "Shipping & Returns Policy";
+  const content =
+    page?.content ||
+    `## Shipping Timelines & Coverage\n*(Replace with client content)*\n\n- Orders dispatch within 24 hours (excluding national holidays).\n- Metro deliveries take 2–3 business days; other regions take 4–6 business days.\n\n### Discreet Packaging Guarantee\nEvery shipment is dispatched in a plain, unmarked box with confidential courier labels and zero product disclosures.\n\n### Hygiene & Returns Policy\nDue to hygiene and intimate health standards, opened sanitary items cannot be returned. Replacements are provided for damaged or verified defective items.`;
 
   return (
     <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Required Mandatory Legal Review Draft Banner */}
+        <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs font-semibold text-amber-900 flex items-center gap-3 shadow-xs">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+          <span>Draft, review with a legal professional before launch.</span>
+        </div>
+
         <div className="text-center space-y-3">
           <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-ink">
-            Shipping & Returns Policy
+            {title}
           </h1>
           <p className="text-xs sm:text-sm text-muted">
-            Reliable, strictly confidential dispatch to over 19,000 pincodes across India.
+            Last updated: {page ? new Date(page.updatedAt).toLocaleDateString() : "Recent"}
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl p-8 sm:p-10 border border-pink-light shadow-xs space-y-8 text-sm text-ink leading-relaxed">
-          <section className="space-y-3">
-            <h2 className="font-heading font-bold text-lg text-ink flex items-center gap-2">
-              <Truck className="w-5 h-5 text-brand" /> 1. Shipping Timelines & Rates
-            </h2>
-            <p className="text-xs sm:text-sm text-muted">
-              {dispatchText}. Metro cities typically receive deliveries within 2–3 business days, while non-metro locations take 4–6 business days.
-            </p>
-            <p className="text-xs sm:text-sm text-muted">
-              We offer <strong>Free Discreet Shipping</strong> on all orders of {thresholdFormatted} and above. For orders below {thresholdFormatted}, standard delivery fees apply at checkout.
-            </p>
-          </section>
-
-          <section className="space-y-3 pt-6 border-t border-blush">
-            <h2 className="font-heading font-bold text-lg text-ink flex items-center gap-2">
-              <Package className="w-5 h-5 text-brand" /> 2. Discreet Packaging Guarantee
-            </h2>
-            <p className="text-xs sm:text-sm text-muted">
-              All Samaura shipments are packaged in unmarked, neutral cardboard boxes or opaque recyclable mailers. The shipping label only displays basic courier routing info and our registered entity name; it never mentions &quot;sanitary pads&quot;, &quot;menstrual cups&quot;, or hygiene products.
-            </p>
-          </section>
-
-          <section className="space-y-3 pt-6 border-t border-blush">
-            <h2 className="font-heading font-bold text-lg text-ink flex items-center gap-2">
-              <RefreshCw className="w-5 h-5 text-brand" /> 3. Hygiene & Return Policy
-            </h2>
-            <p className="text-xs sm:text-sm text-muted">
-              In accordance with intimate health and medical hygiene standards, products once delivered and opened cannot be returned or restocked.
-            </p>
-            <p className="text-xs sm:text-sm text-muted">
-              However, if your order arrives damaged, defective, or incorrect, please notify us within 48 hours of receipt at <a href="mailto:care@samaura.com" className="text-brand font-medium underline">care@samaura.com</a> or via WhatsApp with a photo of the parcel. We will dispatch an immediate replacement at zero extra cost.
-            </p>
-          </section>
+        {/* Content Rendered from Pages Table */}
+        <div className="bg-white rounded-3xl p-8 sm:p-10 border border-pink-light shadow-xs">
+          <div
+            className="prose prose-sm max-w-none text-muted leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: renderMarkdownToHtml(content) }}
+          />
         </div>
       </div>
     </div>

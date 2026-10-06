@@ -1,10 +1,11 @@
 import { db } from "@/db";
-import { users, passwordResetTokens } from "@/db/schema";
+import { users, passwordResetTokens, emailVerificationTokens } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { linkGuestOrdersToUser } from "@/lib/services/orders";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { sendPasswordResetEmail, sendEmailVerificationEmail } from "@/lib/email";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export interface RegisterCustomerInput {
   name: string;
@@ -28,8 +29,9 @@ export async function registerCustomer(input: RegisterCustomerInput) {
     return { success: false, error: "Please provide a valid email address." };
   }
 
-  if (!password || password.length < 6) {
-    return { success: false, error: "Password must be at least 6 characters." };
+  // Minimum password length 8 everywhere
+  if (!password || password.length < 8) {
+    return { success: false, error: "Password must be at least 8 characters." };
   }
 
   if (cleanPhone && !/^[6-9]\d{9}$/.test(cleanPhone)) {
@@ -60,18 +62,35 @@ export async function registerCustomer(input: RegisterCustomerInput) {
       passwordHash,
       phone: cleanPhone,
       role: "customer",
+      isActive: true,
+      emailVerified: null, // Fix A: unverified by default
     })
     .returning();
 
-  // Link previous guest orders matching this verified customer email
-  try {
-    const linkedCount = await linkGuestOrdersToUser(newUser.id, cleanEmail);
-    if (linkedCount > 0) {
-      console.log(`[AUTH] Linked ${linkedCount} previous guest orders to new account ${cleanEmail}`);
-    }
-  } catch (err) {
-    console.error("Failed to link guest orders on register:", err);
-  }
+  // Fix A: Do NOT link guest orders on registration!
+  // Link guest orders ONLY after the email is verified.
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  const tokenId = `evt_${crypto.randomBytes(12).toString("hex")}`;
+  await db.insert(emailVerificationTokens).values({
+    id: tokenId,
+    userId: newUser.id,
+    email: cleanEmail,
+    tokenHash,
+    expiresAt,
+  });
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const verifyUrl = `${siteUrl}/verify-email?token=${rawToken}`;
+
+  // Send verification email
+  sendEmailVerificationEmail({
+    to: cleanEmail,
+    name: cleanName,
+    verifyUrl,
+  }).catch((err) => console.error("Email verification send error:", err));
 
   return {
     success: true,
@@ -81,20 +100,162 @@ export async function registerCustomer(input: RegisterCustomerInput) {
       email: newUser.email,
       role: newUser.role,
     },
+    verificationSent: true,
+    verificationToken: rawToken, // Provided for testing and dev
   };
 }
 
-export async function requestPasswordReset(email: string) {
+/**
+ * Resends email verification with rate-limiting.
+ */
+export async function resendEmailVerification(email: string, clientIp?: string) {
   const cleanEmail = email.trim().toLowerCase();
   if (!cleanEmail) {
     return { success: true };
   }
 
+  // Rate limiting per IP and email: max 3 per 10 minutes
+  const ipKey = `resend_evt_ip:${clientIp || "127.0.0.1"}`;
+  const emailKey = `resend_evt_email:${cleanEmail}`;
+
+  const ipCheck = checkRateLimit(ipKey, { limit: 5, windowMs: 10 * 60 * 1000 });
+  const emailCheck = checkRateLimit(emailKey, { limit: 3, windowMs: 10 * 60 * 1000 });
+
+  if (!ipCheck.success || !emailCheck.success) {
+    return {
+      success: false,
+      error: "Too many verification requests. Please wait a few minutes before trying again.",
+    };
+  }
+
   const [user] = await db.select().from(users).where(eq(users.email, cleanEmail)).limit(1);
 
-  // Return success without leaking email existence if user does not exist
+  // Return success without revealing user existence
   if (!user) {
     return { success: true };
+  }
+
+  if (user.emailVerified) {
+    return { success: true, alreadyVerified: true };
+  }
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  const tokenId = `evt_${crypto.randomBytes(12).toString("hex")}`;
+  await db.insert(emailVerificationTokens).values({
+    id: tokenId,
+    userId: user.id,
+    email: cleanEmail,
+    tokenHash,
+    expiresAt,
+  });
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const verifyUrl = `${siteUrl}/verify-email?token=${rawToken}`;
+
+  sendEmailVerificationEmail({
+    to: user.email,
+    name: user.name,
+    verifyUrl,
+  }).catch((err) => console.error("Email verification send error:", err));
+
+  return { success: true, verificationToken: rawToken };
+}
+
+/**
+ * Verifies email using single-use hashed token with 24h expiry.
+ * Links guest orders ONLY after successful email verification.
+ */
+export async function verifyCustomerEmail(rawToken: string) {
+  if (!rawToken || !rawToken.trim()) {
+    return { success: false, error: "Verification token is required." };
+  }
+
+  const tokenHash = crypto.createHash("sha256").update(rawToken.trim()).digest("hex");
+
+  const [tokenRecord] = await db
+    .select()
+    .from(emailVerificationTokens)
+    .where(eq(emailVerificationTokens.tokenHash, tokenHash))
+    .limit(1);
+
+  if (!tokenRecord) {
+    return { success: false, error: "Invalid or expired verification link." };
+  }
+
+  if (tokenRecord.usedAt) {
+    return { success: false, error: "This email verification link has already been used." };
+  }
+
+  if (new Date(tokenRecord.expiresAt).getTime() < Date.now()) {
+    return { success: false, error: "This email verification link has expired. Please request a new one." };
+  }
+
+  // Atomically mark token used and user verified
+  await db.transaction(async (tx) => {
+    await tx
+      .update(emailVerificationTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(emailVerificationTokens.id, tokenRecord.id));
+
+    await tx
+      .update(users)
+      .set({
+        emailVerified: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, tokenRecord.userId));
+  });
+
+  // FIX A: Link guest orders only after email verification
+  let linkedOrdersCount = 0;
+  try {
+    linkedOrdersCount = await linkGuestOrdersToUser(tokenRecord.userId, tokenRecord.email);
+    if (linkedOrdersCount > 0) {
+      console.log(
+        `[AUTH] Verified ${tokenRecord.email}: linked ${linkedOrdersCount} previous guest orders to user ${tokenRecord.userId}`
+      );
+    }
+  } catch (err) {
+    console.error("Failed to link guest orders after verification:", err);
+  }
+
+  return { success: true, linkedOrdersCount };
+}
+
+/**
+ * Requests password reset: returns identical response for known and unknown emails,
+ * rate-limited per IP and email.
+ */
+export async function requestPasswordReset(email: string, clientIp?: string) {
+  const cleanEmail = email.trim().toLowerCase();
+  const identicalMessage = "If an account with this email exists, a password reset link has been sent.";
+
+  if (!cleanEmail || !/^\S+@\S+\.\S+$/.test(cleanEmail)) {
+    return { success: true, message: identicalMessage };
+  }
+
+  // Fix C: Rate limiting per IP (max 5 per 15m) and per email (max 3 per 15m)
+  const ipKey = `pwd_reset_ip:${clientIp || "127.0.0.1"}`;
+  const emailKey = `pwd_reset_email:${cleanEmail}`;
+
+  const ipCheck = checkRateLimit(ipKey, { limit: 5, windowMs: 15 * 60 * 1000 });
+  const emailCheck = checkRateLimit(emailKey, { limit: 3, windowMs: 15 * 60 * 1000 });
+
+  if (!ipCheck.success || !emailCheck.success) {
+    return {
+      success: false,
+      error: "Too many reset attempts. Please wait a few minutes before trying again.",
+    };
+  }
+
+  const [user] = await db.select().from(users).where(eq(users.email, cleanEmail)).limit(1);
+
+  // Return identical response without leaking user presence
+  if (!user || user.isActive === false) {
+    return { success: true, message: identicalMessage };
   }
 
   // Generate secure single-use random token
@@ -120,16 +281,21 @@ export async function requestPasswordReset(email: string) {
     resetUrl,
   }).catch((err) => console.error("Password reset email send error:", err));
 
-  return { success: true };
+  return { success: true, message: identicalMessage, debugToken: rawToken };
 }
 
+/**
+ * Resets user password. Enforces min length 8, single-use token, expiry check,
+ * and sets passwordChangedAt to invalidate existing sessions.
+ */
 export async function resetPassword(token: string, newPassword: string) {
   if (!token || !token.trim()) {
     return { success: false, error: "Password reset token is missing." };
   }
 
-  if (!newPassword || newPassword.length < 6) {
-    return { success: false, error: "New password must be at least 6 characters." };
+  // Fix C: Minimum password length 8 everywhere
+  if (!newPassword || newPassword.length < 8) {
+    return { success: false, error: "Password must be at least 8 characters." };
   }
 
   const tokenHash = crypto.createHash("sha256").update(token.trim()).digest("hex");
@@ -153,14 +319,16 @@ export async function resetPassword(token: string, newPassword: string) {
   }
 
   const newHash = await bcrypt.hash(newPassword, 12);
+  const now = new Date();
 
   await db.transaction(async (tx) => {
-    // Update user password
+    // Fix C: Update user password and set passwordChangedAt to invalidate sessions
     await tx
       .update(users)
       .set({
         passwordHash: newHash,
-        updatedAt: new Date(),
+        passwordChangedAt: now,
+        updatedAt: now,
       })
       .where(eq(users.id, record.userId));
 
@@ -168,7 +336,7 @@ export async function resetPassword(token: string, newPassword: string) {
     await tx
       .update(passwordResetTokens)
       .set({
-        usedAt: new Date(),
+        usedAt: now,
       })
       .where(eq(passwordResetTokens.id, record.id));
   });

@@ -15,8 +15,8 @@ Last updated: Phase 1 (Foundation) Complete.
 | **Phase 3.1: Responsiveness + Compliance Hotfix** | Fixed horizontal overflow sitewide across viewports (announcement bar, WhatsApp button, w-screen/negative margins removed, min-w-0 flex/grid). Navbar desktop nav at xl (>=1280px), drawer below, icons protected, cart badge inside viewport. Stacked mobile shop toolbar with 2-column filters+sort. ProductCard wrapping and consistent heights. Removed duplicate category pills. Compliance: 0 hardcoded ratings (ProductCard only renders rating when approved reviews exist in DB), neutral copy replacing unsubstantiated claims ("100% GOTS", "100% Rash-Free", "Zero Leaks", "Anion", "Dermatologist Tested"), admin-editable compliance trust badges and announcement text, demo login shown only when `NODE_ENV !== "production"`. | **DONE** | `scrollWidth === innerWidth` verified at 320, 375, 414, 768, 1024, 1280, 1536px across all routes (42/42 PASS) • `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • 0 hardcoded ratings confirmed by grep |
 | **Phase 4: Cart, Checkout & Payments** | Applied Fixes A-E (review recompute rating, marketing claim grep/neutralization, dynamic nav/shipping settings, button layer move, env/db untracked). Cart page & drawer with variantId+qty store, server-authoritative pricing in integer paise (`computePricing`), server coupon validation, dynamic shipping fees, checkout with guest/user saved addresses, atomic stock lock with `UPDATE ... WHERE stock >= qty` in 1 DB transaction, idempotency key & rate limiting, PaymentProvider abstraction (Mock dev gateway + Razorpay with HMAC crypto.timingSafeEqual and raw webhook), 30-min lazy cleanup of abandoned online orders, and unguessable publicAccessToken order confirmation. | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed) • Automated tests for price tampering, out of stock, concurrent race condition, replay protection, HMAC fixtures |
 | **Phase 5: Orders Admin, Customer Account, Emails & Invoicing** | Applied Fixes A-E (`paid_after_cancel` flag, double-cancel idempotency & coupon release, `orders.idempotency_key` UNIQUE constraint, mock provider prod throw/404, isolated `data/test.db` test runner). Built Admin Orders list & detail with state machine enforcement (shipped courier/tracking, delivered COD auto-paid, manual refund notes), admin dashboard metrics (orders today, pending, flagged, net revenue), customer auth (register with bcrypt/rate-limit, forgot/reset password with 1h sha256 single-use token), My Account (profile, addresses CRUD with default, order history & detail with strict data isolation, auto-linking guest orders on registration), Resend email service abstraction (customer confirmation, admin alert, status update, password reset), printable tax invoices (`/order/[token]/invoice` & `/admin/orders/[id]/invoice` with seller settings & optional GST breakup). | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 30 routes) • 46 automated tests pass on isolated `data/test.db` |
-| **Phase 6: Customer Account** | Profile, saved addresses, order tracking history, and detailed receipts | *Pending* | To build |
-| **Phase 7: Content & Support** | About Us, Period Guide / Blog (list + reader), FAQ accordion, Contact enquiry form | *Pending* | To build |
+| **Phase 6: Fixes, Content Pages, Remaining Admin & Verification** | Applied Fixes A-H (Email verification guest-order linking, Customer cancel of paid order -> refund_pending + flagged + stock release once, Forgot-password constant-time response & session revocation via passwordChangedAt + min len 8 + no-referrer, Dynamic Receipt vs Tax Invoice with sequential INV-YYYY-XXXXX, 'returned' status with single restock, revenue calculation exclusions, production RESEND_API_KEY startup alert, test suites for state machine & isolation). Built dynamic home page (banners, categories, featured/bestseller, neutral Why Samaura, zero newsletter, conditional real reviews), offers page, CMS-driven About & FAQ (accordion), Contact page (honeypot, IP rate-limit, emails admin, settings-driven contact info), Blog (/blog & /blog/[slug], JSON-LD Article, draft status, script-stripped Markdown, admin medical disclaimer), Policy pages with legal draft warning. Built remaining Admin modules: Customers (view orders, deactivate), Coupons CRUD, Banners CRUD with active dates, Blog CRUD, Pages CMS editor with live preview, Shipping rules UI, Enquiries inbox, Settings additions (COD, GSTIN, contacts, WhatsApp). | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 38 routes) • 52 Phase 6 automated tests pass • 0 horizontal overflow at 320–1536px |
+
 
 ---
 
@@ -544,6 +544,102 @@ Automated headless browser check executing `document.documentElement.scrollWidth
   - Customer data isolation & unauthorized order blocking: PASS.
   - Reset token reuse & expiry rejection: PASS.
   - Dev database purity verification (`data/samaura.db` untouched): PASS.
+
+---
+
+## Detailed Phase 6 Checklist (Definition of Done)
+
+### 1. Fixes A through H
+- [x] **Fix A: Guest-Order Linking with Verification**:
+  - Registration alone no longer auto-links guest orders.
+  - Generates a single-use SHA-256 hashed verification token with 24h expiration in `email_verification_tokens`.
+  - Rate-limited verification email resend (`checkRateLimit("resend_verify:...")`).
+  - Guest orders linked to `userId` only after email verification is completed via `/verify-email?token=...`.
+  - Automated tests confirm unverified user cannot view guest orders, while verification safely links them.
+- [x] **Fix B: Customer Cancel of Paid Order**:
+  - Customer cancellation of a paid online order updates `paymentStatus` to `refund_pending`, flags the order in admin (`isFlaggedForReview = 1`, `flagReason = "Customer cancelled paid order - refund pending"`), and releases reserved stock exactly once.
+  - Admin fulfillment flow permits transitioning from `cancelled` + `paid` (or `refund_pending`) to `refunded` with mandatory audit notes.
+  - Stock is not double-restocked during refund.
+- [x] **Fix C: Forgot-Password Hardening & Session Revocation**:
+  - `/forgot-password` returns identical success response regardless of whether the email exists in DB.
+  - Rate-limited per IP and per email.
+  - Password reset updates `passwordChangedAt` timestamp on `users` table.
+  - Auth.js JWT callback invalidates active session tokens issued before `passwordChangedAt`.
+  - Minimum password length of 8 characters enforced in Zod validation on both registration and reset.
+  - Added `Referrer-Policy: no-referrer` meta tag and HTTP response headers on password reset pages.
+- [x] **Fix D: Sequential Invoices & Dynamic Tax vs Receipt Title**:
+  - Invoices display title `"Order Receipt"` by default.
+  - Automatically switches title to `"Tax Invoice"` only when `seller_gstin` setting is populated and `show_gst_breakup` setting is `"true"`.
+  - Sequential, unique invoice numbers generated in format `INV-YYYY-XXXXX`.
+- [x] **Fix E: "Returned" Status & Single Restock**:
+  - Added `returned` status to `order_status` schema enum for COD refusals and Return-To-Origin (RTO).
+  - Allowed transition: `shipped -> returned`.
+  - Restocks inventory exactly once upon transitioning to `returned` (idempotent; restock flag stored in `stock_restocked`).
+- [x] **Fix F: Revenue Card Exclusions**:
+  - Dashboard Net Revenue calculation in `orders.ts` strictly excludes `refunded`, `returned`, and `cancelled` orders (even if previously paid).
+- [x] **Fix G: Production RESEND_API_KEY Startup Log**:
+  - When `NODE_ENV === "production"` and `RESEND_API_KEY` is missing or placeholder, startup instrumentation (`src/instrumentation.ts`) and email service log a prominent startup error alert.
+- [x] **Fix H: Automated Test Suite Output Verification**:
+  - Suite `tests/phase6.test.ts` exercises all negative/positive flows against an isolated SQLite test database.
+
+### 2. Storefront Content Pages
+- [x] **Home Page (`/`)**:
+  - Hero and promo banners queried dynamically from `banners` table matching active window dates.
+  - Category tiles rendered from `categories` table.
+  - Featured and Bestseller product carousels/grids queried directly from DB.
+  - "Why Samaura" section loaded from CMS `pages` (`slug = 'why-samaura'`) with neutral, admin-editable copy.
+  - 100% newsletter-free.
+  - Zero hardcoded testimonials or star ratings; customer reviews displayed only when approved reviews exist in DB.
+- [x] **Offers Page (`/offers`)**:
+  - Displays all products currently having a `salePricePaise` set.
+  - Shows active public coupons with code, discount percentage or amount, minimum order value, and copy-to-clipboard button.
+- [x] **About & FAQ Pages (`/about`, `/faq`)**:
+  - Content dynamically served from `pages` table (`slug = 'about'` and `slug = 'faq'`).
+  - FAQ rendered as an accessible, interactive accordion (`FaqAccordion.tsx`).
+  - Seeded with neutral placeholder copy marked `"Replace with client content"`.
+- [x] **Contact Page (`/contact`)**:
+  - Interactive enquiry form (`ContactForm.tsx`) with Zod validation, honeypot field (`hp_website`), and per-IP rate limiting.
+  - Stores submissions to `enquiries` table and sends email notification to admin.
+  - Contact details (email, helpline phone, WhatsApp number, business hours) rendered dynamically from `settings` table without hardcoded phone numbers.
+- [x] **Blog System (`/blog` & `/blog/[slug]`)**:
+  - Paginated blog listing with cover images, reading time, published dates, and excerpt cards.
+  - Article reader with dynamic SEO metadata, JSON-LD `Article` schema, and published/draft access control.
+  - Markdown rendered with sanitization (`renderMarkdownToHtml` strips raw `<script>` tags, inline event handlers, and javascript: links).
+  - Admin-editable health & wellness disclaimer banner rendered at the top of each article.
+- [x] **Policy Pages (`/privacy`, `/terms`, `/shipping-returns`)**:
+  - Served dynamically from `pages` table.
+  - Rendered with prominent disclaimer banner: *"Draft, review with a legal professional before launch"*.
+
+### 3. Admin Additions
+- [x] **Customers (`/admin/customers`)**:
+  - Customer directory with search, order history count, and lifetime spend.
+  - Customer order list view and one-click account deactivation/activation toggle.
+- [x] **Coupons CRUD (`/admin/coupons`)**:
+  - Manage percentage/fixed discount coupons, minimum order value, usage limits, and active date ranges.
+- [x] **Banners CRUD (`/admin/banners`)**:
+  - Manage homepage hero and promo banners with image URL upload, display ordering, title/subtitle, link URL, and active date window.
+- [x] **Blog CRUD (`/admin/blog`)**:
+  - Create and edit articles with Markdown body, cover image, slug, excerpt, and published/draft toggle.
+- [x] **Pages CMS (`/admin/pages`)**:
+  - Static pages editor for `about`, `faq`, `why-samaura`, `privacy`, `terms`, `shipping-returns` with live split-screen preview.
+- [x] **Shipping Rules UI (`/admin/shipping`)**:
+  - Configure tiered shipping rules (minimum order thresholds and base shipping fees).
+- [x] **Enquiries Inbox (`/admin/enquiries`)**:
+  - Customer support inbox to view enquiries, mark as read/resolved, or delete.
+- [x] **Settings (`/admin/settings`)**:
+  - Dynamic store settings for COD enabled/max order value, store contact phone/email, seller GSTIN, show GST breakup toggle, announcement text, WhatsApp helpline, and medical disclaimer copy.
+
+### 4. Responsiveness & Quality Gates
+- [x] **Zero Horizontal Overflow**:
+  - Verified across 320px, 375px, 414px, 640px, 768px, 1024px, 1280px, and 1536px viewports via automated Playwright headless browser script.
+  - All interactive icons, cart drawer badges, and navigation headers remain unclipped.
+- [x] **Verification & Test Results**:
+  - `npm run lint` -> Passed (0 errors, 0 warnings).
+  - `npx tsc --noEmit` -> Passed (0 errors).
+  - `npm run build` -> Passed (38/38 routes generated in Turbopack).
+  - `tests/phase6.test.ts` -> **52 passed, 0 failed**.
+  - `tests/phase5.test.ts` -> **46 passed, 0 failed**.
+
 
 
 

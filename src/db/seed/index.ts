@@ -710,6 +710,56 @@ export async function runSeed() {
       description: "Customer support WhatsApp hotline",
     },
     {
+      key: "contact_email",
+      value: "care@samaura.com",
+      description: "Store contact email",
+    },
+    {
+      key: "contact_phone",
+      value: "+91 98765 43210",
+      description: "Store contact phone",
+    },
+    {
+      key: "store_address",
+      value: "No. 12, Wellness Avenue, HSR Layout, Bengaluru, Karnataka - 560102",
+      description: "Store registered physical address",
+    },
+    {
+      key: "seller_name",
+      value: "Samaura Healthcare",
+      description: "Legal seller entity name",
+    },
+    {
+      key: "seller_gstin",
+      value: "",
+      description: "Seller GSTIN identifier",
+    },
+    {
+      key: "show_gst_breakup",
+      value: "false",
+      description: "Show GST tax breakup on invoice",
+    },
+    {
+      key: "cod_max_paise",
+      value: "200000",
+      description: "Max order total in paise for Cash on Delivery (₹2,000)",
+    },
+    {
+      key: "medical_disclaimer",
+      value: "Disclaimer: The content on this website is for educational and hygiene awareness purposes only and does not replace professional medical advice or clinical diagnosis. Always consult a certified healthcare professional for medical concerns.",
+      description: "Medical disclaimer text",
+    },
+    {
+      key: "why_samaura_title",
+      value: "Why Choose Samaura?",
+      description: "Why Samaura section title",
+    },
+    {
+      key: "why_samaura_content",
+      value: "At Samaura, we believe menstrual care should be comfortable, respectful, and thoughtfully formulated. Our products prioritize pure cotton topsheets, breathable plant-derived cores, and neutral, unscented designs that respect the natural vaginal environment without chlorine bleaching or artificial perfumes.",
+      description: "Why Samaura copy",
+    },
+    {
       key: "announcement_text",
       value: "✨ Free discreet shipping on all orders over ₹499 | Use code WELCOME15 for 15% off",
       description: "Announcement bar text",
@@ -729,6 +779,16 @@ export async function runSeed() {
       isActive: true,
       sortOrder: 1,
     },
+    {
+      id: "ban_promo_02",
+      title: "Thoughtful Care in Plain, Unmarked Packaging",
+      subtitle: "Complete confidentiality from our dispatch center directly to your doorstep.",
+      link: "/offers",
+      imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1200",
+      badge: "Discreet Delivery",
+      isActive: true,
+      sortOrder: 2,
+    },
   ]).onConflictDoNothing();
 
   await db.insert(posts).values([
@@ -737,11 +797,11 @@ export async function runSeed() {
       title: "How to Choose the Right Sanitary Pad for Your Flow",
       slug: "choose-right-sanitary-pad-flow",
       excerpt: "Navigating pad lengths, absorbency ratings, and cotton vs synthetic fabrics.",
-      content: "Full guide on choosing the best cotton pad for daytime and nighttime flow.",
+      content: "Understanding your flow and selecting the right length and absorbency is key to lasting comfort. Samaura pure cotton pads are designed with breathable backing and zero artificial fragrances to help you stay fresh and comfortable throughout your day.",
       coverImage: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=800",
       category: "Period Health",
       readTime: "4 min read",
-      author: "Dr. Ananya Nair",
+      author: "Samaura Health Desk",
       isPublished: true,
     },
     {
@@ -749,7 +809,7 @@ export async function runSeed() {
       title: "Menstrual Cup Beginner Guide: 5 Steps to Confident Comfort",
       slug: "menstrual-cup-guide-beginners",
       excerpt: "Everything you need to know about folding, insertion, and seal verification.",
-      content: "Complete guide on transitioning to silicone cups.",
+      content: "Transitioning to a menstrual cup is a sustainable, cost-effective choice. Made from soft medical-grade silicone, Samaura menstrual cups provide up to 12 hours of reliable leak-resistant wear. Clean thoroughly before first use by boiling in clean water for 5 to 7 minutes.",
       coverImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800",
       category: "Eco-Conscious Periods",
       readTime: "5 min read",
@@ -763,31 +823,37 @@ export async function runSeed() {
       id: "page_about",
       slug: "about",
       title: "About Samaura Healthcare",
-      content: "Samaura Healthcare is dedicated to providing Indian women with gentle, plant-derived, toxin-free female hygiene products.",
+      content: "# About Samaura Healthcare\n\n*[Replace with client content: Insert brand founding story, certified team background, and production ethics here]*\n\nSamaura Healthcare was founded to provide women with gentle, skin-first, and thoughtfully crafted feminine hygiene essentials. Our design philosophy centers around high-grade pure cotton topsheets, totally chlorine-free absorbent cores, and compostable plant-based packaging.\n\n### Our Core Values\n- **Skin-First Gentle Materials**: Zero artificial masking perfumes or synthetic dyes.\n- **Discreet Packaging Promise**: Plain, unbranded outer mailers for every customer delivery.\n- **Conscious Formulation**: Responsible material selection that balances performance and skin comfort.",
     },
     {
       id: "page_faq",
       slug: "faq",
       title: "Frequently Asked Questions",
-      content: "Answers about discreet shipping, quality standards, and product care.",
+      content: "### Is your packaging completely discreet?\nYes. Every order is packaged in a plain, unmarked brown corrugated box or opaque mailer. The shipping address label includes minimal courier barcodes with no mention of female hygiene, pads, or periods on the exterior.\n\n### What materials are used in Samaura sanitary pads?\n*[Replace with client content: Detailed manufacturing specifications and fiber source information]*\nSamaura sanitary pads use soft pure cotton topsheets, a totally chlorine-free (TCF) cellulose core, and a breathable bottom film designed to facilitate airflow and reduce skin friction.\n\n### How do I select the right menstrual cup size?\n*[Replace with client content: Clinical sizing guide]*\nSize S is recommended for menstruators under 25 or those who have not given birth vaginally. Size M is suitable for flow balance after 25 or post-pregnancy.\n\n### What is your policy on returns and cancellations?\nBecause female hygiene items are intimate health goods, opened packages cannot be returned for hygiene and health reasons. If an item arrives damaged or incorrect, please reach out to customer care within 7 days for a replacement or refund.",
     },
     {
       id: "page_privacy",
       slug: "privacy",
       title: "Privacy Policy",
-      content: "We protect your confidentiality and never share your order details.",
+      content: "# Privacy Policy\n\n### 1. Overview\nThis draft privacy policy outlines how Samaura Healthcare collects, uses, and safeguards personal information when you use our website or purchase our products.\n\n### 2. Information Collected\nWe collect personal information necessary to fulfill your orders and provide customer support:\n- Contact details: Full name, delivery address, phone number, and email address.\n- Transaction details: Order history, items ordered, and payment status. Sensitive payment card numbers and UPI MPINs are handled directly by certified payment processors and are never stored on our servers.\n\n### 3. Use of Information\nYour information is used solely to:\n- Process and deliver your purchases in discreet packaging.\n- Send order confirmations, tracking numbers, and account updates.\n- Respond to your inquiries submitted via our contact forms.\n\n### 4. Data Sharing & Third Parties\nWe do not sell, rent, or trade your personal information. Relevant data is shared strictly with delivery logistics providers to transport your order and transactional email services to transmit receipts.\n\n### 5. Contact\nFor privacy questions or data access requests, please reach us at care@samaura.com.",
     },
     {
       id: "page_shipping",
       slug: "shipping-returns",
       title: "Shipping & Return Policy",
-      content: "Discreet packaging guarantee and 7-day hassle-free return policy for damaged items.",
+      content: "# Shipping & Returns Policy\n\n### 1. Discreet Packaging Guarantee\nWe understand that menstrual hygiene is deeply personal. Every package is shipped in a neutral, unmarked outer carton with no logos or descriptions of package contents on the external shipping label.\n\n### 2. Shipping Rates & Delivery Timelines\n- Standard shipping takes between 2 to 6 business days depending on delivery location.\n- Free standard shipping applies to prepaid and eligible orders meeting the minimum order threshold shown at checkout.\n\n### 3. Returns & Replacements\n- In compliance with health, safety, and sanitary guidelines, intimate hygiene items (pads, liners, cups, washes) are non-returnable once opened.\n- If your shipment arrives damaged, defective, or incorrect, please take a photograph and contact our customer care desk within 7 days of delivery for a complimentary replacement or refund.\n\n### 4. Cancellations\nOrders may be cancelled prior to dispatch. If a paid order is cancelled before fulfillment, a full refund will be processed to the original payment method.",
     },
     {
       id: "page_terms",
       slug: "terms",
       title: "Terms & Conditions",
-      content: "Terms of service and customer care policies.",
+      content: "# Terms and Conditions\n\n### 1. Introduction\nWelcome to Samaura Healthcare. By accessing our website, browsing our product catalog, or placing an order, you agree to these Terms and Conditions.\n\n### 2. Products & Intimate Hygiene Standards\nSamaura Healthcare provides female personal hygiene essentials. All product descriptions are provided in good faith. Due to intimate hygiene considerations, opened or tampered personal hygiene products cannot be returned.\n\n### 3. Orders & Payment\n- Orders placed online are confirmed upon receipt of valid payment authorization or COD verification.\n- In the event of pricing errors or inventory unavailability, Samaura reserves the right to cancel the order and provide a full refund.\n\n### 4. Shipping & Delivery\nWe deliver to serviceable PIN codes across India using third-party courier partners in plain, discreet packaging. Delivery timelines are estimates and subject to regional courier operations.\n\n### 5. Limitation of Liability\nThe products and content on this site are for personal hygiene and educational use only. Samaura Healthcare shall not be liable for indirect or consequential damages arising from site use.",
+    },
+    {
+      id: "page_why_samaura",
+      slug: "why-samaura",
+      title: "Why Samaura?",
+      content: "### Pure Cotton Comfort\nSoft breathable pure cotton topsheets designed for velvety comfort and reduced skin friction.\n\n### Chlorine-Free Formulation\nTotally chlorine-free absorbent core with plant-derived components.\n\n### Free from Artificial Fragrances\nZero artificial perfumes or synthetic masking dyes; respects the natural intimate balance.\n\n### Strictly Discreet Delivery\nDelivered across India in unmarked, plain outer mailers with complete privacy.",
     },
   ]).onConflictDoNothing();
 

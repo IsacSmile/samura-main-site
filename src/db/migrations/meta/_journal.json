@@ -22,6 +22,13 @@
       "when": 1791230942040,
       "tag": "0002_chemical_prism",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1791234337285,
+      "tag": "0003_absent_shocker",
+      "breakpoints": true
     }
   ]
 }

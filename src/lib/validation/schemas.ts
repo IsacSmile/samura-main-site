@@ -5,14 +5,22 @@ import { z } from "zod";
 // -----------------------------------------------------------------------------
 export const loginSchema = z.object({
   email: z.string().email("Please provide a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please provide a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian phone number").optional().or(z.literal("")),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 // -----------------------------------------------------------------------------
@@ -163,18 +171,84 @@ export const adminCategorySchema = z.object({
 });
 
 export const adminCouponSchema = z.object({
-  code: z.string().min(3).toUpperCase().trim(),
+  id: z.string().optional(),
+  code: z.string().min(3, "Coupon code must be at least 3 characters").toUpperCase().trim(),
   discountType: z.enum(["percentage", "fixed_paise"]),
-  discountValue: z.number().int().min(1),
+  discountValue: z.number().int().min(1, "Discount value must be at least 1"),
   minOrderPaise: z.number().int().min(0).default(0),
   maxDiscountPaise: z.number().int().optional().nullable(),
+  expiresAt: z.string().optional().nullable(),
   usageLimit: z.number().int().optional().nullable(),
+  isActive: z.boolean().default(true),
+});
+
+export const adminBannerSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(2, "Title is required"),
+  subtitle: z.string().optional().nullable(),
+  link: z.string().default("/shop"),
+  imageUrl: z.string().min(1, "Banner image URL is required"),
+  badge: z.string().optional().nullable(),
+  sortOrder: z.number().int().default(0),
+  isActive: z.boolean().default(true),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
+});
+
+export const adminBlogPostSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(3, "Title is required"),
+  slug: z
+    .string()
+    .min(3, "Slug is required")
+    .regex(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and hyphens"),
+  excerpt: z.string().min(5, "Excerpt is required"),
+  content: z.string().min(10, "Content must be at least 10 characters"),
+  coverImage: z.string().optional().nullable(),
+  author: z.string().default("Samaura Health Desk"),
+  category: z.string().default("Period Health"),
+  readTime: z.string().default("4 min read"),
+  isPublished: z.boolean().default(true),
+});
+
+export const adminPageSchema = z.object({
+  id: z.string().optional(),
+  slug: z.string().min(2, "Slug is required"),
+  title: z.string().min(2, "Title is required"),
+  content: z.string().min(5, "Content is required"),
+});
+
+export const adminShippingRuleSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Rule name is required"),
+  minOrderPaise: z.number().int().min(0).default(0),
+  maxOrderPaise: z.number().int().optional().nullable(),
+  feePaise: z.number().int().min(0).default(0),
+  isDefault: z.boolean().default(false),
   isActive: z.boolean().default(true),
 });
 
 export const adminOrderStatusSchema = z.object({
   orderId: z.string().min(1),
-  status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]),
-  paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]),
+  status: z.enum([
+    "pending_payment",
+    "placed",
+    "confirmed",
+    "shipped",
+    "delivered",
+    "cancelled",
+    "refunded",
+    "returned",
+  ]),
+  paymentStatus: z.enum([
+    "pending",
+    "pending_cod",
+    "paid",
+    "failed",
+    "refunded",
+    "paid_after_cancel",
+    "refund_pending",
+  ]),
   notes: z.string().optional(),
 });
+
