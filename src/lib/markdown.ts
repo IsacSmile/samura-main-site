@@ -13,10 +13,25 @@ export const SANITIZE_OPTIONS: sanitizeHtmlLib.IOptions = {
     img: ["src", "alt", "title", "width", "height", "class"],
     "*": ["class", "id"],
   },
-  allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedSchemes: ["http", "https", "mailto"],
   allowedSchemesByTag: {
     img: ["http", "https"],
-    a: ["http", "https", "mailto", "tel"],
+    a: ["http", "https", "mailto"],
+  },
+  transformTags: {
+    a: (_tagName, attribs) => {
+      const existingRel = attribs.rel || "";
+      const relParts = new Set(existingRel.split(/\s+/).filter(Boolean));
+      relParts.add("noopener");
+      relParts.add("noreferrer");
+      return {
+        tagName: "a",
+        attribs: {
+          ...attribs,
+          rel: Array.from(relParts).join(" "),
+        },
+      };
+    },
   },
   allowProtocolRelative: false,
   disallowedTagsMode: "discard",

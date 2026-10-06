@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { adminBlogPostSchema } from "@/lib/validation/schemas";
+import { checkClaims } from "@/lib/claims/guard";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -38,10 +39,11 @@ export async function upsertPostAction(input: unknown) {
         })
         .where(eq(posts.id, data.id));
 
+      const claimCheck = checkClaims(data);
       revalidatePath("/admin/blog");
       revalidatePath("/blog");
       revalidatePath(`/blog/${data.slug}`);
-      return { success: true, message: "Blog post updated successfully." };
+      return { success: true, message: "Blog post updated successfully.", warning: claimCheck.warning };
     } else {
       await db.insert(posts).values({
         id: `post_${nanoid(10)}`,
@@ -57,10 +59,11 @@ export async function upsertPostAction(input: unknown) {
         publishedAt: new Date(),
       });
 
+      const claimCheck = checkClaims(data);
       revalidatePath("/admin/blog");
       revalidatePath("/blog");
       revalidatePath(`/blog/${data.slug}`);
-      return { success: true, message: "Blog post created successfully." };
+      return { success: true, message: "Blog post created successfully.", warning: claimCheck.warning };
     }
   } catch (error) {
     console.error("upsertPostAction error:", error);

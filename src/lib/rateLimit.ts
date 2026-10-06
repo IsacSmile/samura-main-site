@@ -1,13 +1,68 @@
 import { db } from "@/db";
 import { rateLimits } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 
 /**
- * DB-backed persistent rate limiter with high-performance in-memory cache.
- * Survives application restarts and multiple instances by syncing state to the database.
- * Supports both option object and positional (key, limit, windowSeconds) signatures.
- * Supports both synchronous property access and Promise awaiting.
+ * Derives client IP strictly from trusted platform reverse proxy headers.
+ * Supported reverse proxy / PaaS platforms:
+ * - Vercel: `x-vercel-forwarded-for` or `x-real-ip`
+ * - Caddy / standard reverse proxy: `x-forwarded-for`
+ * Returns sanitized IP string, defaulting to 127.0.0.1.
  */
+export function getTrustedClientIp(
+  headersInstance: Headers | Record<string, string | string[] | undefined>
+): string {
+  const getHeader = (name: string): string | null => {
+    if ("get" in headersInstance && typeof headersInstance.get === "function") {
+      return headersInstance.get(name);
+    }
+    const val = (headersInstance as Record<string, string | string[] | undefined>)[name.toLowerCase()];
+    if (Array.isArray(val)) return val[0] || null;
+    return val || null;
+  };
+
+  // 1. Vercel trusted edge IP header
+  const vercelIp = getHeader("x-vercel-forwarded-for");
+  if (vercelIp) {
+    const candidate = vercelIp.split(",")[0]?.trim();
+    if (candidate) return candidate;
+  }
+
+  // 2. Real IP from trusted proxy (Caddy / Nginx)
+  const realIp = getHeader("x-real-ip");
+  if (realIp && realIp.trim()) {
+    return realIp.trim();
+  }
+
+  // 3. Standard forwarded-for (first IP)
+  const forwarded = getHeader("x-forwarded-for");
+  if (forwarded) {
+    const candidate = forwarded.split(",")[0]?.trim();
+    if (candidate) return candidate;
+  }
+
+  return "127.0.0.1";
+}
+
+/**
+ * Periodically deletes expired rate limit records from the database table `rate_limits`.
+ */
+export async function cleanupExpiredRateLimits(): Promise<number> {
+  try {
+    const now = new Date();
+    await db.delete(rateLimits).where(lt(rateLimits.resetAt, now));
+    return 1;
+  } catch (err) {
+    console.error("[RateLimiter] Expired DB records cleanup warning:", err);
+    return 0;
+  }
+}
+
+export interface RateLimitRecord {
+  count: number;
+  resetAt: number;
+}
+
 export interface RateLimitOptions {
   limit: number;
   windowMs: number;
@@ -22,14 +77,9 @@ export interface RateLimitResult {
 
 export type RateLimitReturn = Promise<RateLimitResult> & RateLimitResult;
 
-interface RateLimitRecord {
-  count: number;
-  resetAt: number;
-}
-
 const rateLimitStore = new Map<string, RateLimitRecord>();
 
-// Clean up expired in-memory records periodically
+// Clean up expired in-memory and database records periodically
 if (typeof setInterval !== "undefined") {
   setInterval(() => {
     const now = Date.now();
@@ -38,6 +88,7 @@ if (typeof setInterval !== "undefined") {
         rateLimitStore.delete(key);
       }
     }
+    cleanupExpiredRateLimits().catch(() => {});
   }, 5 * 60 * 1000).unref?.();
 }
 

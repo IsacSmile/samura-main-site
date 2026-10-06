@@ -47,7 +47,8 @@ export async function runSeed() {
       email: adminEmail,
       passwordHash: adminPasswordHash,
       role: "admin",
-      phone: "+919876543210",
+      phone: "9876543210",
+      emailVerified: new Date(),
     },
   ];
 
@@ -60,7 +61,8 @@ export async function runSeed() {
       email: "priya@example.com",
       passwordHash: customerPasswordHash,
       role: "customer",
-      phone: "+919811223344",
+      phone: "9811223344",
+      emailVerified: new Date(),
     });
   }
 
@@ -89,7 +91,7 @@ export async function runSeed() {
       id: "cat_menstrual_cups",
       name: "Menstrual Cups",
       slug: "menstrual-cups",
-      description: "Medical-grade silicone cups offering 12-hour leak-resistant, zero-waste period freedom.",
+      description: "Flexible soft silicone cups offering comfortable, reusable day and night period freedom.",
       image: "/products/menstrual-cup.svg",
       sortOrder: 3,
     },
@@ -206,7 +208,7 @@ export async function runSeed() {
       faq: JSON.stringify([
         {
           q: "Will this stay in place while tossing in bed?",
-          a: "Yes, our reinforced medical-grade adhesive holds securely across cotton underwear.",
+          a: "Yes, our reinforced gentle adhesive holds securely across cotton underwear.",
         },
       ]),
       variants: [
@@ -324,7 +326,7 @@ export async function runSeed() {
         "1. Remove adhesive strip.\n2. Affix along natural contour of sportswear or panties.\n3. Replace after workout or active day.",
       features: JSON.stringify([
         "Anatomically shaped side curvature",
-        "Hypoallergenic adhesive that won't twist",
+        "Gentle adhesive that won't twist",
         "Formulated for breathable daily comfort",
       ]),
       faq: JSON.stringify([
@@ -353,11 +355,11 @@ export async function runSeed() {
     {
       id: "prod_05_menstrual_cup",
       categoryId: "cat_menstrual_cups",
-      name: "Medical-Grade Silicone Menstrual Cup",
-      slug: "medical-grade-silicone-menstrual-cup",
-      shortDescription: "Biocompatible medical-grade silicone cup with ribbed stem and travel pouch.",
+      name: "Comfort Silicone Menstrual Cup",
+      slug: "comfort-silicone-menstrual-cup",
+      shortDescription: "Flexible silicone cup with ribbed stem and breathable storage pouch.",
       description:
-        "Experience true period liberation with Samaura's bell-shaped menstrual cup. Made from biocompatible, velvety medical silicone that folds easily and pops open gently. Offers up to 12 consecutive hours of reliable protection.",
+        "Experience comfortable period care with Samaura's bell-shaped menstrual cup. Made from soft, flexible velvety silicone that folds easily and pops open gently. Offers dependable day and night protection.",
       basePricePaise: 49900,
       salePricePaise: 39900,
       isFeatured: true,
@@ -365,15 +367,15 @@ export async function runSeed() {
       rating: 0,
       reviewCount: 0,
       badge: "Popular Choice",
-      flowType: "All Flows (12hr Protection)",
+      flowType: "All Flows (Extended Wear)",
       ingredients:
-        "Biocompatible Medical-Grade Silicone. Free of BPA, latex, and phthalates.",
+        "Body-Safe Flexible Silicone. Crafted without BPA, latex, or phthalates.",
       absorptionGuide:
-        "Holds up to 25ml (Size Small) / 30ml (Size Medium) / 35ml (Size Large). Up to 12 hours continuous protection without changing.",
+        "Holds up to 25ml (Size Small) / 30ml (Size Medium) / 35ml (Size Large). Extended wear comfort without changing.",
       usageGuide:
         "1. Sterilize in boiling water for 3–5 minutes before first use.\n2. Wash hands thoroughly and fold cup (C-Fold or Punch-Down Fold).\n3. Relax pelvic muscles and insert angled toward tailbone.\n4. Rotate gently to ensure full seal.\n5. Pinch base to release vacuum seal before removing.",
       features: JSON.stringify([
-        "Biocompatible Medical Grade Silicone",
+        "Flexible Body-Safe Silicone",
         "Velvety matte finish with easy-grip ribbed base",
         "Includes breathable cotton storage pouch",
         "Reusable and long-lasting",
@@ -488,7 +490,7 @@ export async function runSeed() {
       features: JSON.stringify([
         "Natural Lactic Acid maintains healthy flora",
         "Infused with soothing Chamomile and Aloe Vera",
-        "Free from parabens, SLS, or synthetic perfume",
+        "Formulated without parabens, SLS, or artificial fragrance",
       ]),
       faq: JSON.stringify([
         {
@@ -750,7 +752,7 @@ export async function runSeed() {
     },
     {
       key: "medical_disclaimer",
-      value: "Disclaimer: The content on this website is for educational and hygiene awareness purposes only and does not replace professional medical advice or clinical diagnosis. Always consult a certified healthcare professional for medical concerns.",
+      value: "Disclaimer: The content on this website is for educational and hygiene awareness purposes only and does not replace professional medical advice or clinical diagnosis. Always consult a qualified healthcare professional for medical concerns.",
       description: "Medical disclaimer text",
     },
     {
@@ -776,9 +778,9 @@ export async function runSeed() {
     {
       id: "ban_hero_01",
       title: "Pure Comfort, Mindful Care. Period.",
-      subtitle: "Made with soft pure cotton topsheet. No chlorine, perfumes, or synthetic plastics.",
+      subtitle: "Made with soft pure cotton topsheet, crafted without chlorine bleach or synthetic perfumes.",
       link: "/shop",
-      imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=1200",
+      imageUrl: "/banners/hero-banner.svg",
       badge: "Gentle Care",
       isActive: true,
       sortOrder: 1,
@@ -788,7 +790,7 @@ export async function runSeed() {
       title: "Thoughtful Care in Plain, Unmarked Packaging",
       subtitle: "Complete confidentiality from our dispatch center directly to your doorstep.",
       link: "/offers",
-      imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1200",
+      imageUrl: "/banners/promo-banner.svg",
       badge: "Discreet Delivery",
       isActive: true,
       sortOrder: 2,
@@ -802,7 +804,7 @@ export async function runSeed() {
       slug: "choose-right-sanitary-pad-flow",
       excerpt: "Navigating pad lengths, absorbency ratings, and cotton vs synthetic fabrics.",
       content: "Understanding your flow and selecting the right length and absorbency is key to lasting comfort. Samaura pure cotton pads are designed with breathable backing and zero artificial fragrances to help you stay fresh and comfortable throughout your day.",
-      coverImage: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=800",
+      coverImage: "/banners/hero-banner.svg",
       category: "Period Health",
       readTime: "4 min read",
       author: "Samaura Health Desk",
@@ -813,9 +815,9 @@ export async function runSeed() {
       title: "Menstrual Cup Beginner Guide: 5 Steps to Confident Comfort",
       slug: "menstrual-cup-guide-beginners",
       excerpt: "Everything you need to know about folding, insertion, and seal verification.",
-      content: "Transitioning to a menstrual cup is a sustainable, cost-effective choice. Made from soft medical-grade silicone, Samaura menstrual cups provide up to 12 hours of reliable leak-resistant wear. Clean thoroughly before first use by boiling in clean water for 5 to 7 minutes.",
-      coverImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800",
-      category: "Eco-Conscious Periods",
+      content: "Transitioning to a menstrual cup is a thoughtful, cost-effective choice. Made from soft flexible silicone, Samaura menstrual cups provide dependable day and night comfort. Clean thoroughly before first use by boiling in clean water for 5 to 7 minutes.",
+      coverImage: "/banners/promo-banner.svg",
+      category: "Mindful Periods",
       readTime: "5 min read",
       author: "Samaura Health Desk",
       isPublished: false, // Seeded articles are draft by default
@@ -827,19 +829,19 @@ export async function runSeed() {
       id: "page_about",
       slug: "about",
       title: "About Samaura Healthcare",
-      content: "# About Samaura Healthcare\n\n*[Replace with client content: Insert brand founding story, certified team background, and production ethics here]*\n\nSamaura Healthcare was founded to provide women with gentle, skin-first, and thoughtfully crafted feminine hygiene essentials. Our design philosophy centers around high-grade pure cotton topsheets, totally chlorine-free absorbent cores, and compostable plant-based packaging.\n\n### Our Core Values\n- **Skin-First Gentle Materials**: Zero artificial masking perfumes or synthetic dyes.\n- **Discreet Packaging Promise**: Plain, unbranded outer mailers for every customer delivery.\n- **Conscious Formulation**: Responsible material selection that balances performance and skin comfort.",
+      content: "# About Samaura Healthcare\n\n*[Replace with client content: Insert brand founding story, leadership team background, and production ethics here]*\n\nSamaura Healthcare was founded to provide women with gentle, skin-first, and thoughtfully crafted feminine hygiene essentials. Our design philosophy centers around high-grade pure cotton topsheets, totally chlorine-free absorbent cores, and compostable plant-based packaging.\n\n### Our Core Values\n- **Skin-First Gentle Materials**: Zero artificial masking perfumes or synthetic dyes.\n- **Discreet Packaging Promise**: Plain, unbranded outer mailers for every customer delivery.\n- **Conscious Formulation**: Responsible material selection that balances performance and skin comfort.",
     },
     {
       id: "page_faq",
       slug: "faq",
       title: "Frequently Asked Questions",
-      content: "### Is your packaging completely discreet?\nYes. Every order is packaged in a plain, unmarked brown corrugated box or opaque mailer. The shipping address label includes minimal courier barcodes with no mention of female hygiene, pads, or periods on the exterior.\n\n### What materials are used in Samaura sanitary pads?\n*[Replace with client content: Detailed manufacturing specifications and fiber source information]*\nSamaura sanitary pads use soft pure cotton topsheets, a totally chlorine-free (TCF) cellulose core, and a breathable bottom film designed to facilitate airflow and reduce skin friction.\n\n### How do I select the right menstrual cup size?\n*[Replace with client content: Clinical sizing guide]*\nSize S is recommended for menstruators under 25 or those who have not given birth vaginally. Size M is suitable for flow balance after 25 or post-pregnancy.\n\n### What is your policy on returns and cancellations?\nBecause female hygiene items are intimate health goods, opened packages cannot be returned for hygiene and health reasons. If an item arrives damaged or incorrect, please reach out to customer care within 7 days for a replacement or refund.",
+      content: "### Is your packaging completely discreet?\nYes. Every order is packaged in a plain, unmarked brown corrugated box or opaque mailer. The shipping address label includes minimal courier barcodes with no mention of female hygiene, pads, or periods on the exterior.\n\n### What materials are used in Samaura sanitary pads?\n*[Replace with client content: Detailed manufacturing specifications and fiber source information]*\nSamaura sanitary pads use soft pure cotton topsheets, a totally chlorine-free (TCF) cellulose core, and a breathable bottom film designed to facilitate airflow and reduce skin friction.\n\n### How do I select the right menstrual cup size?\n*[Replace with client content: Sizing guide]*\nSize S is recommended for menstruators under 25 or those who have not given birth vaginally. Size M is suitable for flow balance after 25 or post-pregnancy.\n\n### What is your policy on returns and cancellations?\nBecause female hygiene items are intimate health goods, opened packages cannot be returned for hygiene and health reasons. If an item arrives damaged or incorrect, please reach out to customer care within 7 days for a replacement or refund.",
     },
     {
       id: "page_privacy",
       slug: "privacy",
       title: "Privacy Policy",
-      content: "# Privacy Policy\n\n### 1. Overview\nThis draft privacy policy outlines how Samaura Healthcare collects, uses, and safeguards personal information when you use our website or purchase our products.\n\n### 2. Information Collected\nWe collect personal information necessary to fulfill your orders and provide customer support:\n- Contact details: Full name, delivery address, phone number, and email address.\n- Transaction details: Order history, items ordered, and payment status. Sensitive payment card numbers and UPI MPINs are handled directly by certified payment processors and are never stored on our servers.\n\n### 3. Use of Information\nYour information is used solely to:\n- Process and deliver your purchases in discreet packaging.\n- Send order confirmations, tracking numbers, and account updates.\n- Respond to your inquiries submitted via our contact forms.\n\n### 4. Data Sharing & Third Parties\nWe do not sell, rent, or trade your personal information. Relevant data is shared strictly with delivery logistics providers to transport your order and transactional email services to transmit receipts.\n\n### 5. Contact\nFor privacy questions or data access requests, please reach us at care@samaura.com.",
+      content: "# Privacy Policy\n\n### 1. Overview\nThis draft privacy policy outlines how Samaura Healthcare collects, uses, and safeguards personal information when you use our website or purchase our products.\n\n### 2. Information Collected\nWe collect personal information necessary to fulfill your orders and provide customer support:\n- Contact details: Full name, delivery address, phone number, and email address.\n- Transaction details: Order history, items ordered, and payment status. Sensitive payment card numbers and UPI MPINs are handled directly by authorized payment processors and are never stored on our servers.\n\n### 3. Use of Information\nYour information is used solely to:\n- Process and deliver your purchases in discreet packaging.\n- Send order confirmations, tracking numbers, and account updates.\n- Respond to your inquiries submitted via our contact forms.\n\n### 4. Data Sharing & Third Parties\nWe do not sell, rent, or trade your personal information. Relevant data is shared strictly with delivery logistics providers to transport your order and transactional email services to transmit receipts.\n\n### 5. Contact\nFor privacy questions or data access requests, please reach us at care@samaura.com.",
     },
     {
       id: "page_shipping",
@@ -857,7 +859,7 @@ export async function runSeed() {
       id: "page_why_samaura",
       slug: "why-samaura",
       title: "Why Samaura?",
-      content: "### Pure Cotton Comfort\nSoft breathable pure cotton topsheets designed for velvety comfort and reduced skin friction.\n\n### Chlorine-Free Formulation\nTotally chlorine-free absorbent core with plant-derived components.\n\n### Free from Artificial Fragrances\nZero artificial perfumes or synthetic masking dyes; respects the natural intimate balance.\n\n### Strictly Discreet Delivery\nDelivered across India in unmarked, plain outer mailers with complete privacy.",
+      content: "### Pure Cotton Comfort\nSoft breathable pure cotton topsheets designed for velvety comfort and reduced skin friction.\n\n### Chlorine-Free Formulation\nTotally chlorine-free absorbent core with plant-derived components.\n\n### Without Artificial Fragrances\nZero artificial perfumes or synthetic masking dyes; respects the natural intimate balance.\n\n### Strictly Discreet Delivery\nDelivered across India in unmarked, plain outer mailers with complete privacy.",
     },
   ]).onConflictDoNothing();
 

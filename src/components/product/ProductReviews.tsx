@@ -10,7 +10,7 @@ export interface ReviewItem {
   rating: number;
   title: string | null;
   body: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "published" | "rejected";
   isVerified: boolean;
   createdAt: Date;
 }
@@ -36,13 +36,13 @@ export function ProductReviews({
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const approvedReviews = reviews.filter((r) => r.status === "approved");
-  const reviewCount = approvedReviews.length;
+  const publishedReviews = reviews.filter((r) => r.status === "published");
+  const reviewCount = publishedReviews.length;
 
   const averageRating =
     reviewCount > 0
       ? (
-          approvedReviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+          publishedReviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
         ).toFixed(1)
       : null;
 
@@ -165,7 +165,7 @@ export function ProductReviews({
 
           {/* Reviews List */}
           <div className="space-y-4">
-            {approvedReviews.map((rev) => (
+            {publishedReviews.map((rev) => (
               <div
                 key={rev.id}
                 className="p-5 sm:p-6 rounded-2xl bg-white border border-pink-light shadow-xs space-y-3"
@@ -268,7 +268,7 @@ export function ProductReviews({
                   Thank You for Your Review!
                 </h4>
                 <p className="text-xs text-muted leading-relaxed">
-                  Your review has been submitted for moderation and will appear once approved.
+                  Your review has been submitted for moderation and will appear once published.
                 </p>
               </div>
             ) : (

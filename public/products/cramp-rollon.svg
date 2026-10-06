@@ -1,17 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bg" x1="0%" y1="0%" x2="1" y2="1">
       <stop offset="0%" stop-color="#FDFBF7" />
       <stop offset="50%" stop-color="#FFFDF9" />
-      <stop offset="100%" stop-color="#FBF4E8" />
+      <stop offset="1" stop-color="#FBF4E8" />
     </linearGradient>
-    <linearGradient id="packGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <linearGradient id="packGrad" x1="0%" y1="0%" x2="0%" y2="1">
       <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="100%" stop-color="#FDFCF9" />
+      <stop offset="1" stop-color="#FDFCF9" />
     </linearGradient>
-    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="1" y2="0%">
       <stop offset="0%" stop-color="#D97706" />
-      <stop offset="100%" stop-color="#F59E0B" />
+      <stop offset="1" stop-color="#F59E0B" />
     </linearGradient>
     <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
       <feDropShadow dx="0" dy="20" stdDeviation="25" flood-color="#D97706" flood-opacity="0.2" />

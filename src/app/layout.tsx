@@ -121,7 +121,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-white text-muted font-body selection:bg-pink-light selection:text-ink">
         <AnnouncementBar />
         <Navbar offersBadge={settings.nav_offers_badge || "Offers"} />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pb-12 sm:pb-16">{children}</main>
         <Footer />
         <CartDrawer />
         <WhatsAppButton />

@@ -37,7 +37,7 @@ export async function generateMetadata({
     title: `${product.name} | Gentle Cotton Care`,
     description:
       product.shortDescription ||
-      `Buy ${product.name} from Samaura Healthcare. Soft breathable cotton, hypoallergenic comfort, and delivered in plain discreet packaging.`,
+      `Buy ${product.name} from Samaura Healthcare. Soft breathable cotton, gentle everyday comfort, and delivered in plain discreet packaging.`,
     openGraph: {
       title: `${product.name} | Samaura Healthcare`,
       description: product.shortDescription || undefined,
@@ -73,12 +73,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const related = await getRelatedProducts(product.id, product.categoryId, 4);
 
   // Calculate review stats for JSON-LD and display
-  const approvedReviews = product.approvedReviews;
-  const reviewCount = approvedReviews.length;
+  const publishedReviews = product.publishedReviews || [];
+  const reviewCount = publishedReviews.length;
   const avgRating =
     reviewCount > 0
       ? (
-          approvedReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+          publishedReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
         ).toFixed(1)
       : null;
 
@@ -284,7 +284,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           <ProductReviews
             productId={product.id}
             productName={product.name}
-            reviews={product.approvedReviews}
+            reviews={publishedReviews}
           />
         </section>
 

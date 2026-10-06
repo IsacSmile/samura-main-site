@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "check-claims": "tsx scripts/check-claims.ts",
+    "check": "tsx scripts/check-claims.ts && npm run lint && tsc --noEmit",
+    "build": "tsx scripts/check-claims.ts && next build",
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed/index.ts",
-    "db:backup": "tsx scripts/db-backup.ts"
+    "db:backup": "tsx scripts/db-backup.ts",
+    "db:backup:turso": "tsx scripts/turso-backup.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

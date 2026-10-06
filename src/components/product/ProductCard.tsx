@@ -66,7 +66,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="card-soft group flex flex-col justify-between h-full overflow-hidden bg-white p-3.5 sm:p-5 relative transition-all duration-300 min-w-0 w-full">
       {/* Top Badges */}
-      <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5 items-start max-w-[calc(100%-4rem)]">
+      <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5 items-start max-w-[75%]">
         {product.badge && (
           <span className="badge-brand text-[10px] tracking-wide uppercase font-bold shadow-xs truncate max-w-full">
             {product.badge}
@@ -99,14 +99,14 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Flow Type Tag & Rating (on separate lines on narrow mobile widths) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 text-xs text-muted min-w-0">
             {product.flowType ? (
-              <span className="text-[11px] font-medium text-brand bg-blush px-2 py-0.5 rounded-full border border-pink-light/60 truncate max-w-fit">
+              <span className="text-[10px] font-medium leading-tight text-brand bg-blush px-2 py-0.5 rounded-full border border-pink-light/60 max-w-fit line-clamp-2 break-normal">
                 {product.flowType}
               </span>
             ) : (
               <span className="hidden sm:inline-block" />
             )}
 
-            {/* Show rating only when approved reviews exist */}
+            {/* Show rating only when published reviews exist */}
             {product.reviewCount !== undefined && product.reviewCount > 0 && product.rating ? (
               <div className="flex items-center gap-1 shrink-0">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />

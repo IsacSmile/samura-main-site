@@ -112,7 +112,7 @@ export async function sendOrderConfirmationEmail(props: OrderEmailProps): Promis
             </p>
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+          <table width="600" style="max-width: 600px; border-collapse: collapse; margin-bottom: 16px;">
             <thead>
               <tr style="background-color: #FFF1F4; color: #3B1F2B; font-size: 12px; text-transform: uppercase;">
                 <th style="padding: 8px 10px; text-align: left;">Item</th>

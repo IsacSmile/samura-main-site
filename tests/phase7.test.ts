@@ -238,7 +238,7 @@ Here is a test with <script>alert(2)</script> and <iframe src="x"></iframe> and 
   const validBanner = adminBannerSchema.safeParse({
     title: "Summer Sale",
     link: "/shop",
-    imageUrl: "https://images.unsplash.com/photo-123",
+    imageUrl: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
   });
   assert(validBanner.success, "Fix C: Valid banner with HTTPS image and relative link passes schema");
 
@@ -254,9 +254,10 @@ Here is a test with <script>alert(2)</script> and <iframe src="x"></iframe> and 
   // =========================================================================
   console.log("\n--- TEST SUITE 4: FIX D (Invoice Numbers Concurrency Test) ---");
 
-  // Clean test counter
+  // Clean test counter and orders in isolated test DB
   const currentYear = new Date().getFullYear();
   await db.delete(invoiceCounters).where(eq(invoiceCounters.year, currentYear));
+  await db.delete(orders);
 
   // Get active variant
   const [variant] = await db

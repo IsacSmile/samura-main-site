@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useCartStore } from "@/lib/cart/store";
 import { useCartPricing } from "@/lib/cart/useCartPricing";
 import { processCheckoutAction, verifyRazorpayPaymentAction, getCheckoutConfigAction } from "@/app/actions/checkout";
+import { formatRupees } from "@/lib/utils/money";
+import { validatePincodeState, getStatesForPincode } from "@/lib/validation/pincode";
 import {
   ShieldCheck,
   Truck,
@@ -218,6 +220,11 @@ export function CheckoutView() {
 
     if (!/^\d{6}$/.test(formData.postalCode.trim())) {
       errors.postalCode = "Please enter a valid 6-digit PIN code.";
+    } else if (formData.state.trim()) {
+      const pinCheck = validatePincodeState(formData.postalCode, formData.state);
+      if (!pinCheck.isValid) {
+        errors.postalCode = pinCheck.error || "PIN code does not match the selected state.";
+      }
     }
 
     setFormErrors(errors);
@@ -241,8 +248,8 @@ export function CheckoutView() {
     if (paymentMethod === "cod" && config) {
       if (pricing.totalPaise > config.codMaxOrderPaise) {
         setServerError(
-          `Cash on Delivery is only available for orders up to ₹${Math.floor(
-            config.codMaxOrderPaise / 100
+          `Cash on Delivery is only available for orders up to ${formatRupees(
+            config.codMaxOrderPaise
           )}. Please select Online Payment.`
         );
         return;
@@ -665,7 +672,17 @@ export function CheckoutView() {
                         <select
                           id="checkout-state-select"
                           value={formData.state}
-                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                          onChange={(e) => {
+                            const newState = e.target.value;
+                            setFormData({ ...formData, state: newState });
+                            if (formData.postalCode.length === 6) {
+                              const pinCheck = validatePincodeState(formData.postalCode, newState);
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                postalCode: pinCheck.isValid ? "" : pinCheck.error || "",
+                              }));
+                            }
+                          }}
                           className={`w-full px-3 py-2.5 rounded-xl border text-sm bg-white outline-none transition-all ${
                             formErrors.state
                               ? "border-red-400 bg-red-50/20"
@@ -692,12 +709,36 @@ export function CheckoutView() {
                           id="checkout-pin-input"
                           maxLength={6}
                           value={formData.postalCode}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const clean = e.target.value.replace(/\D/g, "");
+                            const expectedStates = clean.length >= 2 ? getStatesForPincode(clean) : [];
+                            let newState = formData.state;
+                            if (clean.length === 6 && expectedStates.length > 0) {
+                              const match = INDIAN_STATES.find((st) =>
+                                expectedStates.includes(st.toLowerCase())
+                              );
+                              if (match && (!formData.state || !expectedStates.includes(formData.state.toLowerCase()))) {
+                                newState = match;
+                              }
+                            }
                             setFormData({
                               ...formData,
-                              postalCode: e.target.value.replace(/\D/g, ""),
-                            })
-                          }
+                              postalCode: clean,
+                              state: newState,
+                            });
+                            if (clean.length === 6) {
+                              const pinCheck = validatePincodeState(clean, newState);
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                postalCode: pinCheck.isValid ? "" : pinCheck.error || "",
+                              }));
+                            } else if (clean.length > 0 && clean.length < 6) {
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                postalCode: "",
+                              }));
+                            }
+                          }}
                           placeholder="110001"
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none transition-all ${
                             formErrors.postalCode
@@ -832,7 +873,7 @@ export function CheckoutView() {
                           </span>
                           {!codAllowedForTotal && (
                             <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                              Max ₹{Math.floor((config.codMaxOrderPaise || 250000) / 100)}
+                              Max {formatRupees(config.codMaxOrderPaise || 250000)}
                             </span>
                           )}
                         </div>
@@ -872,11 +913,11 @@ export function CheckoutView() {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-stone-800 truncate">{item.productName}</p>
                         <p className="text-[11px] text-stone-500">{item.variantName}</p>
-                        <p className="text-[10px] text-stone-400 font-mono">Qty: {item.quantity}</p>
+                        <p className="text-[10px] text-stone-400 font-sans">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="text-xs font-semibold text-stone-900">
-                          ₹{(item.lineTotalPaise / 100).toFixed(2)}
+                        <span className="text-xs font-semibold text-stone-900 font-sans">
+                          {formatRupees(item.lineTotalPaise)}
                         </span>
                       </div>
                     </div>
@@ -887,27 +928,27 @@ export function CheckoutView() {
                 <div className="pt-4 border-t border-stone-200 space-y-2 text-xs">
                   <div className="flex justify-between text-stone-600">
                     <span>Subtotal</span>
-                    <span>
+                    <span className="font-sans">
                       {pricing
-                        ? `₹${(pricing.subtotalPaise / 100).toFixed(2)}`
+                        ? formatRupees(pricing.subtotalPaise)
                         : "Calculating..."}
                     </span>
                   </div>
 
                   {pricing && pricing.couponDiscountPaise > 0 && (
-                    <div className="flex justify-between text-emerald-600 font-medium">
+                    <div className="flex justify-between text-emerald-600 font-medium font-sans">
                       <span>Discount ({pricing.couponCode})</span>
-                      <span>-₹{(pricing.couponDiscountPaise / 100).toFixed(2)}</span>
+                      <span>-{formatRupees(pricing.couponDiscountPaise)}</span>
                     </div>
                   )}
 
                   <div className="flex justify-between text-stone-600">
                     <span>Shipping Fee</span>
-                    <span>
+                    <span className="font-sans">
                       {pricing?.shippingFeePaise === 0
                         ? "FREE"
                         : pricing
-                        ? `₹${(pricing.shippingFeePaise / 100).toFixed(2)}`
+                        ? formatRupees(pricing.shippingFeePaise)
                         : "Calculating..."}
                     </span>
                   </div>
@@ -917,10 +958,10 @@ export function CheckoutView() {
                       <span className="text-sm font-semibold text-stone-900">Total Amount</span>
                       <p className="text-[10px] text-stone-400">Inclusive of all taxes</p>
                     </div>
-                    <span className="text-2xl font-bold font-serif text-brand">
+                    <span className="text-2xl font-bold font-heading text-brand">
                       {pricing
-                        ? `₹${(pricing.totalPaise / 100).toFixed(2)}`
-                        : "₹0.00"}
+                        ? formatRupees(pricing.totalPaise)
+                        : "₹0"}
                     </span>
                   </div>
                 </div>

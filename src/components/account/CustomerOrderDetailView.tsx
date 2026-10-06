@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { formatPaiseToRupees } from "@/lib/utils/money";
+import { formatIndianPhone } from "@/lib/utils/phone";
 import { customerCancelOrderAction } from "@/app/actions/checkout";
 
 interface OrderItem {
@@ -365,11 +366,11 @@ export function CustomerOrderDetailView({ order }: { order: CustomerOrderDetail 
                   {addressData.city}, {addressData.state} - {addressData.postalCode}
                 </p>
                 <p className="pt-2 text-ink font-medium">
-                  Phone: +91 {addressData.phone || order.customerPhone}
+                  Phone: {formatIndianPhone(addressData.phone || order.customerPhone)}
                 </p>
               </div>
               <div className="pt-2 border-t border-blush text-[11px] text-success font-medium flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> 100% Discreet Packaging
+                <ShieldCheck className="w-3.5 h-3.5" /> Plain, Discreet Packaging
               </div>
             </div>
 

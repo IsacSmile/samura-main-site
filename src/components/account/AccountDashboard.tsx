@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { formatPaiseToRupees } from "@/lib/utils/money";
+import { formatIndianPhone, cleanIndianPhoneDigits } from "@/lib/utils/phone";
 import {
   saveCustomerAddressAction,
   updateCustomerAddressAction,
@@ -253,9 +254,10 @@ export function AccountDashboard({
     setProfileMsg(null);
 
     try {
+      const cleanPhone = profilePhone.trim() ? cleanIndianPhoneDigits(profilePhone.trim()) : null;
       const res = await updateCustomerProfileAction({
         name: profileName,
-        phone: profilePhone.trim() ? profilePhone.trim() : null,
+        phone: cleanPhone,
       });
 
       if (!res.success) {
@@ -264,7 +266,7 @@ export function AccountDashboard({
         setUser((prev) => ({
           ...prev,
           name: profileName,
-          phone: profilePhone.trim() ? profilePhone.trim() : null,
+          phone: cleanPhone,
         }));
         setProfileMsg({ text: "Profile details updated successfully!", error: false });
         setIsEditingProfile(false);
@@ -282,7 +284,7 @@ export function AccountDashboard({
         {/* Welcome Banner */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-light shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-brand text-white flex items-center justify-center font-bold text-2xl font-heading shadow-md">
+            <div className="w-16 h-16 rounded-full shrink-0 bg-brand text-white flex items-center justify-center font-bold text-2xl font-heading shadow-md">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -302,7 +304,7 @@ export function AccountDashboard({
                 </span>
                 {user.phone && (
                   <span className="inline-flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-brand" /> +91 {user.phone}
+                    <Phone className="w-3.5 h-3.5 text-brand" /> {formatIndianPhone(user.phone)}
                   </span>
                 )}
               </p>
@@ -333,8 +335,8 @@ export function AccountDashboard({
           </div>
         </div>
 
-        {/* Fix A: Unverified Email Notice */}
-        {!user.emailVerified && (
+        {/* Fix A: Unverified Email Notice (Bypassed for Admins) */}
+        {!user.emailVerified && user.role !== "admin" && (
           <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
               <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -528,7 +530,7 @@ export function AccountDashboard({
                 <MapPin className="w-10 h-10 text-muted mx-auto" />
                 <h4 className="font-semibold text-ink text-sm">No saved addresses</h4>
                 <p className="text-xs text-muted">
-                  Add your primary delivery address for 100% discreet packaging.
+                  Add your primary delivery address for confidential discreet packaging.
                 </p>
                 <Button onClick={handleOpenAddAddress} size="sm" variant="outline">
                   Add Address Now
@@ -569,7 +571,7 @@ export function AccountDashboard({
                       <p>
                         {addr.city}, {addr.state} - {addr.postalCode}
                       </p>
-                      <p className="pt-1 text-ink font-medium">Phone: +91 {addr.phone}</p>
+                      <p className="pt-1 text-ink font-medium">Phone: {formatIndianPhone(addr.phone)}</p>
                     </div>
 
                     <div className="pt-3 border-t border-blush flex items-center justify-end gap-2">
@@ -701,7 +703,7 @@ export function AccountDashboard({
                   <div className="flex justify-between py-2 border-b border-blush">
                     <span className="text-muted">Phone</span>
                     <span className="font-semibold text-ink">
-                      {user.phone ? `+91 ${user.phone}` : "Not provided"}
+                      {user.phone ? formatIndianPhone(user.phone) : "Not provided"}
                     </span>
                   </div>
                   <div className="flex justify-between py-2">

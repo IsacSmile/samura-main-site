@@ -27,11 +27,11 @@ export async function approveReviewAction(reviewId: string) {
   await db
     .update(reviews)
     .set({
-      status: "approved",
+      status: "published",
     })
     .where(eq(reviews.id, reviewId));
 
-  // Recompute product rating and count from approved reviews only
+  // Recompute product rating and count from published reviews only
   await recomputeProductRating(rev.productId);
 
   // Find product slug for revalidation
@@ -49,7 +49,7 @@ export async function approveReviewAction(reviewId: string) {
 
   return {
     success: true,
-    message: "Review approved and published to storefront.",
+    message: "Review published to storefront.",
   };
 }
 
@@ -77,7 +77,7 @@ export async function rejectReviewAction(reviewId: string) {
     })
     .where(eq(reviews.id, reviewId));
 
-  // Recompute product rating and count from approved reviews only
+  // Recompute product rating and count from published reviews only
   await recomputeProductRating(rev.productId);
 
   const [prod] = await db
@@ -114,7 +114,7 @@ export async function deleteReviewAction(reviewId: string) {
   await db.delete(reviews).where(eq(reviews.id, reviewId));
 
   if (rev?.productId) {
-    // Recompute product rating and count from approved reviews only
+    // Recompute product rating and count from published reviews only
     await recomputeProductRating(rev.productId);
 
     const [prod] = await db

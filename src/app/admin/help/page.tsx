@@ -93,8 +93,8 @@ export default function AdminHelpPage() {
             <ul className="list-disc pl-4 space-y-1">
               <li>Customer reviews are submitted with honeypot bot defense and verified buyer badges.</li>
               <li>All reviews are set to <em>Pending</em> by default.</li>
-              <li>Click <em>Approve</em> to publish on the storefront product page, or <em>Reject</em> to keep hidden.</li>
-              <li>Aggregate star ratings on the storefront update dynamically only when approved reviews exist in the database.</li>
+              <li>Click <em>Publish</em> to show on the storefront product page, or <em>Reject</em> to keep hidden.</li>
+              <li>Aggregate star ratings on the storefront update dynamically only when published reviews exist in the database.</li>
             </ul>
           </div>
         </div>

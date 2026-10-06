@@ -35,19 +35,19 @@ async function run() {
     assert.strictEqual(p0.reviewCount, 0, "Initial reviewCount should be 0");
     console.log("✓ Initial state verified: rating=0, reviewCount=0");
 
-    // 2. Insert 3 reviews: 1 approved (4 stars), 1 pending (5 stars), 1 rejected (1 star)
-    const revApprovedId = `rev_app_${Date.now()}`;
+    // 2. Insert 3 reviews: 1 published (4 stars), 1 pending (5 stars), 1 rejected (1 star)
+    const revPublishedId = `rev_pub_${Date.now()}`;
     const revPendingId = `rev_pen_${Date.now()}`;
     const revRejectedId = `rev_rej_${Date.now()}`;
 
     await db.insert(reviews).values([
       {
-        id: revApprovedId,
+        id: revPublishedId,
         productId: testProductId,
         userName: "Alice",
         rating: 4,
-        body: "Approved review",
-        status: "approved",
+        body: "Published review",
+        status: "published",
       },
       {
         id: revPendingId,
@@ -69,30 +69,30 @@ async function run() {
 
     // Recompute
     const res1 = await recomputeProductRating(testProductId);
-    assert.strictEqual(res1.reviewCount, 1, "Only approved reviews must be counted (expected 1)");
-    assert.strictEqual(res1.rating, 4.0, "Rating should be 4.0 from the single approved review");
-    console.log(`✓ Only approved review counted: rating=${res1.rating}, reviewCount=${res1.reviewCount}`);
+    assert.strictEqual(res1.reviewCount, 1, "Only published reviews must be counted (expected 1)");
+    assert.strictEqual(res1.rating, 4.0, "Rating should be 4.0 from the single published review");
+    console.log(`✓ Only published review counted: rating=${res1.rating}, reviewCount=${res1.reviewCount}`);
 
-    // 3. Approve Bob's 5-star review -> average of 4 and 5 is 4.5
-    await db.update(reviews).set({ status: "approved" }).where(eq(reviews.id, revPendingId));
+    // 3. Publish Bob's 5-star review -> average of 4 and 5 is 4.5
+    await db.update(reviews).set({ status: "published" }).where(eq(reviews.id, revPendingId));
     const res2 = await recomputeProductRating(testProductId);
-    assert.strictEqual(res2.reviewCount, 2, "Should now have 2 approved reviews");
+    assert.strictEqual(res2.reviewCount, 2, "Should now have 2 published reviews");
     assert.strictEqual(res2.rating, 4.5, "Average rating should be (4 + 5) / 2 = 4.5");
-    console.log(`✓ After approving 2nd review: rating=${res2.rating}, reviewCount=${res2.reviewCount}`);
+    console.log(`✓ After publishing 2nd review: rating=${res2.rating}, reviewCount=${res2.reviewCount}`);
 
-    // 4. Reject Alice's 4-star review -> only Bob's 5-star review remains approved
-    await db.update(reviews).set({ status: "rejected" }).where(eq(reviews.id, revApprovedId));
+    // 4. Reject Alice's 4-star review -> only Bob's 5-star review remains published
+    await db.update(reviews).set({ status: "rejected" }).where(eq(reviews.id, revPublishedId));
     const res3 = await recomputeProductRating(testProductId);
-    assert.strictEqual(res3.reviewCount, 1, "Should now have 1 approved review");
+    assert.strictEqual(res3.reviewCount, 1, "Should now have 1 published review");
     assert.strictEqual(res3.rating, 5.0, "Average rating should now be 5.0");
     console.log(`✓ After rejecting 1st review: rating=${res3.rating}, reviewCount=${res3.reviewCount}`);
 
-    // 5. Delete Bob's 5-star review -> 0 approved reviews remain
+    // 5. Delete Bob's 5-star review -> 0 published reviews remain
     await db.delete(reviews).where(eq(reviews.id, revPendingId));
     const res4 = await recomputeProductRating(testProductId);
     assert.strictEqual(res4.reviewCount, 0, "Should have 0 reviews after deletion");
     assert.strictEqual(res4.rating, 0, "Average rating should reset to 0");
-    console.log(`✓ After deleting remaining approved review: rating=${res4.rating}, reviewCount=${res4.reviewCount}`);
+    console.log(`✓ After deleting remaining published review: rating=${res4.rating}, reviewCount=${res4.reviewCount}`);
 
     console.log("=== ALL REVIEW RECOMPUTATION TESTS PASSED ===");
   } finally {

@@ -359,7 +359,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <div className="flex items-center gap-2.5">
             <Sliders className="w-5 h-5 text-brand" />
             <h2 className="font-medium text-ink text-base">
-              Certified Claims & Trust Badges
+              Product Badges & Quality Highlights
             </h2>
           </div>
           <span className="text-[11px] font-mono px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-md flex items-center gap-1">
@@ -368,7 +368,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </div>
 
         <p className="text-xs text-muted leading-relaxed">
-          In compliance with advertising regulations, absolute claims (&ldquo;100% GOTS Certified&rdquo;, &ldquo;Dermatologist Tested&rdquo;, &ldquo;Zero Leaks&rdquo;) are disabled by default. Enable these badges only after valid laboratory certificates and audit documents are on file.
+          Marketing badges are controlled here. Ensure that all displayed product badges adhere to consumer protection guidelines with truthful, gentle wording.
         </p>
 
         <div className="space-y-4 pt-2">
@@ -376,22 +376,22 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <div className="flex items-center justify-between p-4 rounded-xl border border-blush bg-blush/10">
             <div>
               <div className="font-semibold text-xs text-ink">
-                100% GOTS Certified Organic Cotton Badge
+                Soft Pure Cotton Comfort Badge
               </div>
               <p className="text-[11px] text-muted mt-0.5">
-                Displays the certified organic seal on product cards and header badges.
+                Displays the pure cotton comfort highlight on product cards and header badges.
               </p>
             </div>
             <button
               type="button"
-              onClick={() => handleToggle("trust_badge_certified_organic")}
+              onClick={() => handleToggle("trust_badge_cotton")}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                settings.trust_badge_certified_organic === "true" ? "bg-emerald-600" : "bg-gray-300"
+                settings.trust_badge_cotton === "true" ? "bg-emerald-600" : "bg-gray-300"
               }`}
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                  settings.trust_badge_certified_organic === "true" ? "translate-x-5" : "translate-x-0"
+                  settings.trust_badge_cotton === "true" ? "translate-x-5" : "translate-x-0"
                 }`}
               />
             </button>
@@ -401,22 +401,22 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <div className="flex items-center justify-between p-4 rounded-xl border border-blush bg-blush/10">
             <div>
               <div className="font-semibold text-xs text-ink">
-                Dermatologically Tested Badge
+                Gentle Everyday Care Badge
               </div>
               <p className="text-[11px] text-muted mt-0.5">
-                Displays clinical dermatology test seal in product specifications.
+                Displays gentle formulation highlight in product specifications.
               </p>
             </div>
             <button
               type="button"
-              onClick={() => handleToggle("trust_badge_dermatology")}
+              onClick={() => handleToggle("trust_badge_gentle")}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                settings.trust_badge_dermatology === "true" ? "bg-emerald-600" : "bg-gray-300"
+                settings.trust_badge_gentle === "true" ? "bg-emerald-600" : "bg-gray-300"
               }`}
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                  settings.trust_badge_dermatology === "true" ? "translate-x-5" : "translate-x-0"
+                  settings.trust_badge_gentle === "true" ? "translate-x-5" : "translate-x-0"
                 }`}
               />
             </button>
@@ -426,22 +426,22 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <div className="flex items-center justify-between p-4 rounded-xl border border-blush bg-blush/10">
             <div>
               <div className="font-semibold text-xs text-ink">
-                Absolute Zero-Leak Guarantee Badge
+                Secure Day and Night Protection Badge
               </div>
               <p className="text-[11px] text-muted mt-0.5">
-                Displays 100% leak-proof certification claim.
+                Displays multi-layer fluid protection highlight.
               </p>
             </div>
             <button
               type="button"
-              onClick={() => handleToggle("trust_badge_leak_guard")}
+              onClick={() => handleToggle("trust_badge_protection")}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                settings.trust_badge_leak_guard === "true" ? "bg-emerald-600" : "bg-gray-300"
+                settings.trust_badge_protection === "true" ? "bg-emerald-600" : "bg-gray-300"
               }`}
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                  settings.trust_badge_leak_guard === "true" ? "translate-x-5" : "translate-x-0"
+                  settings.trust_badge_protection === "true" ? "translate-x-5" : "translate-x-0"
                 }`}
               />
             </button>

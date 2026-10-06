@@ -93,26 +93,50 @@ export const adminProductSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+export function isSafeUrlOrRelative(val: string): boolean {
+  if (!val) return true;
+  const trimmed = val.trim();
+  const lower = trimmed.toLowerCase();
+
+  // Explicitly reject dangerous pseudo-protocols and insecure http
+  if (
+    lower.startsWith("javascript:") ||
+    lower.startsWith("data:") ||
+    lower.startsWith("vbscript:") ||
+    lower.startsWith("file:") ||
+    lower.startsWith("http:")
+  ) {
+    return false;
+  }
+
+  // Reject protocol-relative and backslash bypasses (e.g. //evil.com, /\evil.com)
+  if (trimmed.startsWith("//") || trimmed.startsWith("/\\") || /^\/[/\\]/.test(trimmed)) {
+    return false;
+  }
+
+  // Safe relative paths starting with '/'
+  if (trimmed.startsWith("/")) {
+    return true;
+  }
+
+  // Absolute URL: strictly https:
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 // Safe URL validator: permits only https:// or relative paths starting with '/'.
-// Rejects javascript:, data:, vbscript:, http://, file:, etc.
+// Rejects javascript:, data:, vbscript:, http://, file:, //evil.com, /\evil.com
 export const safeUrlOrRelative = z
   .string()
   .trim()
   .refine(
-    (val) => {
-      if (!val) return true;
-      if (val.startsWith("/") && !val.startsWith("//")) {
-        return true;
-      }
-      try {
-        const parsed = new URL(val);
-        return parsed.protocol === "https:";
-      } catch {
-        return false;
-      }
-    },
+    (val) => isSafeUrlOrRelative(val),
     {
-      message: "Only https:// URLs or relative paths starting with '/' are permitted (javascript: and data: are forbidden)",
+      message: "Only https:// URLs or relative paths starting with '/' are permitted (javascript:, data:, http:, //evil.com, and /\\evil.com are forbidden)",
     }
   );
 
@@ -121,19 +145,9 @@ export const safeRequiredUrlOrRelative = z
   .trim()
   .min(1, "URL is required")
   .refine(
-    (val) => {
-      if (val.startsWith("/") && !val.startsWith("//")) {
-        return true;
-      }
-      try {
-        const parsed = new URL(val);
-        return parsed.protocol === "https:";
-      } catch {
-        return false;
-      }
-    },
+    (val) => Boolean(val) && isSafeUrlOrRelative(val),
     {
-      message: "Only https:// URLs or relative paths starting with '/' are permitted (javascript: and data: are forbidden)",
+      message: "Only https:// URLs or relative paths starting with '/' are permitted (javascript:, data:, http:, //evil.com, and /\\evil.com are forbidden)",
     }
   );
 

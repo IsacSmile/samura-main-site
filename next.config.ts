@@ -30,7 +30,7 @@ const cspDirectives = [
   `script-src ${scriptSrc}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
-  "img-src 'self' data: blob: https: res.cloudinary.com https://images.unsplash.com",
+  "img-src 'self' data: blob: https: res.cloudinary.com",
   `connect-src ${connectSrc}`,
   `frame-src ${frameSrc}`,
   "object-src 'none'",
@@ -75,10 +75,6 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
       {
         protocol: "https",
         hostname: "res.cloudinary.com",

@@ -6,6 +6,7 @@ import { categories, products } from "@/db/schema";
 import { eq, and, ne, sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/auth";
 import { adminCategorySchema } from "@/lib/validation/schemas";
+import { checkClaims } from "@/lib/claims/guard";
 
 export async function createCategoryAction(input: unknown) {
   await requireAdmin();
@@ -52,10 +53,13 @@ export async function createCategoryAction(input: unknown) {
   revalidatePath("/admin/categories");
   revalidatePath("/admin");
 
+  const claimCheck = checkClaims(parsed.data);
+
   return {
     success: true,
     message: `Category "${name}" created successfully.`,
     categoryId: newId,
+    warning: claimCheck.warning,
   };
 }
 
@@ -117,9 +121,12 @@ export async function updateCategoryAction(id: string, input: unknown) {
   revalidatePath("/admin/categories");
   revalidatePath("/admin");
 
+  const claimCheck = checkClaims(parsed.data);
+
   return {
     success: true,
     message: `Category "${name}" updated successfully.`,
+    warning: claimCheck.warning,
   };
 }
 

@@ -6,6 +6,7 @@ import { products, productVariants, productImages } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
 import { requireAdmin } from "@/lib/auth";
 import { adminProductUpsertSchema } from "@/lib/validation/schemas";
+import { checkClaims } from "@/lib/claims/guard";
 
 export async function upsertProductAction(input: unknown) {
   await requireAdmin();
@@ -172,11 +173,14 @@ export async function upsertProductAction(input: unknown) {
   revalidatePath("/admin/products");
   revalidatePath("/admin");
 
+  const claimCheck = checkClaims(data);
+
   return {
     success: true,
     message: `Product "${data.name}" ${isEditing ? "updated" : "created"} successfully.`,
     productId,
     slug: data.slug,
+    warning: claimCheck.warning,
   };
 }
 

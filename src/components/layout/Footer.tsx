@@ -25,7 +25,7 @@ export function Footer() {
               </div>
               <div>
                 <h4 className="font-semibold text-sm text-ink">Skin-First Care</h4>
-                <p className="text-xs text-muted mt-0.5">Soft pure cotton, free from artificial perfumes</p>
+                <p className="text-xs text-muted mt-0.5">Soft pure cotton, without artificial perfumes</p>
               </div>
             </div>
 

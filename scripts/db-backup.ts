@@ -5,12 +5,24 @@ import dotenv from "dotenv";
 dotenv.config();
 
 /**
- * Database Backup Utility for Samaura Healthcare.
- * Backs up local SQLite database or outputs Turso cloud backup procedure.
+ * Local SQLite Database Backup Utility for Samaura Healthcare.
+ * Backs up local SQLite database file to the backups/ folder.
+ * For Turso cloud database backups, use `npm run db:backup:turso`.
  */
-async function backupDatabase() {
+async function backupLocalDatabase() {
   const dbUrl = process.env.DATABASE_URL || "file:data/samaura.db";
-  console.log(`[Backup] Initiating database backup for: ${dbUrl}`);
+  console.log("==================================================");
+  console.log("Local SQLite Database Backup Utility");
+  console.log("==================================================");
+  console.log(`[Backup] Inspecting database URL: ${dbUrl}`);
+
+  if (dbUrl.startsWith("libsql://")) {
+    console.warn("\n⚠️  [Turso Database Detected]");
+    console.warn("This script ('db:backup') is reserved strictly for local SQLite backups.");
+    console.warn("To perform a Turso cloud database backup, please run:");
+    console.warn("  npm run db:backup:turso");
+    process.exit(0);
+  }
 
   const backupDir = path.resolve(process.cwd(), "backups");
   if (!fs.existsSync(backupDir)) {
@@ -32,16 +44,12 @@ async function backupDatabase() {
     fs.copyFileSync(srcPath, destPath);
     const sizeMb = (fs.statSync(destPath).size / (1024 * 1024)).toFixed(2);
     console.log(`✅ [Backup Complete] Local SQLite backup created at: ${destPath} (${sizeMb} MB)`);
-  } else if (dbUrl.startsWith("libsql://")) {
-    console.log(`ℹ️ [Turso Cloud Database Detected]`);
-    console.log(`To create a point-in-time cloud backup on Turso, run:`);
-    console.log(`  turso db dump <database-name> > backups/turso-dump-${timestamp}.sql`);
   } else {
-    console.warn(`[Backup Notice] Custom database protocol "${dbUrl}". Please use database vendor export tool.`);
+    console.warn(`[Backup Notice] Unrecognized database protocol "${dbUrl}". Please use your database provider export tool.`);
   }
 }
 
-backupDatabase().catch((err) => {
+backupLocalDatabase().catch((err) => {
   console.error("[Backup Error]:", err);
   process.exit(1);
 });

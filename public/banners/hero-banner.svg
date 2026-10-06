@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" width="1600" height="700">
+  <defs>
+    <linearGradient id="heroBg" x1="0%" y1="0%" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF5F7" />
+      <stop offset="50%" stop-color="#FFE4EC" />
+      <stop offset="1" stop-color="#FCD5E2" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="1" y2="0%">
+      <stop offset="0%" stop-color="#C8202F" />
+      <stop offset="1" stop-color="#E84855" />
+    </linearGradient>
+    <pattern id="dotPattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.5" fill="#E84855" fill-opacity="0.08" />
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="700" fill="url(#heroBg)" />
+  <rect width="1600" height="700" fill="url(#dotPattern)" />
+
+  <!-- Soft Decorative Circles and Curves -->
+  <g opacity="0.45">
+    <circle cx="1350" cy="350" r="280" fill="#FFE0EA" />
+    <circle cx="1450" cy="350" r="190" fill="#FFCCD8" />
+    <circle cx="200" cy="600" r="180" fill="#FFE8EE" />
+  </g>
+
+  <!-- Botanical Leaf / Gentle Curve Motifs (No pills, no doctors) -->
+  <g transform="translate(1180, 180)" opacity="0.85">
+    <!-- Gentle petal / leaf outlines -->
+    <path d="M120 40 C 220 70, 260 210, 180 300 C 100 230, 80 120, 120 40 Z" fill="#FAD1DC" stroke="#E84855" stroke-width="2" stroke-opacity="0.25" />
+    <path d="M180 160 C 260 190, 280 320, 210 390 C 140 330, 140 230, 180 160 Z" fill="#FFE4EC" stroke="#C8202F" stroke-width="2" stroke-opacity="0.2" />
+    <circle cx="120" cy="200" r="32" fill="url(#accentGrad)" opacity="0.85" />
+    <circle cx="260" cy="270" r="18" fill="#E84855" opacity="0.4" />
+    <circle cx="210" cy="110" r="14" fill="#C8202F" opacity="0.3" />
+  </g>
+
+  <!-- Typographic Hero Content -->
+  <g transform="translate(140, 220)">
+    <!-- Pill Badge -->
+    <rect x="0" y="0" width="220" height="36" rx="18" fill="#FFFFFF" stroke="#FFCCD8" stroke-width="1.5" />
+    <circle cx="18" cy="18" r="5" fill="#C8202F" />
+    <text x="32" y="23" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#C8202F" letter-spacing="1">GENTLE PERIOD CARE</text>
+
+    <!-- Main Headline -->
+    <text x="0" y="105" font-family="Georgia, serif" font-size="54" font-weight="700" fill="#3B1F2B">
+      Soft Pure Cotton Topsheet.
+    </text>
+    <text x="0" y="165" font-family="Georgia, serif" font-size="54" font-weight="700" fill="#C8202F">
+      Comfort You Deserve.
+    </text>
+
+    <!-- Subheadline -->
+    <text x="0" y="225" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#6B5B62">
+      Thoughtfully crafted with gentle softness, discreet packaging, and easy ordering.
+    </text>
+
+    <!-- Micro Highlights -->
+    <g transform="translate(0, 280)">
+      <rect x="0" y="0" width="180" height="42" rx="21" fill="#FFFFFF" stroke="#FFE4EC" />
+      <text x="90" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#3B1F2B" text-anchor="middle">Discreet Delivery</text>
+
+      <rect x="200" y="0" width="180" height="42" rx="21" fill="#FFFFFF" stroke="#FFE4EC" />
+      <text x="290" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#3B1F2B" text-anchor="middle">Gentle Comfort</text>
+
+      <rect x="400" y="0" width="180" height="42" rx="21" fill="#FFFFFF" stroke="#FFE4EC" />
+      <text x="490" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#3B1F2B" text-anchor="middle">Easy Ordering</text>
+    </g>
+  </g>
+</svg>

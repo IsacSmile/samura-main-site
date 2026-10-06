@@ -209,7 +209,7 @@ export async function getShopProducts(params: ShopFilterParams = {}) {
           reviewCount: count(),
         })
         .from(reviews)
-        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "approved")));
+        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "published")));
 
       return {
         ...prod,
@@ -286,11 +286,11 @@ export async function getProductBySlug(slug: string) {
     .where(eq(productImages.productId, product.id))
     .orderBy(desc(productImages.isPrimary), asc(productImages.sortOrder));
 
-  // Fetch approved reviews only (never fake data)
-  const approvedReviews = await db
+  // Fetch published reviews only (never fake data)
+  const publishedReviews = await db
     .select()
     .from(reviews)
-    .where(and(eq(reviews.productId, product.id), eq(reviews.status, "approved")))
+    .where(and(eq(reviews.productId, product.id), eq(reviews.status, "published")))
     .orderBy(desc(reviews.createdAt));
 
   return {
@@ -298,7 +298,7 @@ export async function getProductBySlug(slug: string) {
     category: category ?? null,
     variants,
     images,
-    approvedReviews,
+    publishedReviews,
   };
 }
 
@@ -341,7 +341,7 @@ export async function getRelatedProducts(
           reviewCount: count(),
         })
         .from(reviews)
-        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "approved")));
+        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "published")));
 
       return {
         ...prod,
@@ -391,7 +391,7 @@ export async function recomputeProductRating(productId: string) {
       reviewCount: count(),
     })
     .from(reviews)
-    .where(and(eq(reviews.productId, productId), eq(reviews.status, "approved")));
+    .where(and(eq(reviews.productId, productId), eq(reviews.status, "published")));
 
   const avg = stats ? Math.round(Number(stats.avgRating) * 10) / 10 : 0;
   const total = stats ? Number(stats.reviewCount) : 0;

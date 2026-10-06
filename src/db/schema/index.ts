@@ -396,7 +396,7 @@ export const reviews = sqliteTable("reviews", {
   rating: integer("rating").notNull().default(5),
   title: text("title"),
   body: text("body").notNull(),
-  status: text("status", { enum: ["pending", "approved", "rejected"] })
+  status: text("status", { enum: ["pending", "published", "rejected"] })
     .notNull()
     .default("pending"),
   isVerified: integer("is_verified", { mode: "boolean" }).notNull().default(true),

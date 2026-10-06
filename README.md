@@ -4,6 +4,23 @@ Samaura Healthcare is an enterprise-grade e-commerce web application for gentle,
 
 ---
 
+## 📸 Client Photography Requirement Before Launch
+
+> **IMPORTANT LAUNCH NOTICE FOR CLIENT:**
+> All banner graphics and catalog media currently use branded blush and pink typographic SVG placeholders located in `/public/banners/` and `/public/products/`. No stock photography, doctor imagery, or pharmaceutical packaging is used anywhere in the application.
+> **The client must supply real, high-resolution brand photography before production launch** to replace these placeholders. Upload client photos to Cloudinary or replace the local assets in `/public`.
+
+---
+
+## 🛡️ Marketing & Copy Compliance Guard
+
+This codebase includes an automated compliance scanner (`scripts/check-claims.ts`) enforcing zero unvalidated medical claims or exaggerated marketing terminology.
+- Prohibited phrasing includes unverified certifications, absolute percentages, medical claims, and unsupported longevity claims.
+- The guard runs automatically on `npm run check`, `npm run check-claims`, and during `npm run build`.
+- To register client-authorized and substantiated phrases, add them with verification references in `config/claims-allowlist.json`.
+
+---
+
 ## 🚀 Deployment Options
 
 ### Option A: Vercel + Turso Cloud (Recommended Serverless Architecture)
@@ -29,7 +46,7 @@ npm run db:migrate
 ```
 
 #### Step 3: Seed Initial Data
-Seed the production catalog, shipping rules, and admin user (without demo customers or coupons):
+Seed the production catalog, shipping rules, and admin user:
 ```bash
 NODE_ENV="production" \
 DATABASE_URL="libsql://samaura-prod-yourorg.turso.io" \
@@ -72,7 +89,9 @@ CMD ["npm", "start"]
 ```caddy
 samaura.com, www.samaura.com {
     encode gzip zstd
-    reverse_proxy localhost:3000
+    reverse_proxy localhost:3000 {
+        trusted_proxies private_ranges
+    }
 
     header {
         Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
@@ -82,6 +101,46 @@ samaura.com, www.samaura.com {
     }
 }
 ```
+
+---
+
+## 🔒 Rate Limiting & Trusted Proxy Configuration
+
+Samaura derives client IP addresses strictly from trusted reverse proxy headers to prevent IP spoofing:
+
+1. **Vercel**: Evaluates `x-vercel-forwarded-for` and `x-real-ip` provided by the Vercel Edge Network.
+2. **Caddy / Nginx**: Evaluates the leftmost client IP in `x-forwarded-for` only when forwarded from configured `trusted_proxies`. Ensure your reverse proxy strips untrusted client-supplied headers.
+
+Expired rate limit records are automatically pruned via a background sweeping utility in `src/lib/rateLimit.ts`.
+
+---
+
+## 💾 Database Backup Procedures
+
+### 1. Local SQLite Backup (Development / VPS)
+Creates a timestamped snapshot of `data/samaura.db` in `backups/`:
+```bash
+npm run db:backup
+```
+
+### 2. Turso Cloud Database Backup (Production)
+Dumps the point-in-time schema and data from Turso using the Turso CLI:
+```bash
+npm run db:backup:turso
+```
+Or manually run:
+```bash
+turso db shell samaura-prod .dump > backups/turso-dump-$(date +%F).sql
+```
+
+---
+
+## 🛡️ Razorpay CSP Directives
+
+The Content-Security-Policy header in `next.config.ts` includes the required Razorpay directives:
+- **`script-src`**: `'self'` `'unsafe-inline'` `'unsafe-eval'` `https://checkout.razorpay.com`
+- **`frame-src`**: `'self'` `https://api.razorpay.com` `https://checkout.razorpay.com`
+- **`connect-src`**: `'self'` `https://api.razorpay.com` `https://lumberjack.razorpay.com`
 
 ---
 
@@ -127,7 +186,7 @@ To ensure transactional emails reach the customer inbox:
 
 ## 💳 Razorpay Go-Live Checklist
 
-1. **KYC Approval**: Ensure business KYC is verified on Razorpay dashboard.
+1. **KYC Verification**: Ensure business KYC is verified on Razorpay dashboard.
 2. **Switch to Live Mode**: Toggle switch from Test to Live.
 3. **Generate Live Keys**: Under Settings > API Keys, generate Live Key ID & Secret.
 4. **Register Webhook**:

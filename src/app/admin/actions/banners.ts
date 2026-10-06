@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { banners } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { adminBannerSchema } from "@/lib/validation/schemas";
+import { checkClaims } from "@/lib/claims/guard";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -40,9 +41,10 @@ export async function upsertBannerAction(input: unknown) {
         })
         .where(eq(banners.id, data.id));
 
+      const claimCheck = checkClaims(data);
       revalidatePath("/admin/banners");
       revalidatePath("/");
-      return { success: true, message: "Banner updated successfully." };
+      return { success: true, message: "Banner updated successfully.", warning: claimCheck.warning };
     } else {
       await db.insert(banners).values({
         id: `bnr_${nanoid(10)}`,
@@ -57,9 +59,10 @@ export async function upsertBannerAction(input: unknown) {
         endDate,
       });
 
+      const claimCheck = checkClaims(data);
       revalidatePath("/admin/banners");
       revalidatePath("/");
-      return { success: true, message: "Banner created successfully." };
+      return { success: true, message: "Banner created successfully.", warning: claimCheck.warning };
     }
   } catch (error) {
     console.error("upsertBannerAction error:", error);

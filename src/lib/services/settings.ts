@@ -43,17 +43,17 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; description: stri
     value: "0",
     description: "Extra handling fee in paise for Cash on Delivery",
   },
-  trust_badge_certified_organic: {
-    value: "false",
-    description: "Enable '100% GOTS Certified' badge sitewide once certificate is verified",
+  trust_badge_cotton: {
+    value: "true",
+    description: "Enable 'Soft Pure Cotton' badge sitewide",
   },
-  trust_badge_dermatology: {
-    value: "false",
-    description: "Enable 'Dermatologically Tested' badge sitewide once lab reports are on file",
+  trust_badge_gentle: {
+    value: "true",
+    description: "Enable 'Gentle Everyday Care' badge sitewide",
   },
-  trust_badge_leak_guard: {
-    value: "false",
-    description: "Enable absolute leak guarantee badge once lab absorbency certificate exists",
+  trust_badge_protection: {
+    value: "true",
+    description: "Enable 'Secure Day & Night Protection' badge sitewide",
   },
   seller_name: {
     value: "Samaura Healthcare",

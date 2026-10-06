@@ -33,7 +33,7 @@ export interface ReviewItem {
   rating: number;
   title: string | null;
   body: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "published" | "rejected";
   isVerified: boolean;
   createdAt: string | Date;
 }
@@ -44,7 +44,7 @@ interface ReviewModerationTableProps {
 
 export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerationTableProps) {
   const [reviewsList, setReviewsList] = useState(initialReviews);
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "published" | "rejected">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -58,7 +58,7 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
     return {
       all: reviewsList.length,
       pending: reviewsList.filter((r) => r.status === "pending").length,
-      approved: reviewsList.filter((r) => r.status === "approved").length,
+      published: reviewsList.filter((r) => r.status === "published").length,
       rejected: reviewsList.filter((r) => r.status === "rejected").length,
     };
   }, [reviewsList]);
@@ -86,12 +86,12 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
     startTransition(async () => {
       const res = await approveReviewAction(id);
       if (!res.success) {
-        setToast({ type: "error", title: "Action Failed", message: res.error || "Could not approve review." });
+        setToast({ type: "error", title: "Action Failed", message: res.error || "Could not publish review." });
       } else {
         setReviewsList((prev) =>
-          prev.map((r) => (r.id === id ? { ...r, status: "approved" as const } : r))
+          prev.map((r) => (r.id === id ? { ...r, status: "published" as const } : r))
         );
-        setToast({ type: "success", title: "Approved", message: "Review is now published on storefront." });
+        setToast({ type: "success", title: "Published", message: "Review is now published on storefront." });
       }
     });
   };
@@ -179,14 +179,14 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
           </button>
           <button
             type="button"
-            onClick={() => setFilterStatus("approved")}
+            onClick={() => setFilterStatus("published")}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
-              filterStatus === "approved"
+              filterStatus === "published"
                 ? "bg-emerald-600 text-white shadow-xs"
                 : "text-muted hover:text-ink"
             }`}
           >
-            Approved ({counts.approved})
+            Published ({counts.published})
           </button>
           <button
             type="button"
@@ -274,9 +274,9 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
                   </div>
 
                   <div className="flex items-center gap-2 self-start sm:self-auto">
-                    {rev.status === "approved" && (
+                    {rev.status === "published" && (
                       <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Approved
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Published
                       </span>
                     )}
                     {rev.status === "pending" && (
@@ -319,7 +319,7 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
 
                 {/* Bottom Row: Moderation Actions */}
                 <div className="flex items-center justify-end gap-2 pt-2 border-t border-blush/40">
-                  {rev.status !== "approved" && (
+                  {rev.status !== "published" && (
                     <Button
                       variant="secondary"
                       size="sm"
@@ -328,7 +328,7 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
                       className="text-xs h-8 px-3 border-emerald-200 text-emerald-700 hover:bg-emerald-50 flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      Approve
+                      Publish
                     </Button>
                   )}
 

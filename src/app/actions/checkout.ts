@@ -18,6 +18,7 @@ import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 import { checkRateLimit } from "@/lib/rateLimit";
+import { validatePincodeState } from "@/lib/validation/pincode";
 
 const checkoutActionSchema = z.object({
   customerName: z.string().min(2, "Full name must be at least 2 characters").max(100),
@@ -59,6 +60,12 @@ export async function processCheckoutAction(rawInput: unknown) {
     }
 
     const data = parsed.data;
+
+    // Validate PIN code against state
+    const pinCheck = validatePincodeState(data.postalCode, data.state);
+    if (!pinCheck.isValid) {
+      return { success: false, error: pinCheck.error || "PIN code does not match the selected state." };
+    }
 
     // 2. Extract Client IP
     const headerList = await headers();

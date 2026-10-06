@@ -116,11 +116,11 @@ export default async function HomePage() {
     .where(eq(pages.slug, "why-samaura"))
     .limit(1);
 
-  // 6. Fetch approved verified customer reviews ONLY (no placeholders or fake ratings)
-  const approvedReviews = await db
+  // 6. Fetch published verified customer reviews ONLY (no placeholders or fake ratings)
+  const publishedReviews = await db
     .select()
     .from(reviews)
-    .where(and(eq(reviews.isVerified, true), eq(reviews.status, "approved")))
+    .where(and(eq(reviews.isVerified, true), eq(reviews.status, "published")))
     .limit(3);
 
   // 7. Fetch published blog posts
@@ -384,9 +384,9 @@ export default async function HomePage() {
       </section>
 
       {/* --------------------------------------------------------------------- */}
-      {/* 5. VERIFIED REVIEWS (RENDERED ONLY IF APPROVED REVIEWS EXIST IN DB) */}
+      {/* 5. VERIFIED REVIEWS (RENDERED ONLY IF PUBLISHED REVIEWS EXIST IN DB) */}
       {/* --------------------------------------------------------------------- */}
-      {approvedReviews.length > 0 && (
+      {publishedReviews.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
             <span className="text-xs font-bold uppercase tracking-wider text-brand">
@@ -401,7 +401,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {approvedReviews.map((rev) => (
+            {publishedReviews.map((rev) => (
               <div
                 key={rev.id}
                 className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs space-y-4 flex flex-col justify-between"

@@ -65,7 +65,7 @@ function parseFaqContent(markdown: string): { introHtml: string; items: FaqItem[
       {
         question: "What makes Samaura pads gentle and breathable?",
         answerHtml: renderMarkdownToHtml(
-          "*(Replace with client content)*\n\nSamaura pads use soft pure cotton topsheets and breathable plant-based backing free from chlorine bleach, synthetic perfumes, or harsh chemical dyes."
+          "*(Replace with client content)*\n\nSamaura pads use soft pure cotton topsheets and breathable plant-based backing crafted without chlorine bleach, synthetic perfumes, or harsh chemical dyes."
         ),
       },
       {

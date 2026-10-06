@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { pages } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { adminPageSchema } from "@/lib/validation/schemas";
+import { checkClaims } from "@/lib/claims/guard";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -47,10 +48,11 @@ export async function upsertPageAction(input: unknown) {
       });
     }
 
+    const claimCheck = checkClaims(data);
     revalidatePath("/admin/pages");
     revalidatePath(`/${data.slug}`);
     revalidatePath("/");
-    return { success: true, message: `Page "${data.title}" updated successfully.` };
+    return { success: true, message: `Page "${data.title}" updated successfully.`, warning: claimCheck.warning };
   } catch (error) {
     console.error("upsertPageAction error:", error);
     return { success: false, message: "Failed to save page." };

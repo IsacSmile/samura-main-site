@@ -45,6 +45,7 @@ next-env.d.ts
 data/
 data/*.db
 data/*.db-journal
+backups/
 uploads/
 /uploads
 /public/uploads/
