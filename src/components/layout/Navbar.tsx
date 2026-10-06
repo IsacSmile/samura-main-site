@@ -156,18 +156,18 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
                     </button>
 
                     {/* Dropdown Menu */}
-                    <div className="absolute top-full left-0 w-80 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200">
+                    <div className="absolute top-full left-0 w-80 sm:w-88 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 whitespace-normal">
                       <div className="bg-white rounded-3xl shadow-xl border border-pink-light p-3 space-y-1">
                         {link.dropdown.map((cat) => (
                           <Link
                             key={cat.name}
                             href={cat.href}
-                            className="block p-2.5 rounded-2xl hover:bg-blush transition-colors group/item"
+                            className="block p-3 rounded-2xl hover:bg-blush transition-colors group/item"
                           >
                             <div className="text-sm font-semibold text-ink group-hover/item:text-brand-dark">
                               {cat.name}
                             </div>
-                            <div className="text-xs text-muted mt-0.5">
+                            <div className="text-xs text-muted mt-0.5 leading-relaxed">
                               {cat.desc}
                             </div>
                           </Link>
