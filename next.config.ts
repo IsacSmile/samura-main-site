@@ -14,6 +14,7 @@ const scriptSrc = [
 
 const connectSrc = [
   "'self'",
+  ...(isProduction ? [] : ["ws:", "wss:"]),
   "https://api.razorpay.com",
   "https://lumberjack.razorpay.com",
   ...(hasGa ? ["https://www.google-analytics.com", "https://analytics.google.com"] : []),
