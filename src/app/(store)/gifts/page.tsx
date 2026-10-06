@@ -85,7 +85,7 @@ export default async function GiftsPage() {
             return (
               <div
                 key={item.title}
-                className="bg-white rounded-3xl p-7 border border-pink-light shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow group"
+                className="h-full bg-white rounded-3xl p-7 border border-pink-light shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow group"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">

@@ -226,7 +226,7 @@ export default async function HomePage() {
               return (
                 <div
                   key={card.title}
-                  className="bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+                  className="h-full bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-5"
                 >
                   <div className="space-y-4">
                     <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center shadow-xs">
@@ -275,7 +275,7 @@ export default async function HomePage() {
               return (
                 <div
                   key={card.title}
-                  className="bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6"
+                  className="h-full bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6"
                 >
                   <div className="space-y-3">
                     <h3 className="font-heading font-bold text-lg sm:text-xl text-ink leading-snug">
@@ -339,7 +339,7 @@ export default async function HomePage() {
               return (
                 <div
                   key={card.title}
-                  className="bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6"
+                  className="h-full bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6"
                 >
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
