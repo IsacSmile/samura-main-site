@@ -74,6 +74,7 @@ export interface InitialProductData {
   isFeatured: boolean;
   isBestseller: boolean;
   isActive: boolean;
+  isSample?: boolean;
   variants: VariantItem[];
   images: ProductImageItem[];
 }
@@ -371,8 +372,8 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     setFaqs((prev) => [
       ...prev,
       {
-        question: "Is this product suitable for sensitive skin?",
-        answer: "Yes, our gentle formula is formulated for sensitive skin and free of harsh chemicals.",
+        question: "Is this product designed for sensitive skin?",
+        answer: "Yes, our gentle formula is crafted for comfort and delicate care.",
       },
     ]);
   };
@@ -505,9 +506,16 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-serif text-ink tracking-tight font-medium">
-              {isEditing ? `Edit Product: ${initialData?.name}` : "Create New Product"}
-            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-serif text-ink tracking-tight font-medium">
+                {isEditing ? `Edit Product: ${initialData?.name}` : "Create New Product"}
+              </h1>
+              {(initialData?.isSample || initialData?.id?.startsWith("prod_")) && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                  Sample data. Replace with client product details.
+                </span>
+              )}
+            </div>
             <p className="text-xs text-muted mt-0.5">
               Enter catalog details, specifications, variants, and upload imagery.
             </p>
@@ -1046,7 +1054,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
               </label>
               <textarea
                 rows={4}
-                placeholder="e.g. Holds up to 120ml of liquid. Suitable for medium to heavy flow days. Change every 4-6 hours..."
+                placeholder="e.g. Daytime comfort and fluid absorption. Change every 4-6 hours..."
                 value={absorptionGuide}
                 onChange={(e) => setAbsorptionGuide(e.target.value)}
                 className="w-full p-3 rounded-xl border border-blush text-xs bg-white text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all resize-y"

@@ -34,10 +34,13 @@ export async function generateMetadata({
   const primaryImage = product.images.find((i) => i.isPrimary)?.url || "/products/day-pads.svg";
 
   return {
-    title: `${product.name} | Gentle Cotton Care`,
+    title: `${product.name} | Samaura Healthcare`,
     description:
       product.shortDescription ||
-      `Buy ${product.name} from Samaura Healthcare. Soft breathable cotton, gentle everyday comfort, and delivered in plain discreet packaging.`,
+      `Explore ${product.name} from Samaura Healthcare. Practical menstrual hygiene solutions, awareness, and care.`,
+    alternates: {
+      canonical: `/product/${product.slug}`,
+    },
     openGraph: {
       title: `${product.name} | Samaura Healthcare`,
       description: product.shortDescription || undefined,
@@ -126,7 +129,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-14 pb-24 sm:pb-12">
         {/* Breadcrumb Navigation */}
         <nav
           aria-label="Breadcrumb"
@@ -199,7 +202,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                       href="#reviews"
                       className="text-muted hover:text-brand underline decoration-dotted transition-colors"
                     >
-                      {reviewCount} verified {reviewCount === 1 ? "review" : "reviews"}
+                      {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
                     </a>
                   </>
                 ) : (
@@ -258,28 +261,36 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
         </div>
 
-        {/* Detailed Information Accordion */}
-        <section className="pt-8 border-t border-blush max-w-4xl mx-auto space-y-6">
-          <div className="text-center space-y-1">
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
-              Product Specifications &amp; Care
-            </h2>
-            <p className="text-xs sm:text-sm text-muted">
-              Everything you need to know about material composition, wear instructions, and answers.
-            </p>
-          </div>
+        {/* Detailed Information Accordion (Render only when field has content) */}
+        {Boolean(
+          product.ingredients?.trim() ||
+          product.absorptionGuide?.trim() ||
+          product.usageGuide?.trim() ||
+          (product.features && product.features !== "[]" && product.features !== "") ||
+          (product.faq && product.faq !== "[]" && product.faq !== "")
+        ) && (
+          <section className="pt-8 border-t border-blush max-w-4xl mx-auto space-y-6">
+            <div className="text-center space-y-1">
+              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
+                Product Specifications &amp; Care
+              </h2>
+              <p className="text-xs sm:text-sm text-muted">
+                Everything you need to know about material composition, wear instructions, and answers.
+              </p>
+            </div>
 
-          <ProductAccordion
-            ingredients={product.ingredients}
-            absorptionGuide={product.absorptionGuide}
-            usageGuide={product.usageGuide}
-            features={product.features}
-            faq={product.faq}
-            flowType={product.flowType}
-          />
-        </section>
+            <ProductAccordion
+              ingredients={product.ingredients}
+              absorptionGuide={product.absorptionGuide}
+              usageGuide={product.usageGuide}
+              features={product.features}
+              faq={product.faq}
+              flowType={product.flowType}
+            />
+          </section>
+        )}
 
-        {/* Verified Customer Reviews Section */}
+        {/* Customer Reviews Section */}
         <section id="reviews" className="pt-12 max-w-4xl mx-auto scroll-mt-28">
           <ProductReviews
             productId={product.id}

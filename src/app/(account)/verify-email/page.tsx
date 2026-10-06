@@ -79,7 +79,7 @@ function VerifyEmailContent() {
 
             <div className="space-y-2">
               <h1 className="font-heading font-extrabold text-2xl text-ink">
-                Email Successfully Verified!
+                Email Successfully Confirmed!
               </h1>
               <p className="text-xs text-muted leading-relaxed">
                 Your email address has been confirmed. You now have full access to your Samaura account.
@@ -92,7 +92,7 @@ function VerifyEmailContent() {
               </div>
             ) : (
               <div className="p-3 bg-blush/60 border border-pink-light rounded-2xl text-xs text-muted">
-                Your account is verified and ready for seamless shopping and tracking.
+                Your account is confirmed and ready for seamless shopping and tracking.
               </div>
             )}
 

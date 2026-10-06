@@ -6,9 +6,9 @@ Samaura Healthcare is an enterprise-grade e-commerce web application for gentle,
 
 ## 📸 Client Photography Requirement Before Launch
 
-> **IMPORTANT LAUNCH NOTICE FOR CLIENT:**
-> All banner graphics and catalog media currently use branded blush and pink typographic SVG placeholders located in `/public/banners/` and `/public/products/`. No stock photography, doctor imagery, or pharmaceutical packaging is used anywhere in the application.
-> **The client must supply real, high-resolution brand photography before production launch** to replace these placeholders. Upload client photos to Cloudinary or replace the local assets in `/public`.
+> **IMPORTANT LAUNCH NOTICE FOR CLIENT (Data_for_website.docx):**
+> In accordance with project requirements, none of the images from `Data_for_website.docx` were used. The application strictly utilizes branded blush typographic cards and clean SVG vector artwork across all pages.
+> **The client must supply real, high-resolution photography before production launch** for Samaura Menstrual Cups, educational publications/books, and gift hampers/kits. Real photos can be uploaded via the admin panel or added to `/public`.
 
 ---
 
@@ -158,7 +158,7 @@ The Content-Security-Policy header in `next.config.ts` includes the required Raz
 | `RAZORPAY_KEY_SECRET` | When online enabled | Razorpay Key Secret |
 | `RAZORPAY_WEBHOOK_SECRET` | When online enabled | Razorpay Webhook Secret for HMAC verification |
 | `RESEND_API_KEY` | Optional | Resend API Key (`re_...`). Logs to console if unset |
-| `RESEND_FROM_EMAIL` | Optional | Outbound verified sender (`orders@samaura.com`) |
+| `RESEND_FROM_EMAIL` | Optional | Outbound authorized sender (`orders@samaura.com`) |
 | `ADMIN_ALERT_EMAIL` | Optional | Recipient for new order admin alerts (`admin@samaura.com`) |
 | `STORAGE_PROVIDER` | Optional | `local` (default) or `cloudinary` |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary only | Cloudinary cloud name |
@@ -186,7 +186,7 @@ To ensure transactional emails reach the customer inbox:
 
 ## 💳 Razorpay Go-Live Checklist
 
-1. **KYC Verification**: Ensure business KYC is verified on Razorpay dashboard.
+1. **KYC Verification**: Ensure business KYC is confirmed on Razorpay dashboard.
 2. **Switch to Live Mode**: Toggle switch from Test to Live.
 3. **Generate Live Keys**: Under Settings > API Keys, generate Live Key ID & Secret.
 4. **Register Webhook**:

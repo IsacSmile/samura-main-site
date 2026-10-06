@@ -17,6 +17,7 @@ export default async function AdminProductsPage() {
       basePricePaise: products.basePricePaise,
       salePricePaise: products.salePricePaise,
       isActive: products.isActive,
+      isSample: products.isSample,
       isFeatured: products.isFeatured,
       isBestseller: products.isBestseller,
       updatedAt: products.updatedAt,

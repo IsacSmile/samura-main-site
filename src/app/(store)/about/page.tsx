@@ -10,7 +10,8 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "About Us | Samaura Healthcare",
-  description: "Learn about Samaura's mission for gentle, thoughtful intimate hygiene and breathable comfort.",
+  description:
+    "We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.",
 };
 
 export default async function AboutPage() {
@@ -20,10 +21,24 @@ export default async function AboutPage() {
     .where(eq(pages.slug, "about"))
     .limit(1);
 
-  const title = aboutPage?.title || "About Samaura Healthcare";
+  const title = aboutPage?.title || "About Us";
   const content =
     aboutPage?.content ||
-    `## Our Purpose\n\n*(Replace with client content)*\n\nSamaura Healthcare was founded to provide gentle, thoughtfully designed intimate hygiene products that respect sensitive skin and body wellness.\n\n### Core Tenets\n\n- Pure cotton topsheets\n- Chlorine-free core\n- Neutral, discreet packaging`;
+    `We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.
+
+Our work focuses on educating young girls and children approaching menstrual age, breaking the stigma surrounding menstruation, and helping individuals understand menstrual hygiene, manage challenges, and make informed choices about their menstrual health.
+
+Through educational publications, awareness programmes, community outreach, and menstrual hygiene initiatives, we aim to create a society where menstruation is understood, discussed openly, and managed with confidence and dignity.
+
+As the brand owners of Samaura Menstrual Cups, we also promote awareness and informed adoption of menstrual cups as a reusable alternative to disposable sanitary pads, supporting individuals who wish to transition towards more sustainable menstrual hygiene practices.
+
+Our mission is to combine education, awareness, and accessible menstrual hygiene solutions to make a meaningful difference in the lives of women and girls.
+
+### Mission
+To empower women, girls, and young people through accessible menstrual health education, community awareness, and practical menstrual hygiene solutions, ensuring that no one is left uninformed or unsupported during menstruation.
+
+### Vision
+A society where menstruation is free from stigma, every young person has access to age-appropriate menstrual education, and every individual can make informed choices about menstrual hygiene with confidence, dignity, and access to appropriate products.`;
 
   return (
     <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
@@ -32,7 +47,7 @@ export default async function AboutPage() {
         <div className="text-center space-y-4 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Our Origin &amp; Commitment</span>
+            <span>Our Purpose &amp; Mission</span>
           </div>
           <h1 className="font-heading font-extrabold text-3xl sm:text-5xl text-ink leading-tight">
             {title}
@@ -40,14 +55,6 @@ export default async function AboutPage() {
           <p className="text-xs text-muted">
             Last updated: {aboutPage ? new Date(aboutPage.updatedAt).toLocaleDateString() : "Recent"}
           </p>
-        </div>
-
-        {/* Draft Template Notice Banner */}
-        <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-2xl flex items-center gap-3 text-xs sm:text-sm shadow-xs">
-          <span className="font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full text-[11px] uppercase tracking-wider shrink-0">
-            Draft Template
-          </span>
-          <span>Replace with client content before public launch.</span>
         </div>
 
         {/* Content Rendered from Pages Table */}

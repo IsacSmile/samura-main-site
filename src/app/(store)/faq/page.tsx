@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, HelpCircle } from "lucide-react";
 import { db } from "@/lib/db";
 import { pages } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -12,10 +12,14 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Frequently Asked Questions | Samaura Healthcare",
   description:
-    "Common questions about discreet shipping, pure cotton hygiene products, cup sizing, and returns.",
+    "Find answers about Samaura Menstrual Cups, educational programmes, awareness sessions, and gift collections.",
 };
 
-function parseFaqContent(markdown: string): { introHtml: string; items: FaqItem[] } {
+function parseFaqContent(markdown: string | null | undefined): { introHtml: string; items: FaqItem[] } {
+  if (!markdown || !markdown.trim()) {
+    return { introHtml: "", items: [] };
+  }
+
   const lines = markdown.split("\n");
   const introLines: string[] = [];
   const items: FaqItem[] = [];
@@ -53,36 +57,6 @@ function parseFaqContent(markdown: string): { introHtml: string; items: FaqItem[
     });
   }
 
-  // Fallback default items if none parsed
-  if (items.length === 0) {
-    items.push(
-      {
-        question: "Is the shipping packaging completely discreet?",
-        answerHtml: renderMarkdownToHtml(
-          "*(Replace with client content)*\n\nYes, absolutely. All orders arrive in plain brown cardboard boxes or opaque recyclable mailers without any brand logos, product names, or mentions of sanitary items on the outside label."
-        ),
-      },
-      {
-        question: "What makes Samaura pads gentle and breathable?",
-        answerHtml: renderMarkdownToHtml(
-          "*(Replace with client content)*\n\nSamaura pads use soft pure cotton topsheets and breathable plant-based backing crafted without chlorine bleach, synthetic perfumes, or harsh chemical dyes."
-        ),
-      },
-      {
-        question: "How do I choose the right menstrual cup size?",
-        answerHtml: renderMarkdownToHtml(
-          "*(Replace with client content)*\n\nSize S is recommended for menstruators under 25 or who have not given birth vaginally. Size M is for individuals above 25 or with regular to heavy flow. Size L is for very heavy flow or postpartum."
-        ),
-      },
-      {
-        question: "What is your return policy for hygiene items?",
-        answerHtml: renderMarkdownToHtml(
-          "*(Replace with client content)*\n\nIn accordance with hygiene and intimate wellness standards, opened products cannot be returned. If an item arrives damaged or defective, we provide an immediate replacement upon photo verification."
-        ),
-      }
-    );
-  }
-
   return {
     introHtml: renderMarkdownToHtml(introLines.join("\n")),
     items,
@@ -96,11 +70,7 @@ export default async function FAQPage() {
     .where(eq(pages.slug, "faq"))
     .limit(1);
 
-  const rawContent =
-    faqPage?.content ||
-    `## Frequently Asked Questions\n*(Replace with client content)*\n\n### Is the packaging completely discreet?\nAll orders arrive in plain brown boxes with confidential courier labels.\n\n### What materials are used?\nPure cotton topsheets and chlorine-free absorbent core.\n\n### What are delivery timelines?\nOrders dispatch within 24 hours. Metros take 2-3 business days.`;
-
-  const { introHtml, items } = parseFaqContent(rawContent);
+  const { introHtml, items } = parseFaqContent(faqPage?.content);
 
   return (
     <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
@@ -115,16 +85,8 @@ export default async function FAQPage() {
             {faqPage?.title || "Frequently Asked Questions"}
           </h1>
           <p className="text-muted text-sm sm:text-base leading-relaxed">
-            Everything you need to know about our products, discreet packaging guarantee, and care standards.
+            Guidance and answers regarding menstrual cup transition, educational initiatives, and gift collections.
           </p>
-        </div>
-
-        {/* Draft Template Notice Banner */}
-        <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-2xl flex items-center gap-3 text-xs sm:text-sm shadow-xs">
-          <span className="font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full text-[11px] uppercase tracking-wider shrink-0">
-            Draft Template
-          </span>
-          <span>Replace with client content before public launch.</span>
         </div>
 
         {introHtml && (
@@ -134,8 +96,31 @@ export default async function FAQPage() {
           />
         )}
 
-        {/* Accordion Component */}
-        <FaqAccordion items={items} />
+        {/* Accordion Component or Empty Notice */}
+        {items.length > 0 ? (
+          <FaqAccordion items={items} />
+        ) : (
+          <div className="bg-white rounded-3xl p-8 sm:p-10 border border-pink-light text-center space-y-4 shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-blush text-brand mx-auto flex items-center justify-center">
+              <HelpCircle className="w-6 h-6" />
+            </div>
+            <h2 className="font-heading font-bold text-lg text-ink">
+              FAQ Guide Coming Soon
+            </h2>
+            <p className="text-xs sm:text-sm text-muted max-w-md mx-auto leading-relaxed">
+              Our comprehensive FAQ guide is currently being updated. If you have questions regarding menstrual cups, awareness sessions, or gift collections, please reach out directly.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/contact"
+                className="btn-brand text-xs font-semibold py-2.5 px-6 shadow-xs inline-flex items-center gap-1.5"
+              >
+                <span>Ask a Question</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Footer Support Banner */}
         <div className="bg-blush rounded-3xl p-8 border border-pink-light text-center space-y-4">
@@ -143,11 +128,11 @@ export default async function FAQPage() {
             Have a question that is not listed here?
           </h3>
           <p className="text-xs text-muted max-w-md mx-auto">
-            Our customer care specialists are available for confidential assistance.
+            Our team is available to assist with questions on menstrual health education, product transition, or institutional partnerships.
           </p>
           <Link href="/contact">
             <button className="btn-brand text-xs font-semibold py-2.5 px-6 shadow-xs inline-flex items-center gap-1.5">
-              Contact Helpline <ArrowRight className="w-4 h-4 ml-1" />
+              Contact Us <ArrowRight className="w-4 h-4 ml-1" />
             </button>
           </Link>
         </div>

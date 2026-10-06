@@ -16,7 +16,7 @@ export default function CartPage() {
             Shopping Bag
           </h1>
           <p className="text-xs sm:text-sm text-muted mt-1">
-            Free discreet shipping across India on orders over ₹499.
+            Review your items and proceed to checkout.
           </p>
         </div>
 

@@ -23,7 +23,7 @@ export default async function ShippingReturnsPage() {
   const title = page?.title || "Shipping & Returns Policy";
   const content =
     page?.content ||
-    `## Shipping Timelines & Coverage\n*(Replace with client content)*\n\n- Orders dispatch within 24 hours (excluding national holidays).\n- Metro deliveries take 2–3 business days; other regions take 4–6 business days.\n\n### Discreet Packaging Guarantee\nEvery shipment is dispatched in a plain, unmarked box with confidential courier labels and zero product disclosures.\n\n### Hygiene & Returns Policy\nDue to hygiene and intimate health standards, opened sanitary items cannot be returned. Replacements are provided for damaged or verified defective items.`;
+    `## Shipping Timelines & Coverage\n*(Replace with client content)*\n\n- Orders dispatch within 24 hours (excluding national holidays).\n- Metro deliveries take 2–3 business days; other regions take 4–6 business days.\n\n### Discreet Packaging Standard\nEvery shipment is dispatched in a plain, unmarked box with confidential courier labels and no product disclosures.\n\n### Hygiene & Returns Policy\nDue to hygiene and intimate health standards, opened sanitary items cannot be returned. Replacements are provided for damaged or confirmed defective items.`;
 
   return (
     <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">

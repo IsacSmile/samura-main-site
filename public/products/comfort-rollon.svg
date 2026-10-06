@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <linearGradient id="bg_rol" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFF5F8" />
+      <stop offset="1" stop-color="#FFEBF0" />
+    </linearGradient>
+    <linearGradient id="box_rol" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#FFE4EB" />
+    </linearGradient>
+    <filter id="sh_rol" x="-15%" y="-15%" width="135%" height="135%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#5A0D1B" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="600" fill="url(#bg_rol)" />
+  <circle cx="480" cy="120" r="130" fill="#FFD9E2" opacity="0.38" />
+  <circle cx="100" cy="500" r="110" fill="#FFF1F4" opacity="0.6" />
+
+  <!-- Packaging Box -->
+  <g transform="translate(140, 90)" filter="url(#sh_rol)">
+    <rect width="320" height="420" rx="28" fill="url(#box_rol)" stroke="#E896AA" stroke-width="2" />
+    
+    <!-- Top Accent Band -->
+    <path d="M0 28 C0 12 12 0 28 0 L292 0 C308 0 320 12 320 28 L320 80 L0 80 Z" fill="#C8202F" />
+    <text x="160" y="48" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">SAMAURA</text>
+
+    <!-- Packaging Motif: Roll-on Bottle Silhouette -->
+    <g transform="translate(160, 205)">
+      <!-- Roller ball cap -->
+      <path d="M -24 -70 C -24 -88 24 -88 24 -70 Z" fill="#C8202F" />
+      <!-- Collar -->
+      <rect x="-26" y="-70" width="52" height="18" rx="4" fill="#FFEBF0" stroke="#F5A3B7" stroke-width="1.5" />
+      <!-- Bottle body -->
+      <rect x="-30" y="-52" width="60" height="115" rx="16" fill="#FFFFFF" stroke="#FFD9E2" stroke-width="2" />
+      <path d="M -16 5 C 0 -6 0 16 16 5" stroke="#F5A3B7" stroke-width="2" fill="none" stroke-linecap="round" />
+    </g>
+
+    <!-- Product Wordmark Bottom -->
+    <text x="160" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#2C1820" text-anchor="middle" letter-spacing="1">COMFORT ROLL-ON</text>
+    <circle cx="160" cy="370" r="4" fill="#C8202F" />
+  </g>
+</svg>

@@ -26,6 +26,8 @@ async function runPhase4Tests() {
     }
   }
 
+  const createdTestOrderIds: string[] = [];
+
   // --- Setup Test Fixtures in DB ---
   const testCategoryId = `test_cat_${Date.now()}`;
   await db.insert(categories).values({
@@ -228,6 +230,9 @@ async function runPhase4Tests() {
     const successes = [res1, res2].filter((r) => r.success);
     const failures = [res1, res2].filter((r) => !r.success);
 
+    if (res1.orderId) createdTestOrderIds.push(res1.orderId);
+    if (res2.orderId) createdTestOrderIds.push(res2.orderId);
+
     assert(
       successes.length === 1 && failures.length === 1,
       `Exactly 1 order succeeded and 1 failed (successes: ${successes.length}, failures: ${failures.length})`
@@ -269,6 +274,7 @@ async function runPhase4Tests() {
 
     assert(testOrderRes.success === true, "Order created for webhook test");
     const orderId = testOrderRes.orderId!;
+    if (orderId) createdTestOrderIds.push(orderId);
     const mockPaymentId = `pay_replay_test_${Date.now()}`;
 
     // First confirmation call
@@ -469,6 +475,13 @@ async function runPhase4Tests() {
   // Clean up test data
   // -------------------------------------------------------------
   try {
+    const { orders, orderItems, payments } = await import("../src/db/schema");
+    const { inArray } = await import("drizzle-orm");
+    if (createdTestOrderIds.length > 0) {
+      await db.delete(orderItems).where(inArray(orderItems.orderId, createdTestOrderIds));
+      await db.delete(payments).where(inArray(payments.orderId, createdTestOrderIds));
+      await db.delete(orders).where(inArray(orders.id, createdTestOrderIds));
+    }
     await db.delete(productVariants).where(eq(productVariants.productId, testProductId));
     await db.delete(products).where(eq(products.id, testProductId));
     await db.delete(categories).where(eq(categories.id, testCategoryId));

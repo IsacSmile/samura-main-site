@@ -42,10 +42,10 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${category.name} - Gentle & Breathable Care`,
+    title: `${category.name} | Samaura Healthcare`,
     description:
       category.description ||
-      `Explore Samaura's ${category.name}. Thoughtfully made for sensitive skin with mindful materials.`,
+      `Explore ${category.name} from Samaura Healthcare. Practical menstrual hygiene solutions and education.`,
     openGraph: {
       title: `${category.name} | Samaura Healthcare`,
       description: category.description || undefined,

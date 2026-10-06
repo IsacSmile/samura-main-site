@@ -1,129 +1,119 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { getImageProps } from "next/image";
+import { HERO_BANNER_CONFIG } from "@/config/banners";
 import {
+  BookOpen,
+  Users,
   Sparkles,
-  ShieldCheck,
-  ChevronRight,
-  Star,
-  Quote,
-  CheckCircle2,
+  Gift,
   ArrowRight,
-  Package,
+  ChevronRight,
+  Heart,
+  Quote,
+  Star,
+  CheckCircle2,
+  Building2,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import {
-  categories,
-  products,
-  productVariants,
-  productImages,
-  posts,
-  reviews,
-  banners,
   pages,
+  reviews,
+  posts,
 } from "@/lib/db/schema";
-import { eq, desc, asc, and, lte, gte, or, isNull } from "drizzle-orm";
-import { ProductCard } from "@/components/product/ProductCard";
-import { CategoryCard } from "@/components/product/CategoryCard";
-import { renderMarkdownToHtml } from "@/lib/markdown";
+import { eq, desc, and } from "drizzle-orm";
+import { getAllSettings } from "@/lib/services/settings";
 
 export const revalidate = 60; // ISR cache for 60 seconds
 
+function parseMarkdownCards(
+  content: string | undefined,
+  fallbackCards: { title: string; text: string }[]
+): { title: string; text: string }[] {
+  if (!content) return fallbackCards;
+  const sections = content.split(/^###\s+/m).filter(Boolean);
+  if (sections.length === 0) return fallbackCards;
+
+  return sections.map((sec, idx) => {
+    const lines = sec.trim().split("\n");
+    const title = lines[0]?.trim() || fallbackCards[idx]?.title || "";
+    const text =
+      lines
+        .slice(1)
+        .join("\n")
+        .trim() || fallbackCards[idx]?.text || "";
+    return { title, text };
+  });
+}
+
 export default async function HomePage() {
-  const now = new Date();
+  // 1. Fetch settings from settings table
+  const settingsMap = await getAllSettings();
 
-  // 1. Fetch active banners within active window
-  const activeBanners = await db
-    .select()
-    .from(banners)
-    .where(
-      and(
-        eq(banners.isActive, true),
-        or(isNull(banners.startDate), lte(banners.startDate, now)),
-        or(isNull(banners.endDate), gte(banners.endDate, now))
-      )
-    )
-    .orderBy(asc(banners.sortOrder));
+  // 2. Fetch admin-editable content from pages table
+  const allCmsPages = await db.select().from(pages);
+  const initiativesCms = allCmsPages.find((p) => p.slug === "home-initiatives");
+  const exploreCms = allCmsPages.find((p) => p.slug === "home-explore");
+  const giftsCms = allCmsPages.find((p) => p.slug === "home-gifts");
 
-  const heroBanner = activeBanners[0] || null;
-  const promoBanners = activeBanners.slice(1);
+  // 3. Fallback content matching Data_for_website.docx
+  const defaultInitiatives = [
+    {
+      title: "Menstrual Health Education & Publications",
+      text: "Providing age-appropriate menstrual health education to children and young people through educational programmes, books, and learning materials that promote understanding of menstruation, puberty, personal hygiene, and first-period preparedness.",
+    },
+    {
+      title: "Menstrual Awareness & Community Empowerment",
+      text: "Organising awareness sessions, workshops, and community outreach programmes to break menstrual stigma, address misconceptions, and empower women and girls across all sections of society to manage menstrual health with confidence and dignity.",
+    },
+    {
+      title: "Sustainable Menstrual Hygiene, Thoughtful Gifting & Partnerships",
+      text: "Promoting informed adoption of reusable menstrual products through Samaura Menstrual Cups, while developing thoughtfully curated gift packs for girls approaching menarche and for girls and women on special occasions. Through educational gifts and collaborations with schools, NGOs, communities, and CSR partners, we aim to make menstrual health education, awareness, and practical hygiene solutions more accessible.",
+    },
+  ];
 
-  // 2. Fetch active categories
-  const allCategories = await db
-    .select()
-    .from(categories)
-    .where(eq(categories.isActive, true))
-    .orderBy(asc(categories.sortOrder));
+  const defaultExplore = [
+    {
+      title: "Samaura Menstrual Cup",
+      text: "Learn about the product, its features, usage, care, and how to get started with reusable menstrual hygiene.",
+    },
+    {
+      title: "Learn Before You Transition",
+      text: "Access educational resources, FAQs, and guidance to help you make an informed decision about menstrual cups.",
+    },
+    {
+      title: "Awareness & Support",
+      text: "Participate in menstrual cup awareness sessions and educational programmes to learn more about reusable menstrual products.",
+    },
+  ];
 
-  // Helper to enrich products with variant and primary image
-  const enrichProducts = async (rawProducts: (typeof products.$inferSelect)[]) => {
-    return Promise.all(
-      rawProducts.map(async (prod) => {
-        const [defaultVar] = await db
-          .select()
-          .from(productVariants)
-          .where(eq(productVariants.productId, prod.id))
-          .orderBy(desc(productVariants.isDefault), asc(productVariants.sortOrder))
-          .limit(1);
+  const defaultGifts = [
+    {
+      title: "My First Period Gift Box",
+      text: "An age-appropriate gift pack for girls approaching menarche, combining educational publications, personal-care essentials, and thoughtful keepsakes to help them feel informed and supported.",
+    },
+    {
+      title: "Self-Care & Celebration Hampers",
+      text: "Customisable gift packs for birthdays, special occasions, and celebrations, designed for girls and women with personal-care products, accessories, and meaningful additions.",
+    },
+    {
+      title: "Custom & Institutional Gift Packs",
+      text: "Personalised gift kits for schools, NGOs, CSR initiatives, and organisations, tailored to age groups, budgets, and programme objectives.",
+    },
+  ];
 
-        const [primaryImg] = await db
-          .select()
-          .from(productImages)
-          .where(eq(productImages.productId, prod.id))
-          .orderBy(desc(productImages.isPrimary), asc(productImages.sortOrder))
-          .limit(1);
+  const initiativeCards = parseMarkdownCards(initiativesCms?.content, defaultInitiatives);
+  const exploreCards = parseMarkdownCards(exploreCms?.content, defaultExplore);
+  const giftCards = parseMarkdownCards(giftsCms?.content, defaultGifts);
 
-        return {
-          ...prod,
-          image: primaryImg?.url ?? null,
-          defaultVariant: defaultVar ?? null,
-        };
-      })
-    );
-  };
-
-  // 3. Fetch Featured Products
-  const rawFeatured = await db
-    .select()
-    .from(products)
-    .where(and(eq(products.isActive, true), eq(products.isFeatured, true)))
-    .limit(4);
-  const featuredProducts = await enrichProducts(rawFeatured);
-
-  // 4. Fetch Bestsellers Products
-  const rawBestsellers = await db
-    .select()
-    .from(products)
-    .where(and(eq(products.isActive, true), eq(products.isBestseller, true)))
-    .limit(4);
-  const bestsellerProducts = await enrichProducts(rawBestsellers);
-
-  // Fallback to recent products if no specific featured/bestsellers tagged
-  let displayProducts = featuredProducts;
-  if (displayProducts.length === 0) {
-    const rawAll = await db
-      .select()
-      .from(products)
-      .where(eq(products.isActive, true))
-      .limit(8);
-    displayProducts = await enrichProducts(rawAll);
-  }
-
-  // 5. Fetch "Why Samaura" content from pages table (admin-editable copy)
-  const [whySamauraPage] = await db
-    .select()
-    .from(pages)
-    .where(eq(pages.slug, "why-samaura"))
-    .limit(1);
-
-  // 6. Fetch published verified customer reviews ONLY (no placeholders or fake ratings)
+  // 4. Fetch published customer reviews ONLY (no fake reviews)
   const publishedReviews = await db
     .select()
     .from(reviews)
     .where(and(eq(reviews.isVerified, true), eq(reviews.status, "published")))
     .limit(3);
 
-  // 7. Fetch published blog posts
+  // 5. Fetch published blog posts ONLY
   const latestArticles = await db
     .select()
     .from(posts)
@@ -131,402 +121,381 @@ export default async function HomePage() {
     .orderBy(desc(posts.publishedAt))
     .limit(3);
 
+  // Hero Banner image props for <picture> art direction
+  const commonHeroProps = {
+    alt: HERO_BANNER_CONFIG.alt,
+    sizes: "100vw",
+    priority: true,
+  };
+
+  const {
+    props: { srcSet: desktopHeroSrcSet },
+  } = getImageProps({
+    ...commonHeroProps,
+    width: HERO_BANNER_CONFIG.desktop.width,
+    height: HERO_BANNER_CONFIG.desktop.height,
+    src: HERO_BANNER_CONFIG.desktop.src,
+  });
+
+  const {
+    props: { srcSet: mobileHeroSrcSet, ...mobileHeroRest },
+  } = getImageProps({
+    ...commonHeroProps,
+    width: HERO_BANNER_CONFIG.mobile.width,
+    height: HERO_BANNER_CONFIG.mobile.height,
+    src: HERO_BANNER_CONFIG.mobile.src,
+  });
+
   return (
-    <div className="space-y-16 lg:space-y-24 pb-16">
+    <div className="flex flex-col min-h-screen">
+      {/* Visually hidden h1 for accessibility & SEO */}
+      <h1 className="sr-only">Samaura Healthcare</h1>
+
       {/* --------------------------------------------------------------------- */}
-      {/* 1. HERO & PROMO BANNER SECTION (FROM BANNERS TABLE) */}
+      {/* 1. HERO BANNER (IMAGE-ONLY, ART-DIRECTED, ZERO CLS) */}
       {/* --------------------------------------------------------------------- */}
-      <section className="relative overflow-hidden bg-linear-to-b from-blush via-blush/60 to-white pt-10 pb-16 lg:pt-16 lg:pb-24 border-b border-pink-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-            {/* Left Copy */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              {heroBanner?.badge && (
-                <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
-                  <Sparkles className="w-3.5 h-3.5 text-brand" />
-                  <span>{heroBanner.badge}</span>
-                </div>
-              )}
-
-              <h1 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-6xl text-ink tracking-tight leading-tight">
-                {heroBanner?.title || "Thoughtfully Crafted Intimate Hygiene"}
-              </h1>
-
-              <p className="text-muted text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                {heroBanner?.subtitle ||
-                  "Gentle pure cotton period pads and breathable intimate essentials. Delivered with strictly confidential, plain packaging."}
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                <Link
-                  href={heroBanner?.link || "/shop"}
-                  className="btn-brand w-full sm:w-auto text-sm font-semibold py-3.5 px-8 shadow-md flex items-center justify-center gap-2"
-                >
-                  Explore Collection <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/about"
-                  className="w-full sm:w-auto text-xs font-semibold text-ink/80 hover:text-brand px-6 py-3.5 rounded-full border border-pink-light bg-white/80 hover:bg-white text-center transition-all"
-                >
-                  Why Samaura
-                </Link>
-              </div>
-
-              {/* Trust Badges Bar */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-6 border-t border-pink-light/70 text-left">
-                <div className="flex items-center gap-2 text-ink">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span className="text-xs font-medium">Soft Pure Cotton</span>
-                </div>
-                <div className="flex items-center gap-2 text-ink">
-                  <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
-                  <span className="text-xs font-medium">Discreet Packaging</span>
-                </div>
-                <div className="flex items-center gap-2 text-ink">
-                  <Package className="w-4 h-4 text-brand shrink-0" />
-                  <span className="text-xs font-medium">Pan-India Delivery</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Banner Image */}
-            <div className="lg:col-span-5 relative flex justify-center">
-              <div className="relative w-full max-w-md aspect-4/3 sm:aspect-square rounded-3xl overflow-hidden shadow-xl border-2 border-white bg-blush">
-                {heroBanner?.imageUrl ? (
-                  <Image
-                    src={heroBanner.imageUrl}
-                    alt={heroBanner.title}
-                    fill
-                    priority
-                    sizes="(max-width: 768px) 100vw, 500px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-linear-to-br from-blush to-pink-light/40">
-                    <Sparkles className="w-12 h-12 text-brand mb-3" />
-                    <span className="font-heading font-bold text-lg text-ink">
-                      Samaura Healthcare
-                    </span>
-                    <span className="text-xs text-muted mt-1">
-                      Breathable, Chlorine-Free Period Care
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Secondary Promo Banners Strip */}
-          {promoBanners.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-12">
-              {promoBanners.map((promo) => (
-                <Link
-                  key={promo.id}
-                  href={promo.link || "/shop"}
-                  className="group bg-white rounded-2xl p-4 border border-pink-light shadow-xs hover:shadow-md transition-all flex items-center gap-4"
-                >
-                  <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-blush shrink-0 border border-pink-light">
-                    {promo.imageUrl && (
-                      <Image
-                        src={promo.imageUrl}
-                        alt={promo.title}
-                        fill
-                        sizes="64px"
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    {promo.badge && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-brand">
-                        {promo.badge}
-                      </span>
-                    )}
-                    <h3 className="font-semibold text-xs text-ink truncate group-hover:text-brand transition-colors">
-                      {promo.title}
-                    </h3>
-                    {promo.subtitle && (
-                      <p className="text-[11px] text-muted truncate mt-0.5">
-                        {promo.subtitle}
-                      </p>
-                    )}
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted group-hover:text-brand group-hover:translate-x-0.5 transition-all shrink-0" />
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+      <section className="w-full overflow-hidden border-b border-pink-light/40 bg-blush">
+        <Link
+          href={HERO_BANNER_CONFIG.href}
+          aria-label={HERO_BANNER_CONFIG.ariaLabel}
+          className="block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+        >
+          <picture className="block w-full">
+            <source
+              media="(min-width: 768px)"
+              srcSet={desktopHeroSrcSet}
+              width={HERO_BANNER_CONFIG.desktop.width}
+              height={HERO_BANNER_CONFIG.desktop.height}
+            />
+            <source
+              media="(max-width: 767px)"
+              srcSet={mobileHeroSrcSet}
+              width={HERO_BANNER_CONFIG.mobile.width}
+              height={HERO_BANNER_CONFIG.mobile.height}
+            />
+            <img
+              {...mobileHeroRest}
+              fetchPriority="high"
+              decoding="async"
+              alt={HERO_BANNER_CONFIG.alt}
+              className="w-full h-auto block object-cover aspect-1536/2728 md:aspect-2728/1536"
+            />
+          </picture>
+        </Link>
       </section>
 
-      {/* --------------------------------------------------------------------- */}
-      {/* 2. CATEGORY TILES (FROM CATEGORIES TABLE) */}
-      {/* --------------------------------------------------------------------- */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-          <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-brand">
-              Curated Collections
+      {/* Secondary Promo Strip from Settings */}
+      <section className="bg-blush/40 py-3.5 border-b border-pink-light/40 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-xs sm:text-sm font-medium text-ink flex items-center justify-center flex-wrap gap-2">
+            <span>
+              {settingsMap["announcement_text"] ||
+                "✨ Menstrual Health Education, Awareness & Sustainable Menstrual Cups"}
             </span>
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
-              Shop by Category
-            </h2>
-          </div>
-          <Link
-            href="/shop"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark transition-colors group"
-          >
-            <span>View All Categories</span>
-            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {allCategories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
-          ))}
-        </div>
-      </section>
-
-      {/* --------------------------------------------------------------------- */}
-      {/* 3. FEATURED & BESTSELLER PRODUCTS (FROM DB) */}
-      {/* --------------------------------------------------------------------- */}
-      {featuredProducts.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand">
-                Editor&apos;s Selection
-              </span>
-              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
-                Featured Essentials
-              </h2>
-            </div>
             <Link
-              href="/shop"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark transition-colors group"
+              href="/about"
+              className="text-brand font-semibold hover:underline inline-flex items-center gap-0.5 ml-1"
             >
-              <span>Explore All</span>
-              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              Learn about our mission →
             </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {bestsellerProducts.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand">
-                Most Popular
-              </span>
-              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
-                Customer Bestsellers
-              </h2>
-            </div>
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark transition-colors group"
-            >
-              <span>Browse Catalog</span>
-              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {bestsellerProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* --------------------------------------------------------------------- */}
-      {/* 4. WHY SAMAURA (ADMIN-EDITABLE NEUTRAL COPY FROM DB) */}
-      {/* --------------------------------------------------------------------- */}
-      <section className="bg-blush/50 py-16 lg:py-20 border-y border-pink-light">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-brand">
-              Our Principles & Materials
-            </span>
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-ink">
-              {whySamauraPage?.title || "Why Samaura"}
-            </h2>
-          </div>
-
-          <div className="bg-white rounded-3xl p-8 sm:p-10 border border-pink-light shadow-xs">
-            {whySamauraPage?.content ? (
-              <div
-                className="prose prose-sm max-w-none text-muted leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: renderMarkdownToHtml(whySamauraPage.content),
-                }}
-              />
-            ) : (
-              <div className="text-xs sm:text-sm text-muted leading-relaxed space-y-4">
-                <p>
-                  Samaura Healthcare focuses on gentle, thoughtfully formulated intimate hygiene products. Our sanitary pads prioritize pure cotton topsheets and breathable plant-based layers.
-                </p>
-                <p>
-                  All products are shipped in neutral, unmarked cardboard boxes to ensure complete discretion and customer confidentiality.
-                </p>
-              </div>
-            )}
-          </div>
+          </p>
         </div>
       </section>
 
       {/* --------------------------------------------------------------------- */}
-      {/* 5. VERIFIED REVIEWS (RENDERED ONLY IF PUBLISHED REVIEWS EXIST IN DB) */}
+      {/* 2. OUR KEY INITIATIVES (3 NEUTRAL CARDS) */}
       {/* --------------------------------------------------------------------- */}
-      {publishedReviews.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-brand">
-              Verified Feedback
+      <section className="bg-white py-12 lg:py-18 border-b border-pink-light/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted">
+              What We Do
             </span>
-            <h2 className="font-heading font-bold text-3xl text-ink">
-              Customer Experiences
+            <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-ink">
+              {initiativesCms?.title || "Our Key Initiatives"}
             </h2>
-            <p className="text-sm text-muted">
-              Unfiltered reviews from verified buyers across India.
+            <p className="text-xs sm:text-sm text-muted">
+              Combining education, awareness, and accessible solutions across society.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {publishedReviews.map((rev) => (
-              <div
-                key={rev.id}
-                className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs space-y-4 flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <Quote className="w-8 h-8 text-pink-light" />
-                  <div className="flex items-center gap-1">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {initiativeCards.map((card, idx) => {
+              const icons = [BookOpen, Users, Sparkles];
+              const Icon = icons[idx] || Sparkles;
+              return (
+                <div
+                  key={card.title}
+                  className="bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+                >
+                  <div className="space-y-4">
+                    <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center shadow-xs">
+                      <Icon className="w-6 h-6" strokeWidth={1.75} />
+                    </div>
+                    <h3 className="font-heading font-bold text-lg sm:text-xl text-ink leading-snug">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                      {card.text}
+                    </p>
                   </div>
-                  <p className="text-sm text-ink leading-relaxed italic">
-                    &ldquo;{rev.body}&rdquo;
-                  </p>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-                <div className="pt-4 border-t border-blush flex items-center justify-between">
-                  <div>
+      {/* --------------------------------------------------------------------- */}
+      {/* 3. EXPLORE SAMAURA (3 NEUTRAL CARDS WITH LINKS) */}
+      {/* --------------------------------------------------------------------- */}
+      <section className="bg-blush/30 py-12 lg:py-18 border-b border-pink-light/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted">
+              Get Started
+            </span>
+            <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-ink">
+              {exploreCms?.title || "Explore Samaura"}
+            </h2>
+            <p className="text-xs sm:text-sm text-muted">
+              Discover reusable menstrual cups, educational guides, and community support.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {exploreCards.map((card, idx) => {
+              const links = [
+                { href: "/category/menstrual-cups", label: "Explore Menstrual Cups" },
+                { href: "/learn", label: "Read Transition Guide" },
+                { href: "/awareness", label: "View Awareness Programmes" },
+              ];
+              const target = links[idx] || { href: "/shop", label: "Learn More" };
+
+              return (
+                <div
+                  key={card.title}
+                  className="bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6"
+                >
+                  <div className="space-y-3">
+                    <h3 className="font-heading font-bold text-lg sm:text-xl text-ink leading-snug">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                      {card.text}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-blush">
+                    <Link
+                      href={target.href}
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-brand hover:text-brand-dark transition-colors group"
+                    >
+                      <span>{target.label}</span>
+                      <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------------------- */}
+      {/* 4. GIFT COLLECTIONS (3 NEUTRAL CARDS, LINK TO /gifts) */}
+      {/* --------------------------------------------------------------------- */}
+      <section className="bg-white py-12 lg:py-18 border-b border-pink-light/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted">
+                Thoughtful Care
+              </span>
+              <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-ink">
+                {giftsCms?.title || "Gift Collections"}
+              </h2>
+            </div>
+            <Link
+              href="/gifts"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-brand hover:text-brand-dark transition-colors group"
+            >
+              <span>View All Gift Collections</span>
+              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {giftCards.map((card, idx) => {
+              const icons = [Heart, Gift, Building2];
+              const Icon = icons[idx] || Gift;
+              const tags = [
+                "Menarche Support",
+                "Celebrations & Birthdays",
+                "Schools & CSR",
+              ];
+              const tag = tags[idx] || "Gift Kit";
+
+              return (
+                <div
+                  key={card.title}
+                  className="bg-white rounded-3xl p-7 sm:p-8 border border-pink-light shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-12 h-12 rounded-2xl bg-blush text-brand flex items-center justify-center shadow-xs">
+                        <Icon className="w-6 h-6" strokeWidth={1.75} />
+                      </div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-brand bg-blush/60 px-2.5 py-1 rounded-full border border-pink-light">
+                        {tag}
+                      </span>
+                    </div>
+                    <h3 className="font-heading font-bold text-lg sm:text-xl text-ink leading-snug">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                      {card.text}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-blush">
+                    <Link
+                      href="/gifts"
+                      className="btn-brand w-full text-xs font-semibold py-2.5 flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <span>Explore Collection</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------------------- */}
+      {/* CUSTOMER REVIEWS (RENDERED ONLY IF PUBLISHED REVIEWS EXIST IN DB) */}
+      {/* --------------------------------------------------------------------- */}
+      {publishedReviews.length > 0 && (
+        <section className="bg-blush/40 py-10 lg:py-16 border-b border-pink-light/40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted">
+                Feedback
+              </span>
+              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
+                Community Feedback
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {publishedReviews.map((rev) => (
+                <div
+                  key={rev.id}
+                  className="bg-white rounded-3xl p-6 sm:p-7 border border-pink-light shadow-xs space-y-4 flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <Quote className="w-7 h-7 text-pink-light" strokeWidth={1.75} />
+                    <div className="flex items-center gap-1">
+                      {[...Array(rev.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-ink leading-relaxed italic">
+                      &ldquo;{rev.body}&rdquo;
+                    </p>
+                  </div>
+                  <div className="pt-4 border-t border-blush flex items-center justify-between">
                     <h4 className="font-heading font-semibold text-sm text-ink">
                       {rev.userName}
                     </h4>
                     <span className="text-[11px] text-emerald-700 font-medium flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Verified Purchase
+                      <CheckCircle2 className="w-3 h-3" /> Community Review
                     </span>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
       )}
 
       {/* --------------------------------------------------------------------- */}
-      {/* 6. PERIOD HEALTH DESK HIGHLIGHTS (FROM BLOG POSTS) */}
+      {/* PERIOD HEALTH DESK (RENDERED ONLY IF PUBLISHED ARTICLES EXIST) */}
       {/* --------------------------------------------------------------------- */}
       {latestArticles.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand">
-                Hygiene Education
-              </span>
-              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
-                From the Period Health Desk
-              </h2>
-            </div>
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark transition-colors group"
-            >
-              <span>Read All Articles</span>
-              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {latestArticles.map((article) => (
+        <section className="bg-white py-10 lg:py-16 border-b border-pink-light/40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted">
+                  Educational Publications
+                </span>
+                <h2 className="font-heading font-bold text-2xl sm:text-3xl text-ink">
+                  From Our Health Desk
+                </h2>
+              </div>
               <Link
-                key={article.id}
-                href={`/blog/${article.slug}`}
-                className="group bg-white rounded-3xl border border-pink-light shadow-xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between"
+                href="/blog"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
               >
-                <div className="relative w-full aspect-16/10 bg-blush">
-                  {article.coverImage && (
-                    <Image
-                      src={article.coverImage}
-                      alt={article.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  )}
-                  <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-brand text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border border-pink-light">
-                    {article.category}
-                  </div>
-                </div>
-
-                <div className="p-5 space-y-2 flex-1 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <h3 className="font-heading font-semibold text-base text-ink group-hover:text-brand transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-                    <p className="text-xs text-muted line-clamp-2 leading-relaxed">
-                      {article.excerpt}
-                    </p>
-                  </div>
-
-                  <div className="pt-3 border-t border-blush flex items-center justify-between text-[11px] text-muted">
-                    <span>{article.readTime}</span>
-                    <span className="text-brand font-semibold flex items-center gap-1">
-                      Read Guide →
-                    </span>
-                  </div>
-                </div>
+                <span>Read All Publications</span>
+                <ChevronRight className="w-4 h-4" />
               </Link>
-            ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {latestArticles.map((article) => (
+                <Link
+                  key={article.id}
+                  href={`/blog/${article.slug}`}
+                  className="bg-white rounded-3xl border border-pink-light shadow-xs p-6 space-y-3 hover:shadow-md transition-all"
+                >
+                  <h3 className="font-heading font-bold text-base text-ink">
+                    {article.title}
+                  </h3>
+                  <p className="text-xs text-muted leading-relaxed line-clamp-3">
+                    {article.excerpt}
+                  </p>
+                  <span className="text-brand text-xs font-semibold inline-flex items-center gap-1 pt-2">
+                    Read Article →
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
       {/* --------------------------------------------------------------------- */}
-      {/* 7. DISCREET PACKAGING GUARANTEE */}
+      {/* 5. CLOSING PURPOSE BANNER */}
       {/* --------------------------------------------------------------------- */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-linear-to-r from-blush via-white to-blush border border-pink-light p-8 sm:p-12 shadow-xs flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center text-brand shrink-0">
-              <ShieldCheck className="w-8 h-8 text-brand" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-heading font-bold text-xl sm:text-2xl text-ink">
-                Strictly Confidential & Discreet Delivery
-              </h3>
-              <p className="text-sm text-muted max-w-xl">
-                Every order arrives in a completely plain brown cardboard box or opaque mailer. No mentions of pads, female hygiene, or periods anywhere on the outer label.
-              </p>
-            </div>
+      <section className="bg-linear-to-b from-blush/60 to-blush py-12 lg:py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-white mx-auto flex items-center justify-center text-ink shadow-xs border border-pink-light">
+            <Sparkles className="w-8 h-8 text-brand" strokeWidth={1.75} />
           </div>
-
-          <Link
-            href="/shop"
-            className="btn-brand whitespace-nowrap text-sm font-semibold py-3.5 px-8 shadow-md"
-          >
-            Shop Now →
-          </Link>
+          <div className="space-y-3 max-w-2xl mx-auto">
+            <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-ink">
+              Creating a Society Where Menstruation is Handled with Dignity
+            </h2>
+            <p className="text-xs sm:text-sm text-muted leading-relaxed">
+              We combine age-appropriate education, community outreach, and practical reusable hygiene solutions so no one is left uninformed or unsupported.
+            </p>
+          </div>
+          <div className="pt-2 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/about"
+              className="btn-brand text-xs sm:text-sm font-semibold py-3.5 px-8 shadow-md flex items-center gap-2"
+            >
+              About Our Purpose <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/contact?topic=awareness"
+              className="px-6 py-3.5 rounded-full text-xs sm:text-sm font-semibold bg-white border border-pink-light hover:bg-blush text-ink transition-colors shadow-xs"
+            >
+              Request a Workshop
+            </Link>
+          </div>
         </div>
       </section>
     </div>

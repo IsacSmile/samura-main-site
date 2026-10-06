@@ -23,16 +23,21 @@ if (process.env.NODE_ENV !== "production" && dbUrl.startsWith("file:")) {
   }
 }
 
+// Normalize libsql:// to https:// for fast, reliable HTTP transport in Next.js builds
+const clientUrl = dbUrl.startsWith("libsql://")
+  ? dbUrl.replace(/^libsql:\/\//, "https://")
+  : dbUrl;
+
 if (process.env.NODE_ENV === "production") {
   client = createClient({
-    url: dbUrl,
+    url: clientUrl,
     authToken,
   });
   db = drizzle(client, { schema });
 } else {
   if (!global.__samaura_client) {
     global.__samaura_client = createClient({
-      url: dbUrl,
+      url: clientUrl,
       authToken,
     });
   }

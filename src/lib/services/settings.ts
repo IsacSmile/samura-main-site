@@ -4,20 +4,20 @@ import { eq, asc } from "drizzle-orm";
 
 export const DEFAULT_SETTINGS: Record<string, { value: string; description: string }> = {
   announcement_text: {
-    value: "Free Discreet Shipping on orders above ₹499 | Code: WELCOME15",
+    value: "✨ Menstrual Health Education, Awareness & Sustainable Menstrual Cups",
     description: "Storefront top banner promo and announcement copy",
   },
   announcement_left_badge: {
-    value: "Gentle & Breathable Cotton",
-    description: "Announcement bar left badge copy (non-substantiated claim free)",
+    value: "Education & Awareness",
+    description: "Announcement bar left badge copy",
   },
   announcement_right_badge: {
-    value: "Delivered in Plain Discreet Packaging",
+    value: "Reusable Menstrual Cups",
     description: "Announcement bar right badge copy",
   },
   nav_offers_badge: {
-    value: "Offers",
-    description: "Badge text next to Offers & Bundles in navigation (from settings)",
+    value: "",
+    description: "Badge text next to navigation links (from settings)",
   },
   dispatch_time_text: {
     value: "Orders are dispatched within 24 hours of placement (excluding Sundays and national holidays)",
@@ -44,16 +44,16 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; description: stri
     description: "Extra handling fee in paise for Cash on Delivery",
   },
   trust_badge_cotton: {
-    value: "true",
-    description: "Enable 'Soft Pure Cotton' badge sitewide",
+    value: "false",
+    description: "Legacy cotton badge flag",
   },
   trust_badge_gentle: {
-    value: "true",
-    description: "Enable 'Gentle Everyday Care' badge sitewide",
+    value: "false",
+    description: "Legacy gentle care badge flag",
   },
   trust_badge_protection: {
-    value: "true",
-    description: "Enable 'Secure Day & Night Protection' badge sitewide",
+    value: "false",
+    description: "Legacy protection badge flag",
   },
   seller_name: {
     value: "Samaura Healthcare",
@@ -64,12 +64,52 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; description: stri
     description: "Physical dispatch center address printed on tax invoices",
   },
   seller_email: {
-    value: "care@samaura.com",
+    value: "samaurahealthcare@gmail.com",
     description: "Support contact email for billing inquiries",
   },
   seller_phone: {
-    value: "+91 98765 43210",
+    value: "+91 6282132510",
     description: "Support contact phone number",
+  },
+  contact_phone: {
+    value: "+91 6282132510",
+    description: "Customer support helpline phone number",
+  },
+  contact_email: {
+    value: "samaurahealthcare@gmail.com",
+    description: "Customer support helpline email address",
+  },
+  support_email: {
+    value: "samaurahealthcare@gmail.com",
+    description: "General support email address",
+  },
+  site_url: {
+    value: "https://www.samaurahealthcare.com",
+    description: "Official website domain URL",
+  },
+  whatsapp_number: {
+    value: "",
+    description: "Official WhatsApp helpline number (empty until confirmed)",
+  },
+  social_instagram: {
+    value: "",
+    description: "Instagram URL (empty to hide)",
+  },
+  social_facebook: {
+    value: "",
+    description: "Facebook URL (empty to hide)",
+  },
+  social_linkedin: {
+    value: "",
+    description: "LinkedIn URL (empty to hide)",
+  },
+  footer_description: {
+    value: "We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.",
+    description: "Footer overview description",
+  },
+  about_overview: {
+    value: "We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.",
+    description: "Brand purpose overview",
   },
   seller_gstin: {
     value: "",
@@ -77,7 +117,7 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; description: stri
   },
   show_gst_breakup: {
     value: "false",
-    description: "Flag to display explicit CGST/SGST breakup lines on invoice (do not enable without verified GSTIN)",
+    description: "Flag to display explicit CGST/SGST breakup lines on invoice (do not enable unless valid GSTIN is present)",
   },
 };
 

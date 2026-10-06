@@ -14,10 +14,10 @@ import {
   Truck,
   CreditCard,
   Banknote,
-  Lock,
   ArrowLeft,
   Loader2,
   AlertCircle,
+  AlertTriangle,
   ChevronRight,
   ShoppingBag,
 } from "lucide-react";
@@ -43,6 +43,7 @@ interface CheckoutConfig {
   providerName: string | null;
   codEnabled: boolean;
   codMaxOrderPaise: number;
+  dispatchTimeText?: string;
 }
 
 const INDIAN_STATES = [
@@ -191,6 +192,9 @@ export function CheckoutView() {
     }
   };
 
+  const [confirmAddressMismatch, setConfirmAddressMismatch] = useState(false);
+  const [pinWarning, setPinWarning] = useState<string | null>(null);
+
   const validateForm = () => {
     const errors: Record<string, string> = {};
 
@@ -220,10 +224,16 @@ export function CheckoutView() {
 
     if (!/^\d{6}$/.test(formData.postalCode.trim())) {
       errors.postalCode = "Please enter a valid 6-digit PIN code.";
+      setPinWarning(null);
     } else if (formData.state.trim()) {
       const pinCheck = validatePincodeState(formData.postalCode, formData.state);
       if (!pinCheck.isValid) {
-        errors.postalCode = pinCheck.error || "PIN code does not match the selected state.";
+        setPinWarning(pinCheck.error || "PIN code does not match the selected state.");
+        if (!confirmAddressMismatch) {
+          errors.postalCode = pinCheck.error || "PIN code does not match the selected state.";
+        }
+      } else {
+        setPinWarning(null);
       }
     }
 
@@ -274,11 +284,15 @@ export function CheckoutView() {
         items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })),
         idempotencyKey,
         saveAddress: config?.isLoggedIn ? formData.saveAddress : false,
+        confirmAddressMismatch,
       };
 
       const result = await processCheckoutAction(orderPayload);
 
       if (!result.success) {
+        if ((result as { warningMismatch?: boolean }).warningMismatch) {
+          setPinWarning(result.error || "PIN code does not match selected state.");
+        }
         setServerError(result.error || "Failed to place order.");
         setSubmitting(false);
         return;
@@ -400,7 +414,7 @@ export function CheckoutView() {
         </div>
         <h1 className="text-2xl font-bold font-serif text-stone-900">Your Cart is Empty</h1>
         <p className="text-sm text-stone-500">
-          Add natural menstrual care items to your cart before proceeding to checkout.
+          Add gentle menstrual care items to your cart before proceeding to checkout.
         </p>
         <div className="pt-2">
           <Link
@@ -565,31 +579,40 @@ export function CheckoutView() {
                       Select Delivery Address:
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {config.savedAddresses.map((addr) => (
-                        <div
-                          key={addr.id}
-                          onClick={() => handleSavedAddressChange(addr.id)}
-                          className={`p-3.5 rounded-2xl border cursor-pointer text-xs transition-all relative ${
-                            selectedAddressId === addr.id
-                              ? "border-brand bg-brand/5 ring-1 ring-brand"
-                              : "border-stone-200 hover:border-stone-300 bg-stone-50"
-                          }`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <span className="font-semibold text-stone-900">{addr.fullName}</span>
-                            {addr.isDefault && (
-                              <span className="text-[10px] bg-stone-200 text-stone-700 px-1.5 py-0.5 rounded font-medium">
-                                Default
-                              </span>
+                      {config.savedAddresses.map((addr) => {
+                        const pinCheck = validatePincodeState(addr.postalCode, addr.state);
+                        return (
+                          <div
+                            key={addr.id}
+                            onClick={() => handleSavedAddressChange(addr.id)}
+                            className={`p-3.5 rounded-2xl border cursor-pointer text-xs transition-all relative ${
+                              selectedAddressId === addr.id
+                                ? "border-brand bg-brand/5 ring-1 ring-brand"
+                                : "border-stone-200 hover:border-stone-300 bg-stone-50"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <span className="font-semibold text-stone-900">{addr.fullName}</span>
+                              {addr.isDefault && (
+                                <span className="text-[10px] bg-stone-200 text-stone-700 px-1.5 py-0.5 rounded font-medium">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-stone-600 mt-1 line-clamp-2">{addr.addressLine1}</p>
+                            <p className="text-stone-500 mt-0.5">
+                              {addr.city}, {addr.state} - {addr.postalCode}
+                            </p>
+                            <p className="text-stone-500 mt-1 font-sans">{addr.phone}</p>
+                            {!pinCheck.isValid && (
+                              <div className="mt-2 flex items-start gap-1.5 p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-tight">
+                                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600 mt-0.5" />
+                                <span>{pinCheck.error || "PIN code and state do not match."}</span>
+                              </div>
                             )}
                           </div>
-                          <p className="text-stone-600 mt-1 line-clamp-2">{addr.addressLine1}</p>
-                          <p className="text-stone-500 mt-0.5">
-                            {addr.city}, {addr.state} - {addr.postalCode}
-                          </p>
-                          <p className="text-stone-400 mt-1 font-mono">{addr.phone}</p>
-                        </div>
-                      ))}
+                        );
+                      })}
 
                       <div
                         onClick={() => handleSavedAddressChange("new")}
@@ -752,6 +775,34 @@ export function CheckoutView() {
                       </div>
                     </div>
 
+                    {pinWarning && (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs space-y-2 text-amber-900 animate-in fade-in">
+                        <p className="flex items-start gap-1.5 font-medium">
+                          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                          <span>{pinWarning}</span>
+                        </p>
+                        <label className="flex items-center gap-2 cursor-pointer font-medium text-stone-800 pt-1 select-none">
+                          <input
+                            type="checkbox"
+                            checked={confirmAddressMismatch}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setConfirmAddressMismatch(checked);
+                              if (checked) {
+                                setFormErrors((prev) => {
+                                  const copy = { ...prev };
+                                  delete copy.postalCode;
+                                  return copy;
+                                });
+                              }
+                            }}
+                            className="w-4 h-4 rounded border-stone-300 text-brand focus:ring-brand"
+                          />
+                          <span>My address is correct (Deliver to this PIN code & state)</span>
+                        </label>
+                      </div>
+                    )}
+
                     {config?.isLoggedIn && (
                       <div className="pt-1 flex items-center gap-2">
                         <input
@@ -796,92 +847,86 @@ export function CheckoutView() {
                     </span>
                     <span>Payment Method</span>
                   </h2>
-                  <div className="flex items-center gap-1 text-[11px] text-stone-400">
-                    <Lock className="w-3 h-3" />
-                    <span>256-bit Encrypted</span>
-                  </div>
                 </div>
 
                 <div className="space-y-3">
-                  {/* Online Payment (Razorpay or Mock) */}
-                  {config?.onlinePaymentAvailable && (
-                    <label
-                      className={`flex items-start gap-3.5 p-4 rounded-2xl border cursor-pointer transition-all ${
-                        paymentMethod === "razorpay" || paymentMethod === "mock"
-                          ? "border-brand bg-brand/5 ring-1 ring-brand"
-                          : "border-stone-200 hover:border-stone-300 bg-stone-50"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        id="payment-method-online"
-                        value={config.providerName === "mock" ? "mock" : "razorpay"}
-                        checked={paymentMethod === "razorpay" || paymentMethod === "mock"}
-                        onChange={() =>
-                          setPaymentMethod(config.providerName === "mock" ? "mock" : "razorpay")
-                        }
-                        className="mt-1 w-4 h-4 text-brand focus:ring-brand border-stone-300"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-                            <CreditCard className="w-4 h-4 text-brand" />
-                            <span>
-                              {config.providerName === "mock"
-                                ? "Pay Online (Sandbox Dev Gateway)"
-                                : "Pay Online via UPI, Cards, Netbanking"}
+                  {/* When only COD is available */}
+                  {!config?.onlinePaymentAvailable && config?.codEnabled ? (
+                    <div className="p-4 rounded-2xl border border-stone-200 bg-stone-50 flex items-center gap-3">
+                      <Banknote className="w-5 h-5 text-brand shrink-0" />
+                      <p className="text-sm font-medium text-stone-800">
+                        Pay when your order arrives
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Online Payment */}
+                      {config?.onlinePaymentAvailable && (
+                        <label
+                          className={`flex items-center gap-3.5 p-4 rounded-2xl border cursor-pointer transition-all ${
+                            paymentMethod === "razorpay" || paymentMethod === "mock"
+                              ? "border-brand bg-brand/5 ring-1 ring-brand"
+                              : "border-stone-200 hover:border-stone-300 bg-stone-50"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            id="payment-method-online"
+                            value={config.providerName === "mock" ? "mock" : "razorpay"}
+                            checked={paymentMethod === "razorpay" || paymentMethod === "mock"}
+                            onChange={() =>
+                              setPaymentMethod(config.providerName === "mock" ? "mock" : "razorpay")
+                            }
+                            className="w-4 h-4 text-brand focus:ring-brand border-stone-300"
+                          />
+                          <div className="flex-1 min-w-0 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+                              <CreditCard className="w-4 h-4 text-brand" />
+                              <span>Online Payment</span>
                             </span>
-                          </span>
-                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-full">
-                            Recommended
-                          </span>
-                        </div>
-                        <p className="text-xs text-stone-500 mt-1">
-                          Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit cards, Net Banking.
-                        </p>
-                      </div>
-                    </label>
-                  )}
+                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-full">
+                              Recommended
+                            </span>
+                          </div>
+                        </label>
+                      )}
 
-                  {/* Cash on Delivery (COD) */}
-                  {config?.codEnabled && (
-                    <label
-                      className={`flex items-start gap-3.5 p-4 rounded-2xl border transition-all ${
-                        !codAllowedForTotal
-                          ? "opacity-60 cursor-not-allowed bg-stone-50 border-stone-200"
-                          : paymentMethod === "cod"
-                          ? "border-brand bg-brand/5 ring-1 ring-brand cursor-pointer"
-                          : "border-stone-200 hover:border-stone-300 bg-stone-50 cursor-pointer"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        id="payment-method-cod"
-                        value="cod"
-                        disabled={!codAllowedForTotal}
-                        checked={paymentMethod === "cod"}
-                        onChange={() => setPaymentMethod("cod")}
-                        className="mt-1 w-4 h-4 text-brand focus:ring-brand border-stone-300 disabled:opacity-40"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-                            <Banknote className="w-4 h-4 text-stone-700" />
-                            <span>Cash on Delivery (COD)</span>
-                          </span>
-                          {!codAllowedForTotal && (
-                            <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                              Max {formatRupees(config.codMaxOrderPaise || 250000)}
+                      {/* Cash on Delivery (COD) */}
+                      {config?.codEnabled && (
+                        <label
+                          className={`flex items-center gap-3.5 p-4 rounded-2xl border transition-all ${
+                            !codAllowedForTotal
+                              ? "opacity-60 cursor-not-allowed bg-stone-50 border-stone-200"
+                              : paymentMethod === "cod"
+                              ? "border-brand bg-brand/5 ring-1 ring-brand cursor-pointer"
+                              : "border-stone-200 hover:border-stone-300 bg-stone-50 cursor-pointer"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            id="payment-method-cod"
+                            value="cod"
+                            disabled={!codAllowedForTotal}
+                            checked={paymentMethod === "cod"}
+                            onChange={() => setPaymentMethod("cod")}
+                            className="w-4 h-4 text-brand focus:ring-brand border-stone-300 disabled:opacity-40"
+                          />
+                          <div className="flex-1 min-w-0 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+                              <Banknote className="w-4 h-4 text-stone-700" />
+                              <span>Cash on Delivery</span>
                             </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-stone-500 mt-1">
-                          Pay in cash or via delivery executive UPI upon order handover at your doorstep.
-                        </p>
-                      </div>
-                    </label>
+                            {!codAllowedForTotal && (
+                              <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                                Max {formatRupees(config.codMaxOrderPaise || 250000)}
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -892,7 +937,10 @@ export function CheckoutView() {
               <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200 shadow-sm space-y-6 lg:sticky lg:top-24">
                 <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                   <h3 className="text-base font-semibold text-stone-900">
-                    Order Summary ({pricing?.itemCount || items.reduce((acc, i) => acc + i.quantity, 0)})
+                    Order Summary ({pricing?.itemCount || items.reduce((acc, i) => acc + i.quantity, 0)}{" "}
+                    {(pricing?.itemCount || items.reduce((acc, i) => acc + i.quantity, 0)) === 1
+                      ? "item"
+                      : "items"})
                   </h3>
                   <span className="text-[11px] text-stone-400">All prices in INR</span>
                 </div>
@@ -971,33 +1019,38 @@ export function CheckoutView() {
                   type="submit"
                   id="place-order-btn"
                   disabled={submitting || pricingLoading || (pricing && !pricing.isValid)}
-                  className="w-full py-4 px-6 rounded-full bg-brand hover:bg-brand/90 text-white font-medium text-sm tracking-wider uppercase shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 px-6 rounded-full bg-brand hover:bg-brand/90 text-white shadow-md transition-all flex flex-col items-center justify-center gap-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
-                    <>
+                    <div className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Processing Order...</span>
-                    </>
+                      <span className="text-sm font-semibold">Processing order...</span>
+                    </div>
                   ) : (
                     <>
-                      <ShieldCheck className="w-4 h-4" />
-                      <span>
-                        {paymentMethod === "cod" ? "Confirm & Place COD Order" : "Proceed to Payment"}
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4" />
+                        <span className="text-sm font-semibold">Place order</span>
+                      </div>
+                      <span className="text-[11px] text-white/80 font-normal">
+                        {paymentMethod === "cod" ? "Pay on delivery" : "Pay online"}
                       </span>
                     </>
                   )}
                 </button>
 
-                {/* Trust and Guarantees */}
+                {/* Trust and Assurances */}
                 <div className="pt-2 border-t border-stone-100 space-y-2 text-[11px] text-stone-500">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-3.5 h-3.5 text-stone-400 shrink-0" />
                     <span>Discreet billing and non-descript shipping box</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Truck className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                    <span>Orders dispatched within 24 hours</span>
-                  </div>
+                  {config?.dispatchTimeText && (
+                    <div className="flex items-center gap-2">
+                      <Truck className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                      <span>{config.dispatchTimeText}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

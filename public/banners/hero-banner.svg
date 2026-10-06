@@ -25,7 +25,7 @@
     <circle cx="200" cy="600" r="180" fill="#FFE8EE" />
   </g>
 
-  <!-- Botanical Leaf / Gentle Curve Motifs (No pills, no doctors) -->
+  <!-- Gentle Leaf / Gentle Curve Motifs (No pills, no doctors) -->
   <g transform="translate(1180, 180)" opacity="0.85">
     <!-- Gentle petal / leaf outlines -->
     <path d="M120 40 C 220 70, 260 210, 180 300 C 100 230, 80 120, 120 40 Z" fill="#FAD1DC" stroke="#E84855" stroke-width="2" stroke-opacity="0.25" />

@@ -89,20 +89,20 @@ export function ProductFilters({
   return (
     <>
       {/* Top Filter Bar (Sort, Search, Active Filter Tags, Mobile Drawer Trigger) */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-pink-light shadow-pink-xs mb-8 space-y-4 w-full max-w-full min-w-0 overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 w-full min-w-0">
+      <div className="bg-white rounded-3xl p-3.5 sm:p-5 border border-pink-light shadow-pink-xs mb-8 space-y-3.5 w-full max-w-full min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full min-w-0">
           {/* Search bar */}
           <form
             onSubmit={handleSearchSubmit}
-            className="w-full md:max-w-md relative flex items-center min-w-0"
+            className="w-full sm:max-w-md relative flex items-center min-w-0"
           >
             <Search className="w-4 h-4 text-muted absolute left-3.5 pointer-events-none shrink-0" />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search by pad, cup, wash, ingredients..."
-              className="w-full bg-blush/40 hover:bg-blush/70 focus:bg-white border border-pink-light rounded-full pl-10 pr-20 py-2.5 text-xs sm:text-sm text-ink placeholder:text-muted/60 transition-all focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand min-w-0"
+              placeholder="Search products..."
+              className="w-full bg-blush/40 hover:bg-blush/70 focus:bg-white border border-pink-light rounded-full pl-10 pr-20 py-2 text-xs sm:text-sm text-ink placeholder:text-muted/60 transition-all focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand min-w-0"
             />
             {searchInput && (
               <button
@@ -125,15 +125,15 @@ export function ProductFilters({
             </button>
           </form>
 
-          {/* Right: Results Count + Sort Dropdown + Mobile Filter Button */}
-          <div className="grid grid-cols-2 md:flex md:items-center md:justify-end gap-2.5 sm:gap-3 w-full md:w-auto min-w-0">
+          {/* Right: Sort Dropdown + Mobile Filter Button */}
+          <div className="flex items-center justify-between sm:justify-end gap-2.5 w-full sm:w-auto min-w-0">
             {/* Mobile Filter Toggle Button */}
             <button
               onClick={() => setIsOpenMobile(true)}
-              className="lg:hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-pink-light bg-blush text-ink text-xs font-semibold hover:bg-pink-light transition-colors w-full md:w-auto min-w-0"
+              className="lg:hidden inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-light bg-blush text-ink text-xs font-semibold hover:bg-pink-light transition-colors min-w-0 shrink-0"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-brand shrink-0" />
-              <span className="truncate">Filters</span>
+              <span>Filters</span>
               {hasActiveFilters && (
                 <span className="w-2 h-2 rounded-full bg-brand shrink-0" />
               )}
@@ -141,11 +141,11 @@ export function ProductFilters({
 
             {/* Desktop product count */}
             <span className="hidden md:inline-block text-xs text-muted font-medium shrink-0 whitespace-nowrap">
-              Showing <strong className="text-ink">{totalProducts}</strong> products
+              {totalProducts} products
             </span>
 
-            {/* Sort Selector: Bounded width and truncated text */}
-            <div className="flex items-center gap-1.5 bg-blush/40 border border-pink-light rounded-full px-2.5 sm:px-3 py-1.5 w-full md:w-auto min-w-0 overflow-hidden">
+            {/* Sort Selector */}
+            <div className="flex items-center gap-1.5 bg-blush/40 border border-pink-light rounded-full px-2.5 sm:px-3 py-1.5 min-w-0 shrink-0">
               <ArrowUpDown className="w-3.5 h-3.5 text-brand shrink-0" />
               <label htmlFor="shop-sort" className="sr-only">
                 Sort Products
@@ -154,7 +154,7 @@ export function ProductFilters({
                 id="shop-sort"
                 value={currentSort}
                 onChange={(e) => updateQuery({ sort: e.target.value })}
-                className="bg-transparent text-xs font-semibold text-ink focus:outline-none cursor-pointer w-full min-w-0 truncate"
+                className="bg-transparent text-xs font-semibold text-ink focus:outline-none cursor-pointer min-w-0"
               >
                 <option value="newest">Newest</option>
                 <option value="popular">Popular</option>
@@ -164,6 +164,7 @@ export function ProductFilters({
             </div>
           </div>
         </div>
+
 
         {/* Quick Category Chips Strip */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none w-full max-w-full min-w-0">

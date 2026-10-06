@@ -146,11 +146,11 @@ export function AdminCustomersView({ initialCustomers }: { initialCustomers: Cus
                     <td className="py-3.5 px-4">
                       {cust.emailVerified ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                          <CheckCircle2 className="w-3 h-3" /> Verified
+                          <CheckCircle2 className="w-3 h-3" /> Confirmed
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                          <XCircle className="w-3 h-3" /> Unverified
+                          <XCircle className="w-3 h-3" /> Unconfirmed
                         </span>
                       )}
                     </td>

@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { getSetting } from "@/lib/services/settings";
+import { formatPaymentMethod } from "@/lib/utils/statusLabels";
 
 const resendApiKey = process.env.RESEND_API_KEY || "";
 if (process.env.NODE_ENV === "production" && !resendApiKey) {
@@ -64,7 +65,7 @@ export async function sendOrderConfirmationEmail(props: OrderEmailProps): Promis
   const safeName = escapeHtml(customerName);
   const safeOrderNumber = escapeHtml(orderNumber);
   const safeTotal = escapeHtml(totalRupees);
-  const safePaymentMethod = escapeHtml(paymentMethod || "standard");
+  const safePaymentMethod = escapeHtml(formatPaymentMethod(paymentMethod));
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const orderUrl = publicToken ? `${siteUrl}/order/${publicToken}` : `${siteUrl}/account`;
@@ -102,7 +103,7 @@ export async function sendOrderConfirmationEmail(props: OrderEmailProps): Promis
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #FFD9E2; border-radius: 20px; background-color: #FFFFFF;">
           <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #FFF1F4;">
             <h1 style="color: #C8202F; margin: 0; font-size: 24px; font-weight: bold;">Samaura Healthcare</h1>
-            <p style="color: #6B5B62; font-size: 13px; margin-top: 4px;">Gentle & Soothing Cotton Menstrual Care</p>
+            <p style="color: #6B5B62; font-size: 13px; margin-top: 4px;">Gentle & Soft Cotton Personal Care</p>
           </div>
 
           <div style="background-color: #FFF1F4; padding: 18px; border-radius: 14px; margin: 20px 0;">
@@ -358,7 +359,7 @@ export async function sendEmailVerificationEmail(
           <h2 style="color: #C8202F; margin-top: 0;">Samaura Healthcare</h2>
           <h3 style="color: #3B1F2B; margin-top: 10px;">Please Verify Your Email</h3>
           <p style="color: #6B5B62; font-size: 14px;">Hello ${safeName},</p>
-          <p style="color: #6B5B62; font-size: 14px;">Thank you for registering with Samaura. Please confirm your email address by clicking the button below. Once verified, any previous guest orders placed with this email address will be linked to your account.</p>
+          <p style="color: #6B5B62; font-size: 14px;">Thank you for registering with Samaura. Please confirm your email address by clicking the button below. Once confirmed, any previous guest orders placed with this email address will be linked to your account.</p>
           <div style="text-align: center; margin: 24px 0;">
             <a href="${verifyUrl}" style="background-color: #C8202F; color: #FFFFFF; text-decoration: none; padding: 12px 26px; border-radius: 30px; font-size: 13px; font-weight: bold;">Verify Email Address</a>
           </div>
@@ -378,6 +379,7 @@ export interface EnquiryEmailProps {
   name: string;
   email: string;
   phone?: string | null;
+  topic?: string | null;
   subject: string;
   message: string;
 }
@@ -388,12 +390,12 @@ export interface EnquiryEmailProps {
 export async function sendNewEnquiryAdminEmail(
   props: EnquiryEmailProps
 ): Promise<{ success: boolean; simulated?: boolean; error?: unknown }> {
-  const { name, email, phone, subject, message } = props;
+  const { name, email, phone, topic, subject, message } = props;
   const adminEmail = (await getSetting("contact_email")) || "admin@samaura.com";
 
   if (!resend || !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_test_placeholder") {
     console.log(
-      `\n[DEV EMAIL LOG - NEW ENQUIRY ADMIN ALERT]\nTo: ${adminEmail}\nFrom: ${name} (${email})\nPhone: ${phone || "N/A"}\nSubject: ${subject}\nMessage: ${message}\n`
+      `\n[DEV EMAIL LOG - NEW ENQUIRY ADMIN ALERT]\nTo: ${adminEmail}\nFrom: ${name} (${email})\nPhone: ${phone || "N/A"}\nTopic: ${topic || "General"}\nSubject: ${subject}\nMessage: ${message}\n`
     );
     return { success: true, simulated: true };
   }
@@ -404,7 +406,7 @@ export async function sendNewEnquiryAdminEmail(
     await resend.emails.send({
       from: fromEmail,
       to: adminEmail,
-      subject: `New Customer Enquiry: ${escapeHtml(subject)}`,
+      subject: `New Customer Enquiry [${escapeHtml(topic || "General")}]: ${escapeHtml(subject)}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #FFD9E2; border-radius: 16px; background-color: #FFFFFF;">
           <h2 style="color: #C8202F; margin-top: 0;">Samaura Customer Care Desk</h2>
@@ -412,6 +414,7 @@ export async function sendNewEnquiryAdminEmail(
           <p style="color: #6B5B62; font-size: 14px;"><strong>Customer:</strong> ${escapeHtml(name)}</p>
           <p style="color: #6B5B62; font-size: 14px;"><strong>Email:</strong> ${escapeHtml(email)}</p>
           <p style="color: #6B5B62; font-size: 14px;"><strong>Phone:</strong> ${escapeHtml(phone || "Not provided")}</p>
+          <p style="color: #6B5B62; font-size: 14px;"><strong>Topic:</strong> <span style="background-color: #FFF1F4; padding: 3px 8px; border-radius: 6px; font-weight: bold; color: #C8202F;">${escapeHtml(topic || "General")}</span></p>
           <p style="color: #6B5B62; font-size: 14px;"><strong>Subject:</strong> ${escapeHtml(subject)}</p>
           <div style="background-color: #FFF1F4; padding: 16px; border-radius: 12px; margin: 16px 0; color: #3B1F2B; font-size: 14px; white-space: pre-wrap;">
             ${escapeHtml(message)}

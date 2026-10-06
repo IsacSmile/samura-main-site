@@ -17,6 +17,9 @@ Last updated: Phase 1 (Foundation) Complete.
 | **Phase 5: Orders Admin, Customer Account, Emails & Invoicing** | Applied Fixes A-E (`paid_after_cancel` flag, double-cancel idempotency & coupon release, `orders.idempotency_key` UNIQUE constraint, mock provider prod throw/404, isolated `data/test.db` test runner). Built Admin Orders list & detail with state machine enforcement (shipped courier/tracking, delivered COD auto-paid, manual refund notes), admin dashboard metrics (orders today, pending, flagged, net revenue), customer auth (register with bcrypt/rate-limit, forgot/reset password with 1h sha256 single-use token), My Account (profile, addresses CRUD with default, order history & detail with strict data isolation, auto-linking guest orders on registration), Resend email service abstraction (customer confirmation, admin alert, status update, password reset), printable tax invoices (`/order/[token]/invoice` & `/admin/orders/[id]/invoice` with seller settings & optional GST breakup). | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 30 routes) • 46 automated tests pass on isolated `data/test.db` |
 | **Phase 6: Fixes, Content Pages, Remaining Admin & Verification** | Applied Fixes A-H (Email verification guest-order linking, Customer cancel of paid order -> refund_pending + flagged + stock release once, Forgot-password constant-time response & session revocation via passwordChangedAt + min len 8 + no-referrer, Dynamic Receipt vs Tax Invoice with sequential INV-YYYY-XXXXX, 'returned' status with single restock, revenue calculation exclusions, production RESEND_API_KEY startup alert, test suites for state machine & isolation). Built dynamic home page (banners, categories, featured/bestseller, neutral Why Samaura, zero newsletter, conditional real reviews), offers page, CMS-driven About & FAQ (accordion), Contact page (honeypot, IP rate-limit, emails admin, settings-driven contact info), Blog (/blog & /blog/[slug], JSON-LD Article, draft status, script-stripped Markdown, admin medical disclaimer), Policy pages with legal draft warning. Built remaining Admin modules: Customers (view orders, deactivate), Coupons CRUD, Banners CRUD with active dates, Blog CRUD, Pages CMS editor with live preview, Shipping rules UI, Enquiries inbox, Settings additions (COD, GSTIN, contacts, WhatsApp). | **DONE** | `npm run lint` (0 errors) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 38 routes) • 52 Phase 6 automated tests pass • 0 horizontal overflow at 320–1536px |
 | **Phase 7: Hardening, SEO, Deployment Readiness & Handover** | Applied Fixes A-F (behavioural tests for invalidated session after password reset, deactivated user blocked from login/session, expired email token rejected; maintained `sanitize-html` library with complete sanitization; Zod safe URL validation allowing only https:// and relative paths; atomic sequential invoice numbering via `invoice_counters`; unpublish seeded blog & visible draft banners on policy/FAQ/about pages; concurrency test verifying returned/cancelled cannot double restock). Built CSP & security headers, auth hardening with generic errors & persistent DB rate limiter, startup env validation in instrumentation, upload magic-bytes signature verification & Cloudinary storage provider, dynamic sitemap & robots.txt, canonical URLs, Open Graph / Twitter cards, JSON-LD Organization/WebSite, custom not-found/error pages, next/image with sizes, font display swap, cookie consent notice, Turso prod DB scripts (db:migrate, db:seed, db:backup), comprehensive deployment documentation in README.md, and interactive admin handover manual at `/admin/help`. | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 41 routes) • 38 Phase 7 tests pass • 52 Phase 6 tests pass • 46 Phase 5 tests pass |
+| **Phase 8: Compliance & Security Verification** | Automated PIN code vs State validation, URL protocol sanitization, rel=noopener noreferrer sanitization, analytics consent guard. | **DONE** | `tests/phase8.test.ts` (41 passed, 0 failed) • Claims guard checks |
+| **Phase 9: Reviews Lifecycle, Art-Direction & SEO Slugs** | Reviews moderation lifecycle with DB recomputation, image-only hero banner art-direction with `<picture>`, customer status label mapping, shared-circle postal validation, and 301 SEO redirects. | **DONE** | `tests/phase9.test.ts` (87 passed, 0 failed) |
+| **Phase 10: Client Content Application (`Data_for_website.docx`)** | Applied exact client text into `pages` and `settings` tables (admin-editable). Added `topic` to contact enquiries, admin email, and admin view. Configured 2 categories only ("Menstrual Cups" & "Gift Collections"), removed sample products from dev DB & seed. Built `/learn`, `/awareness`, `/gifts`. Implemented image-only hero + 3 Initiatives + 3 Explore cards + 3 Gift collections on home page. Hidden empty sections. Verified claims allowlist (`sustainable`, `free from`, `free-from` per client document). | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 44 routes) • `check-claims` (Passed) • `check-claims:db` (Passed) • All 6 test suites passed |
 
 
 ---
@@ -735,6 +738,117 @@ Automated headless browser check executing `document.documentElement.scrollWidth
 - `tests/phase7.test.ts` -> **38 passed, 0 failed**
 - `tests/phase6.test.ts` -> **52 passed, 0 failed**
 - `tests/phase5.test.ts` -> **46 passed, 0 failed**
+
+---
+
+## Detailed Phase 10 Checklist (Definition of Done)
+
+### 1. Settings & Brand Identity
+- [x] Phone updated to `+91 6282132510`, support email to `samaurahealthcare@gmail.com`.
+- [x] Base site URL set to `https://www.samaurahealthcare.com` (`.env.example` placeholder updated).
+- [x] Social links (Instagram, Facebook, LinkedIn) left empty; footer hides empty icon links cleanly.
+- [x] WhatsApp number left empty until confirmed; floating WhatsApp button hidden when empty.
+- [x] JSON-LD `Organization` schema description and storefront metadata updated to match education, awareness, menstrual cups, and gifting.
+
+### 2. About Page (`pages` table, slug: `about`)
+- [x] Exact client copy applied from `Data_for_website.docx`:
+  - Heading "About Us".
+  - Overview paragraphs on purpose-driven startup, young people education, stigma-breaking, menstrual cups as reusable alternative, and combining awareness with hygiene solutions.
+  - Mission: "To empower women, girls, and young people through accessible menstrual health education, community awareness, and practical menstrual hygiene solutions, ensuring that no one is left uninformed or unsupported during menstruation."
+  - Vision: "A society where menstruation is free from stigma, every young person has access to age-appropriate menstrual education, and every individual can make informed choices about menstrual hygiene with confidence, dignity, and access to appropriate products."
+- [x] Removed "Replace with client content" banner from About page.
+
+### 3. Home Page Content Order & Legacy Copy Purge
+- [x] Kept image-only hero banner with `<picture>` art-direction.
+- [x] Added in exact specified order with neutral card styling:
+  1. **Our Key Initiatives** (3 cards):
+     - Menstrual Health Education & Publications
+     - Menstrual Awareness & Community Empowerment
+     - Sustainable Menstrual Hygiene, Thoughtful Gifting & Partnerships
+  2. **Explore Samaura** (3 cards):
+     - Samaura Menstrual Cup (links to `/category/menstrual-cups`)
+     - Learn Before You Transition (links to `/learn`)
+     - Awareness & Support (links to `/awareness`)
+  3. **Gift Collections** (3 cards, link to `/gifts`):
+     - My First Period Gift Box
+     - Self-Care & Celebration Hampers
+     - Custom & Institutional Gift Packs
+- [x] Removed all old pads/cotton copy, discreet-delivery bands, and legacy sections describing pads, liners, wash, or roll-ons.
+- [x] Conditional rendering: customer reviews and articles render only when published items exist in the database.
+
+### 4. New Admin-Editable CMS Routes
+- [x] `/learn` ("Learn Before You Transition"): Rendered with client text, sitemap entry, and fallback "Resources coming soon" block until client adds content.
+- [x] `/awareness` ("Awareness & Support"): Rendered with client text, sitemap entry, and "Request a session" CTA linking to `/contact?topic=awareness`. Zero invented dates.
+- [x] `/gifts` ("Gift Collections"): Rendered with 3 collections, sitemap entry, and "Enquire" buttons to `/contact?topic=gift` (first two) and `/contact?topic=institutional` (third). Explicitly enquiry-only.
+- [x] Registered `/learn`, `/awareness`, `/gifts` in `src/app/sitemap.ts`.
+
+### 5. Contact Enquiries Topic Management
+- [x] Added `topic` column to `enquiries` table (default: `General`).
+- [x] Migrated remote Turso DEV database and local SQLite database (`ALTER TABLE enquiries ADD COLUMN topic text DEFAULT 'General'`).
+- [x] Added topic selector with 5 options:
+  - `General`
+  - `Menstrual cup`
+  - `Awareness session`
+  - `Gift pack`
+  - `Institutional/CSR`
+- [x] Auto-prefilled from query parameter `?topic=` (mapping `awareness` -> `Awareness session`, `gift` -> `Gift pack`, `institutional` -> `Institutional/CSR`, `cup` -> `Menstrual cup`).
+- [x] Topic stored in `enquiries` table, passed in admin alert email, and displayed in admin enquiries inbox and modal.
+
+### 6. Catalogue & Sample Product Removal
+- [x] Categories set strictly to 2: "Menstrual Cups" (`menstrual-cups`) and "Gift Collections" (`gift-collections`).
+- [x] Removed all sample products (pads, liners, wash, roll-on, sterilizer) from DEV DB and dev seed.
+- [x] Zero demo products in production. Client will add real cup product(s) via admin panel.
+- [x] Updated shop page copy, category descriptions, and product SEO defaults to match the new business model.
+- [x] Existing redirects in `next.config.ts` preserved safely.
+
+### 7. Layout, Navigation & Footer
+- [x] Navbar: Shop, Explore (Learn, Awareness), Gifts, About, Contact.
+- [x] Footer description dynamically pulled from About overview first sentence.
+- [x] Footer contact block rendered from store settings.
+- [x] Social links and WhatsApp buttons hidden when settings values are empty.
+
+### 8. Compliance & Test Verifications
+- [x] `config/claims-allowlist.json` updated ONLY with client-supplied phrases triggering guard (`sustainable`, `free from`, `free-from` per client document reference).
+- [x] `npm run check-claims` -> **PASSED (0 violations)**
+- [x] `npm run check-claims:db` -> **PASSED (0 violations on Turso DEV DB & local DB)**
+- [x] `npm run lint` -> **PASSED (0 errors, 0 warnings)**
+- [x] `npx tsc --noEmit` -> **PASSED (0 errors)**
+- [x] `npm run build` -> **PASSED (44 routes compiled)**
+- [x] `tests/phase4-checkout.test.ts` -> **26 passed, 0 failed**
+- [x] `tests/phase5.test.ts` -> **46 passed, 0 failed**
+- [x] `tests/phase6.test.ts` -> **52 passed, 0 failed**
+- [x] `tests/phase7.test.ts` -> **40 passed, 0 failed**
+- [x] `tests/phase8.test.ts` -> **41 passed, 0 failed**
+- [x] `tests/phase9.test.ts` -> **87 passed, 0 failed**
+- [x] Updated `README.md` note stating client must supply real photos before launch.
+
+### 9. Viewports for Manual Verification
+- **Mobile Extra-Small**: 320px
+- **Mobile Standard**: 375px
+- **Tablet / Phablet**: 768px
+- **Desktop Standard**: 1024px
+- **Desktop Large**: 1440px
+
+### 10. Core URLs for Manual Verification
+- Home: `/`
+- About Us: `/about`
+- Learn Guide: `/learn`
+- Awareness & Workshops: `/awareness`
+- Gift Collections: `/gifts`
+- Shop: `/shop`
+- Category - Menstrual Cups: `/category/menstrual-cups`
+- Category - Gift Collections: `/category/gift-collections`
+- Contact & Topic Enquiry: `/contact`
+  - `/contact?topic=awareness`
+  - `/contact?topic=gift`
+  - `/contact?topic=institutional`
+  - `/contact?topic=cup`
+- FAQ: `/faq`
+- Privacy Policy: `/privacy`
+- Shipping & Returns: `/shipping-returns`
+- Terms & Conditions: `/terms`
+- Admin Enquiries Inbox: `/admin/enquiries`
+
 
 
 

@@ -4,7 +4,7 @@ import { CheckoutView } from "@/components/checkout/CheckoutView";
 export const metadata: Metadata = {
   title: "Secure Checkout | Samaura Healthcare",
   description:
-    "Complete your order for natural, gentle menstrual wellness essentials with discreet home delivery.",
+    "Complete your order for soft, gentle menstrual wellness essentials with discreet home delivery.",
   robots: {
     index: false,
     follow: false,

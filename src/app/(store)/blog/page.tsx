@@ -46,7 +46,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   // 3. Fetch admin-editable medical disclaimer from settings
   const medicalDisclaimer = await getSetting(
     "medical_disclaimer_text",
-    "The educational articles and guidance published on the Samaura Period Health Desk are intended for general hygiene and wellness information only. They do not constitute formal medical diagnosis, clinical treatment, or gynecological advice. Always consult a qualified medical professional regarding persistent pelvic pain, abnormal bleeding, or medical concerns."
+    "The educational articles and guidance published on the Samaura Period Health Desk are intended for general hygiene and wellness information only. They do not constitute clinical guidance or gynecological consultation. Always consult a qualified physician regarding persistent cycle symptoms or physical concerns."
   );
 
   return (

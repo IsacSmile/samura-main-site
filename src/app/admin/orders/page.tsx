@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminOrders } from "@/lib/services/orders";
 import { formatRupees } from "@/lib/utils/money";
+import { formatAdminPaymentStatus } from "@/lib/utils/statusLabels";
 import {
   Package,
   Search,
@@ -231,7 +232,7 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
                             ord.paymentStatus
                           )}`}
                         >
-                          {ord.paymentStatus.replace("_", " ")}
+                          {formatAdminPaymentStatus(ord.paymentStatus)}
                         </span>
                         <div className="text-[10px] text-muted uppercase font-mono">
                           {ord.paymentMethod}

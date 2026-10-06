@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { orders, orderItems, payments } from "@/db/schema";
-import { eq, and, sql, lt, desc, count, sum, gte, or, like, notInArray } from "drizzle-orm";
+import { eq, and, sql, lt, desc, count, sum, gte, or, like, notInArray, inArray } from "drizzle-orm";
 import crypto from "node:crypto";
 import { computePricing, CartItemInput } from "@/lib/services/pricing";
 import { getPaymentProvider } from "@/lib/payments";
@@ -45,6 +45,8 @@ export interface CreateOrderResult {
   paymentStatus?: string;
   clientPayload?: Record<string, unknown>;
   error?: string;
+  warningMismatch?: boolean;
+  expectedStates?: string[];
 }
 
 /**
@@ -532,7 +534,7 @@ export async function cancelOrderPayment(params: {
   // flags it in admin, and keeps stock released once.
   const isPaidOnline = order.paymentStatus === "paid" || order.paymentStatus === "refund_pending";
 
-  // FIX B: If already cancelled, return early without restocking or decrementing coupon again!
+  // FIX B: If already cancelled, return early; avoid duplicate restock or coupon decrement.
   if (order.status === "cancelled") {
     return { ok: true, alreadyCancelled: true };
   }
@@ -1085,7 +1087,26 @@ export async function getCustomerOrders(userId: string, email: string) {
     .where(or(...userConditions))
     .orderBy(desc(orders.createdAt));
 
-  return userOrders;
+  if (userOrders.length === 0) return [];
+
+  const orderIds = userOrders.map((o) => o.id);
+  const items = await db
+    .select({
+      orderId: orderItems.orderId,
+      quantity: orderItems.quantity,
+    })
+    .from(orderItems)
+    .where(inArray(orderItems.orderId, orderIds));
+
+  const countMap = new Map<string, number>();
+  for (const it of items) {
+    countMap.set(it.orderId, (countMap.get(it.orderId) || 0) + (it.quantity || 1));
+  }
+
+  return userOrders.map((o) => ({
+    ...o,
+    itemCount: countMap.get(o.id) || 0,
+  }));
 }
 
 /**

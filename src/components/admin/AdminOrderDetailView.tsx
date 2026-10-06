@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatRupees } from "@/lib/utils/money";
+import { formatAdminPaymentStatus } from "@/lib/utils/statusLabels";
 import { updateOrderStatusAdminAction, toggleOrderFlagAdminAction } from "@/app/admin/actions/orders";
 import {
   MapPin,
@@ -346,7 +347,7 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
             </span>
             <span className="text-xs text-muted">•</span>
             <span className="text-xs font-semibold text-muted">
-              Payment: <strong className="text-ink uppercase">{order.paymentStatus}</strong> ({order.paymentMethod})
+              Payment: <strong className="text-ink uppercase">{formatAdminPaymentStatus(order.paymentStatus)}</strong> ({order.paymentMethod})
             </span>
           </div>
 

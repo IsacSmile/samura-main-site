@@ -1,7 +1,14 @@
 [
   {
-    "phrase": "comfort",
-    "reference": "CLIENT-REF-GENERAL-COMFORT",
-    "notes": "General comfort and soft feel descriptions"
+    "phrase": "sustainable",
+    "reference": "Data_for_website.docx (client-supplied, written confirmation pending)"
+  },
+  {
+    "phrase": "free from",
+    "reference": "Data_for_website.docx (client-supplied, written confirmation pending)"
+  },
+  {
+    "phrase": "free-from",
+    "reference": "Data_for_website.docx (client-supplied, written confirmation pending)"
   }
 ]

@@ -1,10 +1,22 @@
 /**
  * Indian Postal PIN Code validation and state prefix mapping.
- * Ensures the 6-digit postal code corresponds to the user's selected state/UT.
+ * Supports auto-fill lookup, shared-prefix region resolution (Goa, Lakshadweep,
+ * Andaman & Nicobar, Ladakh, Chandigarh, Sikkim, North-East), and non-blocking
+ * address confirmation warnings.
  */
 
-// Mapping of 2-digit PIN prefixes to valid state/UT names (normalized lowercase)
-const PIN_PREFIX_STATE_MAP: Record<string, string[]> = {
+// 3-digit specific region mappings for shared postal circles (allows both specific region and parent circle)
+const PIN_3DIGIT_MAP: Record<string, string[]> = {
+  "403": ["goa", "maharashtra"],
+  "682": ["lakshadweep", "kerala"],
+  "744": ["andaman and nicobar islands", "andaman and nicobar", "andaman & nicobar", "west bengal"],
+  "194": ["ladakh", "jammu & kashmir", "jammu and kashmir"],
+  "160": ["chandigarh", "punjab", "haryana"],
+  "737": ["sikkim", "west bengal"],
+};
+
+// 2-digit circle mappings
+const PIN_2DIGIT_MAP: Record<string, string[]> = {
   "11": ["delhi", "new delhi", "nct of delhi"],
   "12": ["haryana"],
   "13": ["haryana"],
@@ -31,7 +43,7 @@ const PIN_PREFIX_STATE_MAP: Record<string, string[]> = {
   "36": ["gujarat"],
   "37": ["gujarat"],
   "38": ["gujarat"],
-  "39": ["gujarat", "dadra and nagar haveli and daman and diu", "daman and diu"],
+  "39": ["gujarat", "dadra and nagar haveli and daman and diu", "daman and diu", "dadra and nagar haveli"],
   "40": ["maharashtra", "goa"],
   "41": ["maharashtra"],
   "42": ["maharashtra"],
@@ -50,8 +62,8 @@ const PIN_PREFIX_STATE_MAP: Record<string, string[]> = {
   "57": ["karnataka"],
   "58": ["karnataka"],
   "59": ["karnataka"],
-  "60": ["tamil nadu", "puducherry"],
-  "61": ["tamil nadu", "puducherry"],
+  "60": ["tamil nadu", "puducherry", "pondicherry"],
+  "61": ["tamil nadu", "puducherry", "pondicherry"],
   "62": ["tamil nadu"],
   "63": ["tamil nadu"],
   "64": ["tamil nadu"],
@@ -62,12 +74,12 @@ const PIN_PREFIX_STATE_MAP: Record<string, string[]> = {
   "71": ["west bengal"],
   "72": ["west bengal"],
   "73": ["west bengal", "sikkim"],
-  "74": ["west bengal", "andaman and nicobar islands", "andaman and nicobar"],
+  "74": ["west bengal", "andaman and nicobar islands", "andaman and nicobar", "andaman & nicobar islands"],
   "75": ["odisha", "orissa"],
   "76": ["odisha", "orissa"],
   "77": ["odisha", "orissa"],
-  "78": ["assam"],
-  "79": ["arunachal pradesh", "manipur", "meghalaya", "mizoram", "nagaland", "tripura"],
+  "78": ["assam", "meghalaya"],
+  "79": ["arunachal pradesh", "manipur", "meghalaya", "mizoram", "nagaland", "tripura", "assam"],
   "80": ["bihar"],
   "81": ["bihar", "jharkhand"],
   "82": ["bihar", "jharkhand"],
@@ -78,74 +90,27 @@ const PIN_PREFIX_STATE_MAP: Record<string, string[]> = {
 
 export interface PincodeValidationResult {
   isValid: boolean;
+  isWarning?: boolean;
   error?: string;
   expectedStates?: string[];
 }
 
-/**
- * Validates a 6-digit Indian PIN code against the selected state name.
- */
-export function validatePincodeState(pincode: string, state: string): PincodeValidationResult {
-  const cleanPin = (pincode || "").trim().replace(/\D/g, "");
-  if (cleanPin.length !== 6) {
-    return {
-      isValid: false,
-      error: "Postal code must be exactly 6 digits.",
-    };
-  }
-
-  if (cleanPin.startsWith("0")) {
-    return {
-      isValid: false,
-      error: "Indian postal codes cannot begin with 0.",
-    };
-  }
-
-  const prefix = cleanPin.substring(0, 2);
-  const allowedStates = PIN_PREFIX_STATE_MAP[prefix];
-
-  if (!allowedStates) {
-    // Unknown prefix
-    return {
-      isValid: false,
-      error: `Invalid PIN code prefix "${prefix}". Please verify your postal code.`,
-    };
-  }
-
-  if (!state || !state.trim()) {
-    return {
-      isValid: true,
-      expectedStates: allowedStates,
-    };
-  }
-
-  const normalizedState = state.trim().toLowerCase();
-  const matches = allowedStates.some(
-    (s) => s === normalizedState || normalizedState.includes(s) || s.includes(normalizedState)
-  );
-
-  if (!matches) {
-    const formattedExpected = allowedStates
-      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-      .join(" / ");
-    return {
-      isValid: false,
-      error: `PIN code ${cleanPin} belongs to ${formattedExpected}, but you selected ${state}. Please verify your postal code and state.`,
-      expectedStates: allowedStates,
-    };
-  }
-
-  return {
-    isValid: true,
-    expectedStates: allowedStates,
-  };
+function normalizeState(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/\s+/g, " ");
 }
 
 function formatStateName(s: string): string {
-  if (s === "nct of delhi") return "Delhi";
-  if (s === "jammu & kashmir") return "Jammu & Kashmir";
-  if (s === "andaman and nicobar islands") return "Andaman and Nicobar Islands";
-  if (s === "dadra and nagar haveli and daman and diu") return "Dadra and Nagar Haveli and Daman and Diu";
+  const norm = s.toLowerCase();
+  if (norm === "nct of delhi" || norm === "new delhi") return "Delhi";
+  if (norm === "jammu & kashmir" || norm === "jammu and kashmir") return "Jammu & Kashmir";
+  if (norm.includes("andaman")) return "Andaman and Nicobar Islands";
+  if (norm.includes("daman") || norm.includes("dadra")) return "Dadra and Nagar Haveli and Daman and Diu";
+  if (norm === "orissa") return "Odisha";
+  if (norm === "pondicherry") return "Puducherry";
   return s
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -153,12 +118,93 @@ function formatStateName(s: string): string {
 }
 
 /**
- * Returns expected state(s) for a given 6-digit PIN code or prefix with standard Title Case.
+ * Returns allowed state names for a given 6-digit PIN code.
+ * Checks specific 3-digit prefix first, falling back to 2-digit circle.
+ */
+function getAllowedStatesForPincode(cleanPin: string): string[] {
+  if (cleanPin.length >= 3) {
+    const prefix3 = cleanPin.substring(0, 3);
+    if (PIN_3DIGIT_MAP[prefix3]) {
+      return PIN_3DIGIT_MAP[prefix3];
+    }
+  }
+
+  const prefix2 = cleanPin.substring(0, 2);
+  return PIN_2DIGIT_MAP[prefix2] || [];
+}
+
+/**
+ * Validates a 6-digit Indian PIN code against the selected state name.
+ * Handles shared-prefix regions (Goa, Lakshadweep, Andaman, Ladakh, Chandigarh, Sikkim, North-East).
+ */
+export function validatePincodeState(pincode: string, state: string): PincodeValidationResult {
+  const cleanPin = (pincode || "").trim().replace(/\D/g, "");
+  if (cleanPin.length !== 6) {
+    return {
+      isValid: false,
+      isWarning: false,
+      error: "Postal code must be exactly 6 digits.",
+    };
+  }
+
+  if (cleanPin.startsWith("0")) {
+    return {
+      isValid: false,
+      isWarning: false,
+      error: "Indian postal codes cannot begin with 0.",
+    };
+  }
+
+  const allowedStates = getAllowedStatesForPincode(cleanPin);
+
+  if (allowedStates.length === 0) {
+    const prefix = cleanPin.substring(0, 2);
+    return {
+      isValid: false,
+      isWarning: false,
+      error: `Invalid PIN code prefix "${prefix}". Please verify your postal code.`,
+    };
+  }
+
+  if (!state || !state.trim()) {
+    return {
+      isValid: true,
+      expectedStates: Array.from(new Set(allowedStates.map(formatStateName))),
+    };
+  }
+
+  const normUser = normalizeState(state);
+  const matches = allowedStates.some((s) => {
+    const normAllowed = normalizeState(s);
+    return (
+      normAllowed === normUser ||
+      normAllowed.includes(normUser) ||
+      normUser.includes(normAllowed)
+    );
+  });
+
+  if (!matches) {
+    const formattedExpected = Array.from(new Set(allowedStates.map(formatStateName))).join(" / ");
+    return {
+      isValid: false,
+      isWarning: true,
+      error: `PIN code ${cleanPin} belongs to ${formattedExpected}, but you selected ${state}. Please verify your postal code and state.`,
+      expectedStates: Array.from(new Set(allowedStates.map(formatStateName))),
+    };
+  }
+
+  return {
+    isValid: true,
+    expectedStates: Array.from(new Set(allowedStates.map(formatStateName))),
+  };
+}
+
+/**
+ * Returns formatted expected state(s) for a given 6-digit PIN code.
  */
 export function getStatesForPincode(pincode: string): string[] {
   const cleanPin = (pincode || "").trim().replace(/\D/g, "");
   if (cleanPin.length < 2) return [];
-  const prefix = cleanPin.substring(0, 2);
-  const rawStates = PIN_PREFIX_STATE_MAP[prefix] || [];
-  return rawStates.map(formatStateName);
+  const allowed = getAllowedStatesForPincode(cleanPin);
+  return Array.from(new Set(allowed.map(formatStateName)));
 }

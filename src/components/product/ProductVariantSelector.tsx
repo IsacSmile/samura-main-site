@@ -176,7 +176,7 @@ export function ProductVariantSelector({
               Select Option / Pack Size:
             </label>
             {selectedVariant?.size && (
-              <span className="text-xs font-semibold text-brand">
+              <span className="text-xs font-semibold text-ink">
                 {selectedVariant.size}
               </span>
             )}
@@ -209,7 +209,7 @@ export function ProductVariantSelector({
                     </span>
                     {isSelected && (
                       <span className="w-4 h-4 rounded-full bg-brand text-white flex items-center justify-center shrink-0">
-                        <Check className="w-2.5 h-2.5" />
+                        <Check className="w-2.5 h-2.5" strokeWidth={2} />
                       </span>
                     )}
                   </div>
@@ -241,10 +241,10 @@ export function ProductVariantSelector({
               type="button"
               onClick={() => handleQuantityChange(-1)}
               disabled={quantity <= 1 || isOutOfStock}
-              className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink hover:text-brand disabled:opacity-40 transition-colors shadow-xs"
+              className="w-9 h-9 min-w-9 min-h-9 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center text-ink hover:text-ink-muted disabled:opacity-40 transition-colors shadow-xs"
               aria-label="Decrease quantity"
             >
-              <Minus className="w-3.5 h-3.5" />
+              <Minus className="w-3.5 h-3.5" strokeWidth={1.75} />
             </button>
             <span className="w-10 text-center font-heading font-bold text-sm text-ink">
               {quantity}
@@ -253,10 +253,10 @@ export function ProductVariantSelector({
               type="button"
               onClick={() => handleQuantityChange(1)}
               disabled={quantity >= stock || isOutOfStock}
-              className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink hover:text-brand disabled:opacity-40 transition-colors shadow-xs"
+              className="w-9 h-9 min-w-9 min-h-9 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center text-ink hover:text-ink-muted disabled:opacity-40 transition-colors shadow-xs"
               aria-label="Increase quantity"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5" strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -269,17 +269,17 @@ export function ProductVariantSelector({
             size="lg"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="w-full shadow-pink transition-all active:scale-95"
+            className="w-full shadow-pink transition-all active:scale-95 min-h-11"
           >
             {addedAnimation ? (
-              <span className="flex items-center gap-2 text-brand font-bold">
-                <Check className="w-4 h-4 text-brand" /> Added to Bag!
+              <span className="flex items-center gap-2 text-ink font-bold">
+                <Check className="w-4 h-4 text-emerald-600" strokeWidth={2} /> Added to Bag!
               </span>
             ) : isOutOfStock ? (
               "Out of Stock"
             ) : (
               <span className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4" /> Add to Bag
+                <ShoppingBag className="w-4 h-4" strokeWidth={1.75} /> Add to Bag
               </span>
             )}
           </Button>
@@ -290,10 +290,10 @@ export function ProductVariantSelector({
             size="lg"
             onClick={handleBuyNow}
             disabled={isOutOfStock}
-            className="w-full border-pink-light hover:border-brand transition-all active:scale-95"
+            className="w-full border-pink-light hover:border-ink transition-all active:scale-95 min-h-11"
           >
             <span className="flex items-center gap-2 text-ink font-semibold">
-              <Zap className="w-4 h-4 text-brand" /> Buy Now
+              <Zap className="w-4 h-4 text-ink-muted" strokeWidth={1.75} /> Buy Now
             </span>
           </Button>
         </div>
@@ -302,19 +302,49 @@ export function ProductVariantSelector({
       {/* Trust & Delivery Micro Badges */}
       <div className="grid grid-cols-2 gap-3 pt-4 border-t border-blush text-xs text-muted">
         <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-blush/30 border border-pink-light/50">
-          <Truck className="w-4 h-4 text-brand shrink-0 mt-0.5" />
+          <Truck className="w-4 h-4 text-ink-muted shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
             <span className="font-semibold text-ink block">Plain Box Delivery</span>
             <span className="text-[11px] text-muted">Zero product labels on outside</span>
           </div>
         </div>
         <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-blush/30 border border-pink-light/50">
-          <ShieldCheck className="w-4 h-4 text-brand shrink-0 mt-0.5" />
+          <ShieldCheck className="w-4 h-4 text-ink-muted shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
             <span className="font-semibold text-ink block">Gentle Skin Care</span>
             <span className="text-[11px] text-muted">Thoughtful, breathable comfort</span>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Sticky Bottom "Add to Bag" Bar */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-pink-light p-3 sm:hidden flex items-center justify-between gap-3 shadow-lg">
+        <div className="min-w-0">
+          <div className="font-heading font-extrabold text-base text-ink">
+            {formatRupees(currentPrice)}
+          </div>
+          <div className="text-[10px] text-muted truncate">
+            {selectedVariant?.name || "Standard"}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className="btn-brand flex-1 max-w-50 text-xs py-3 px-4 shadow-md flex items-center justify-center gap-1.5 min-h-11"
+        >
+          {addedAnimation ? (
+            <>
+              <Check className="w-4 h-4" strokeWidth={2} /> Added
+            </>
+          ) : isOutOfStock ? (
+            "Out of Stock"
+          ) : (
+            <>
+              <ShoppingBag className="w-4 h-4" strokeWidth={1.75} /> Add to Bag
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

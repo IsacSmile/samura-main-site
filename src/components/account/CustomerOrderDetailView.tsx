@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/Button";
 import { formatPaiseToRupees } from "@/lib/utils/money";
 import { formatIndianPhone } from "@/lib/utils/phone";
 import { customerCancelOrderAction } from "@/app/actions/checkout";
+import { formatOrderStatus, formatPaymentStatus, formatPaymentMethod } from "@/lib/utils/statusLabels";
 
 interface OrderItem {
   id: string;
@@ -176,7 +177,7 @@ export function CustomerOrderDetailView({ order }: { order: CustomerOrderDetail 
                       : "bg-stone-100 text-stone-800"
                   }`}
                 >
-                  {currentStatus}
+                  {formatOrderStatus(currentStatus)}
                 </span>
               </div>
               <p className="text-xs text-muted">
@@ -382,7 +383,7 @@ export function CustomerOrderDetailView({ order }: { order: CustomerOrderDetail 
               <div className="text-xs space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted">Payment Method</span>
-                  <span className="font-semibold text-ink uppercase">{order.paymentMethod}</span>
+                  <span className="font-semibold text-ink">{formatPaymentMethod(order.paymentMethod)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted">Payment Status</span>
@@ -395,7 +396,7 @@ export function CustomerOrderDetailView({ order }: { order: CustomerOrderDetail 
                         : "text-amber-700"
                     }`}
                   >
-                    {order.paymentStatus}
+                    {formatPaymentStatus(order.paymentStatus)}
                   </span>
                 </div>
               </div>

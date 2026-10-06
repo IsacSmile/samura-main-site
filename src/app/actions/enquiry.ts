@@ -12,7 +12,7 @@ export async function submitEnquiryAction(formData: FormData) {
   // 1. Honeypot check
   const honeypot = formData.get("hp_website");
   if (honeypot && String(honeypot).trim().length > 0) {
-    // Bot detected: return simulated success without processing
+    // Bot detected: return simulated success, bypassing processing
     return {
       success: true,
       message: "Thank you! Your message has been received.",
@@ -37,6 +37,7 @@ export async function submitEnquiryAction(formData: FormData) {
     name: formData.get("name"),
     email: formData.get("email"),
     phone: formData.get("phone") || undefined,
+    topic: formData.get("topic") || "General",
     subject: formData.get("subject"),
     message: formData.get("message"),
   };
@@ -49,7 +50,7 @@ export async function submitEnquiryAction(formData: FormData) {
     };
   }
 
-  const { name, email, phone, subject, message } = parsed.data;
+  const { name, email, phone, topic, subject, message } = parsed.data;
 
   try {
     // 4. Store in database
@@ -59,6 +60,7 @@ export async function submitEnquiryAction(formData: FormData) {
       name,
       email,
       phone: phone || null,
+      topic: topic || "General",
       subject,
       message,
       status: "new",
@@ -70,6 +72,7 @@ export async function submitEnquiryAction(formData: FormData) {
       name,
       email,
       phone: phone || null,
+      topic: topic || "General",
       subject,
       message,
     });

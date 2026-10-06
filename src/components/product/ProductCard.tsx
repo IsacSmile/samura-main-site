@@ -65,18 +65,17 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="card-soft group flex flex-col justify-between h-full overflow-hidden bg-white p-3.5 sm:p-5 relative transition-all duration-300 min-w-0 w-full">
-      {/* Top Badges */}
+      {/* Top Badge: at most one badge */}
       <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5 items-start max-w-[75%]">
-        {product.badge && (
+        {product.badge ? (
           <span className="badge-brand text-[10px] tracking-wide uppercase font-bold shadow-xs truncate max-w-full">
             {product.badge}
           </span>
-        )}
-        {hasDiscount && (
+        ) : hasDiscount ? (
           <span className="bg-blush text-brand border border-pink-light text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
             {discountPercent}% OFF
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* Product Image */}
@@ -96,10 +95,10 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Details */}
       <div className="flex-1 flex flex-col justify-between space-y-3 min-w-0">
         <div className="space-y-1.5 min-w-0">
-          {/* Flow Type Tag & Rating (on separate lines on narrow mobile widths) */}
+          {/* Flow Type Tag & Rating */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 text-xs text-muted min-w-0">
             {product.flowType ? (
-              <span className="text-[10px] font-medium leading-tight text-brand bg-blush px-2 py-0.5 rounded-full border border-pink-light/60 max-w-fit line-clamp-2 break-normal">
+              <span className="text-[10px] font-medium leading-tight text-ink-muted bg-blush px-2 py-0.5 rounded-full border border-pink-light/60 max-w-fit line-clamp-2 break-normal">
                 {product.flowType}
               </span>
             ) : (
@@ -109,7 +108,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {/* Show rating only when published reviews exist */}
             {product.reviewCount !== undefined && product.reviewCount > 0 && product.rating ? (
               <div className="flex items-center gap-1 shrink-0">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" strokeWidth={1.75} />
                 <span className="font-semibold text-ink">
                   {product.rating.toFixed(1)}
                 </span>
@@ -123,7 +122,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Product Name */}
           <Link
             href={`/product/${product.slug}`}
-            className="block font-heading font-semibold text-sm sm:text-base text-ink group-hover:text-brand transition-colors line-clamp-2 min-w-0"
+            className="block font-heading font-semibold text-sm sm:text-base text-ink group-hover:text-brand-dark transition-colors line-clamp-2 min-w-0"
           >
             {product.name}
           </Link>
@@ -150,7 +149,7 @@ export function ProductCard({ product }: ProductCardProps) {
               )}
             </div>
             {product.defaultVariant && (
-              <span className="text-[10px] text-muted block truncate">
+              <span className="text-[10px] text-muted block line-clamp-2 break-normal">
                 {product.defaultVariant.name}
               </span>
             )}
@@ -159,18 +158,18 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleQuickAdd}
             disabled={!product.defaultVariant || product.defaultVariant.stock <= 0}
-            className={`p-2 sm:p-2.5 rounded-full transition-all duration-200 flex items-center justify-center shadow-xs active:scale-95 shrink-0 ${
+            className={`min-w-10 min-h-10 sm:min-w-11 sm:min-h-11 rounded-full transition-all duration-200 flex items-center justify-center shadow-xs active:scale-95 shrink-0 ${
               added
-                ? "bg-success text-white"
-                : "bg-blush text-brand hover:bg-brand hover:text-white border border-pink-light"
+                ? "bg-emerald-600 text-white"
+                : "bg-blush text-ink hover:bg-brand hover:text-white border border-pink-light"
             }`}
             title="Add to Bag"
             aria-label="Add to Bag"
           >
             {added ? (
-              <Check className="w-4 h-4" />
+              <Check className="w-4 h-4" strokeWidth={2} />
             ) : (
-              <ShoppingBag className="w-4 h-4" />
+              <ShoppingBag className="w-4 h-4" strokeWidth={1.75} />
             )}
           </button>
         </div>

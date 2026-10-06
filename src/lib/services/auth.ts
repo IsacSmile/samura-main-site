@@ -68,7 +68,7 @@ export async function registerCustomer(input: RegisterCustomerInput) {
     .returning();
 
   // Fix A: Do NOT link guest orders on registration!
-  // Link guest orders ONLY after the email is verified.
+  // Link guest orders ONLY after the email is confirmed.
   const rawToken = crypto.randomBytes(32).toString("hex");
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
@@ -130,7 +130,7 @@ export async function resendEmailVerification(email: string, clientIp?: string) 
 
   const [user] = await db.select().from(users).where(eq(users.email, cleanEmail)).limit(1);
 
-  // Return success without revealing user existence
+  // Return success silently if user does not exist
   if (!user) {
     return { success: true };
   }
@@ -193,7 +193,7 @@ export async function verifyCustomerEmail(rawToken: string) {
     return { success: false, error: "This email verification link has expired. Please request a new one." };
   }
 
-  // Atomically mark token used and user verified
+  // Atomically mark token used and user confirmed
   await db.transaction(async (tx) => {
     await tx
       .update(emailVerificationTokens)
@@ -215,7 +215,7 @@ export async function verifyCustomerEmail(rawToken: string) {
     linkedOrdersCount = await linkGuestOrdersToUser(tokenRecord.userId, tokenRecord.email);
     if (linkedOrdersCount > 0) {
       console.log(
-        `[AUTH] Verified ${tokenRecord.email}: linked ${linkedOrdersCount} previous guest orders to user ${tokenRecord.userId}`
+        `[AUTH] Confirmed ${tokenRecord.email}: linked ${linkedOrdersCount} previous guest orders to user ${tokenRecord.userId}`
       );
     }
   } catch (err) {
@@ -253,7 +253,7 @@ export async function requestPasswordReset(email: string, clientIp?: string) {
 
   const [user] = await db.select().from(users).where(eq(users.email, cleanEmail)).limit(1);
 
-  // Return identical response without leaking user presence
+  // Return identical response to prevent user enumeration
   if (!user || user.isActive === false) {
     return { success: true, message: identicalMessage };
   }

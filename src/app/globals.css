@@ -4,51 +4,61 @@
   --color-brand: #C8202F;
   --color-brand-DEFAULT: #C8202F;
   --color-brand-dark: #A31A27;
+  --color-brand-light: #FDE8EC;
   --color-white: #FFFFFF;
   --color-blush: #FFF1F4;
+  --color-pink-50: #FFF8F9;
+  --color-pink-100: #FFEAF0;
   --color-pink-light: #FFD9E2;
   --color-rose: #F5A3B7;
-  --color-ink: #3B1F2B;
+  --color-ink: #2C1820;
+  --color-ink-muted: #5C4A52;
   --color-muted: #6B5B62;
   --color-success: #5BBF9F;
 
-  --font-heading: var(--font-poppins), sans-serif;
-  --font-body: var(--font-inter), sans-serif;
+  --font-heading: var(--font-poppins), system-ui, -apple-system, sans-serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
 
-  --shadow-pink-xs: 0 1px 4px rgba(245, 163, 183, 0.15);
-  --shadow-pink-sm: 0 2px 8px -1px rgba(245, 163, 183, 0.2);
-  --shadow-pink: 0 4px 20px -2px rgba(245, 163, 183, 0.25);
-  --shadow-pink-md: 0 8px 24px -4px rgba(245, 163, 183, 0.3);
-  --shadow-pink-lg: 0 14px 34px -4px rgba(200, 32, 47, 0.12);
-  --shadow-pink-xl: 0 22px 45px -8px rgba(200, 32, 47, 0.16);
+  /* Radius scale (xl, 2xl, 3xl, full) */
+  --radius-xl: 0.875rem; /* 14px */
+  --radius-2xl: 1.125rem; /* 18px */
+  --radius-3xl: 1.5rem; /* 24px */
+  --radius-full: 9999px;
 
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.5rem;
-  --radius-4xl: 2rem;
+  /* Soft pink-tinted shadow scale */
+  --shadow-sm: 0 2px 8px -1px rgba(245, 163, 183, 0.22);
+  --shadow-md: 0 6px 20px -2px rgba(245, 163, 183, 0.32);
+  --shadow-lg: 0 12px 32px -4px rgba(245, 163, 183, 0.4);
 }
 
 :root {
   --background: #FFFFFF;
-  --foreground: #3B1F2B;
+  --foreground: #2C1820;
 }
 
 body {
   background-color: var(--background);
-  color: #6B5B62;
-  font-family: var(--font-inter), sans-serif;
+  color: #5C4A52;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-poppins), sans-serif;
-  color: #3B1F2B;
+  font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
+  color: #2C1820;
 }
 
-/* Custom scrollbar for soft feminine aesthetic */
+/* Brand accent styling for form controls */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--color-brand);
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: #FFF1F4;
@@ -61,19 +71,22 @@ h1, h2, h3, h4, h5, h6 {
   background: #F5A3B7;
 }
 
-/* Reusable pill buttons, badges and soft card components */
+/* Reusable buttons, badges, and card styling */
 @layer components {
+  /* Primary CTA Button (Only brand red is used for primary actions) */
   .btn-brand {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-weight: 500;
+    min-height: 44px;
+    font-weight: 600;
+    font-size: 0.875rem;
     border-radius: 9999px;
     background-color: #C8202F;
     color: #FFFFFF;
     padding: 0.625rem 1.5rem;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 14px rgba(200, 32, 47, 0.25);
   }
   .btn-brand:hover {
@@ -85,15 +98,18 @@ h1, h2, h3, h4, h5, h6 {
     transform: scale(0.98);
   }
 
+  /* Secondary Neutral Button */
   .btn-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    min-height: 44px;
     font-weight: 500;
+    font-size: 0.875rem;
     border-radius: 9999px;
     background-color: #FFFFFF;
-    color: #3B1F2B;
+    color: #2C1820;
     border: 1px solid #FFD9E2;
     padding: 0.625rem 1.5rem;
     transition: all 0.2s ease;
@@ -107,44 +123,49 @@ h1, h2, h3, h4, h5, h6 {
     transform: scale(0.98);
   }
 
+  /* Soft Blush Pill Button */
   .btn-blush {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    min-height: 44px;
     font-weight: 500;
+    font-size: 0.875rem;
     border-radius: 9999px;
     background-color: #FFF1F4;
-    color: #C8202F;
+    color: #2C1820;
     border: 1px solid #FFD9E2;
     padding: 0.625rem 1.5rem;
     transition: all 0.2s ease;
   }
   .btn-blush:hover {
     background-color: #FFD9E2;
-    color: #A31A27;
   }
 
+  /* Consistent Card Design */
   .card-soft {
     background-color: #FFFFFF;
     border-radius: 1.5rem;
-    border: 1px solid rgba(255, 217, 226, 0.8);
-    box-shadow: 0 4px 20px -2px rgba(245, 163, 183, 0.25);
-    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 217, 226, 0.75);
+    box-shadow: 0 2px 8px -1px rgba(245, 163, 183, 0.22);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .card-soft:hover {
-    box-shadow: 0 8px 30px -4px rgba(245, 163, 183, 0.4);
+    box-shadow: 0 6px 20px -2px rgba(245, 163, 183, 0.35);
     border-color: #F5A3B7;
     transform: translateY(-2px);
   }
 
+  /* Badges */
   .badge-brand {
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.625rem;
     border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.025em;
     background-color: #C8202F;
     color: #FFFFFF;
   }
@@ -152,24 +173,41 @@ h1, h2, h3, h4, h5, h6 {
   .badge-blush {
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.625rem;
     border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.6875rem;
+    font-weight: 600;
     background-color: #FFF1F4;
-    color: #3B1F2B;
+    color: #2C1820;
     border: 1px solid #FFD9E2;
   }
+}
 
-  .badge-success {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background-color: rgba(91, 191, 159, 0.12);
-    color: #2D7A61;
-    border: 1px solid rgba(91, 191, 159, 0.35);
+/* Micro-interaction animations */
+@keyframes cartBump {
+  from, to {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+}
+
+.animate-cart-bump {
+  animation: cartBump 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

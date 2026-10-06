@@ -8,14 +8,14 @@ import { WhatsAppButton } from "@/components/common/WhatsAppButton";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const poppins = Poppins({
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-poppins",
   display: "swap",
 });
 
 const inter = Inter({
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
@@ -24,31 +24,30 @@ const inter = Inter({
 import { getAllSettings } from "@/lib/services/settings";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.samaurahealthcare.com"),
   title: {
-    default: "Samaura Healthcare | Pure Cotton & Gentle Female Hygiene Care",
+    default: "Samaura Healthcare | Menstrual Health Education & Menstrual Cups",
     template: "%s | Samaura Healthcare",
   },
   description:
-    "Premium, plant-derived sanitary pads, panty liners, menstrual cups, and intimate wellness products crafted for pure comfort and discreet care.",
+    "We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.",
   icons: {
     icon: "/samaura-logo.png",
   },
   keywords: [
-    "sanitary pads",
-    "cotton sanitary pads",
-    "panty liners",
+    "menstrual health education",
     "menstrual cups",
-    "intimate hygiene wash",
-    "anti-chafing pads",
-    "female wellness",
+    "menstrual hygiene",
+    "reusable menstrual hygiene",
+    "first period gift box",
+    "menstrual awareness",
     "Samaura Healthcare",
   ],
   openGraph: {
-    title: "Samaura Healthcare | Pure Cotton & Gentle Female Hygiene Care",
+    title: "Samaura Healthcare | Menstrual Health Education & Menstrual Cups",
     description:
-      "Premium, plant-derived sanitary pads, panty liners, menstrual cups, and intimate wellness products.",
-    url: "https://samaura.com",
+      "We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.",
+    url: "https://www.samaurahealthcare.com",
     siteName: "Samaura Healthcare",
     images: [
       {
@@ -62,9 +61,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Samaura Healthcare | Pure Cotton & Gentle Female Hygiene Care",
+    title: "Samaura Healthcare | Menstrual Health Education & Menstrual Cups",
     description:
-      "Premium, plant-derived sanitary pads, panty liners, menstrual cups, and intimate wellness products crafted for pure comfort and discreet care.",
+      "We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.",
     images: ["/samaura-logo.png"],
   },
 };
@@ -77,18 +76,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const settings = await getAllSettings();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://samaura.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.samaurahealthcare.com";
 
   const structuredData = [
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "Samaura Healthcare",
+      description:
+        "We are a purpose-driven startup committed to making menstrual health education accessible, inclusive, and empowering for women and young people across all sections of society.",
       url: siteUrl,
       logo: `${siteUrl}/samaura-logo.png`,
+      email: settings.contact_email || "samaurahealthcare@gmail.com",
       contactPoint: {
         "@type": "ContactPoint",
-        telephone: settings.store_phone || "+91-9876543210",
+        telephone: settings.contact_phone || "+91 6282132510",
         contactType: "Customer Support",
         areaServed: "IN",
         availableLanguage: ["English", "Hindi"],
@@ -120,11 +122,11 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-white text-muted font-body selection:bg-pink-light selection:text-ink">
         <AnnouncementBar />
-        <Navbar offersBadge={settings.nav_offers_badge || "Offers"} />
+        <Navbar offersBadge={settings.nav_offers_badge || ""} />
         <main className="flex-1 pb-12 sm:pb-16">{children}</main>
         <Footer />
         <CartDrawer />
-        <WhatsAppButton />
+        <WhatsAppButton phoneNumber={settings.whatsapp_number} />
         <CookieNotice />
       </body>
     </html>

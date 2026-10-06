@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
 import {
-  approveReviewAction,
+  publishReviewAction,
   rejectReviewAction,
   deleteReviewAction,
 } from "@/app/admin/actions/reviews";
@@ -84,7 +84,7 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
 
   const handleApprove = (id: string) => {
     startTransition(async () => {
-      const res = await approveReviewAction(id);
+      const res = await publishReviewAction(id);
       if (!res.success) {
         setToast({ type: "error", title: "Action Failed", message: res.error || "Could not publish review." });
       } else {
@@ -301,7 +301,7 @@ export function ReviewModerationTable({ reviews: initialReviews }: ReviewModerat
                     </span>
                     {rev.isVerified && (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified Buyer
+                        <ShieldCheck className="w-3 h-3 text-emerald-600" /> Buyer
                       </span>
                     )}
                   </div>

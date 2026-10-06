@@ -91,7 +91,7 @@ export default function AdminHelpPage() {
               <strong>Navigate:</strong> Open <Link href="/admin/reviews" className="text-brand font-semibold hover:underline">Review Moderation</Link>.
             </p>
             <ul className="list-disc pl-4 space-y-1">
-              <li>Customer reviews are submitted with honeypot bot defense and verified buyer badges.</li>
+              <li>Customer reviews are submitted with honeypot bot defense and buyer badges.</li>
               <li>All reviews are set to <em>Pending</em> by default.</li>
               <li>Click <em>Publish</em> to show on the storefront product page, or <em>Reject</em> to keep hidden.</li>
               <li>Aggregate star ratings on the storefront update dynamically only when published reviews exist in the database.</li>
@@ -164,7 +164,7 @@ export default function AdminHelpPage() {
 
       {/* Safety Notice Card */}
       <div className="bg-linear-to-r from-blush to-pink-light/30 rounded-3xl p-6 sm:p-8 border border-pink-light flex items-start gap-4">
-        <ShieldCheck className="w-6 h-6 text-brand shrink-0 mt-0.5" />
+        <ShieldCheck className="w-6 h-6 text-ink shrink-0 mt-0.5" />
         <div className="space-y-1 text-xs sm:text-sm text-muted">
           <p className="font-heading font-bold text-ink text-base">Security &amp; Compliance Notes</p>
           <p>

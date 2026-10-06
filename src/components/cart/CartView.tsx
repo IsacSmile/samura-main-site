@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ShoppingBag,
   Trash2,
   Plus,
   Minus,
@@ -20,6 +19,7 @@ import { useCartPricing } from "@/lib/cart/useCartPricing";
 import { formatRupees } from "@/lib/utils/money";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { EmptyStateIllustration } from "@/components/ui/EmptyStateIllustration";
 
 export function CartView() {
   const {
@@ -71,14 +71,12 @@ export function CartView() {
   if (items.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 py-16">
-        <div className="w-24 h-24 rounded-full bg-blush flex items-center justify-center text-brand border border-pink-light mb-6 shadow-xs">
-          <ShoppingBag className="w-12 h-12 opacity-60" />
-        </div>
+        <EmptyStateIllustration type="cart" className="w-28 h-28 mx-auto mb-6" />
         <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-ink mb-2">
           Your Shopping Bag is Empty
         </h1>
         <p className="text-sm text-muted max-w-md mb-8 leading-relaxed">
-          Looks like you haven&apos;t added any products yet. Treat yourself to pure cotton, breathable daily care.
+          Looks like you haven&apos;t added any products yet. Discover our pure cotton, breathable daily care.
         </p>
         <Link href="/shop">
           <Button size="lg" className="shadow-md">
@@ -162,7 +160,7 @@ export function CartView() {
                       <div className="min-w-0 space-y-1">
                         <Link
                           href={`/product/${item.productSlug}`}
-                          className="font-heading font-semibold text-sm sm:text-base text-ink hover:text-brand transition-colors line-clamp-1"
+                          className="font-heading font-semibold text-sm sm:text-base text-ink hover:text-brand transition-colors line-clamp-2"
                         >
                           {item.productName}
                         </Link>
@@ -173,11 +171,6 @@ export function CartView() {
                           <span className="text-sm font-bold text-ink">
                             {formatRupees(item.effectivePricePaise)}
                           </span>
-                          {hasSale && (
-                            <span className="text-xs text-muted line-through">
-                              {formatRupees(item.pricePaise)}
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -256,7 +249,10 @@ export function CartView() {
             {/* Subtotal, Shipping, Discount lines */}
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between text-muted">
-                <span>Subtotal ({pricing?.itemCount ?? items.length} items)</span>
+                <span>
+                  Subtotal ({pricing?.itemCount ?? items.length}{" "}
+                  {(pricing?.itemCount ?? items.length) === 1 ? "item" : "items"})
+                </span>
                 <span className="font-semibold text-ink">
                   {formatRupees(subtotalPaise)}
                 </span>
@@ -354,22 +350,22 @@ export function CartView() {
               <Button
                 size="lg"
                 disabled={!pricing?.isValid || items.length === 0}
-                className="w-full shadow-md text-sm font-semibold flex items-center justify-center gap-2"
+                className="w-full shadow-md text-sm font-semibold flex items-center justify-center gap-1.5 whitespace-nowrap"
               >
                 <span>Proceed to Checkout</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </Button>
             </Link>
 
             {/* Trust Assurance */}
             <div className="space-y-2 pt-4 border-t border-blush text-xs text-muted">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-ink-muted shrink-0" />
                 <span>Plain, discreet packaging on all orders</span>
               </div>
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-brand shrink-0" />
-                <span>Skin-friendly botanical hygiene guarantee</span>
+                <Sparkles className="w-4 h-4 text-rose shrink-0" />
+                <span>Skin-friendly intimate hygiene standard</span>
               </div>
             </div>
           </div>

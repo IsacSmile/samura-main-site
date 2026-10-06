@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { Metadata } from "next";
+import { formatPaymentStatus, formatPaymentMethod } from "@/lib/utils/statusLabels";
 
 export const metadata: Metadata = {
   title: "Order Status | Samaura Healthcare",
@@ -189,23 +190,19 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
             <div className="text-xs text-stone-600 space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-stone-500">Method</span>
-                <span className="font-medium text-stone-900 uppercase">
-                  {order.paymentMethod === "cod"
-                    ? "Cash on Delivery (COD)"
-                    : order.paymentMethod === "razorpay"
-                    ? "Razorpay Online"
-                    : "Mock Online Gateway"}
+                <span className="font-medium text-stone-900">
+                  {formatPaymentMethod(order.paymentMethod)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-stone-500">Status</span>
-                <span className="font-medium text-stone-900 capitalize">
-                  {order.paymentStatus.replace("_", " ")}
+                <span className="font-medium text-stone-900">
+                  {formatPaymentStatus(order.paymentStatus)}
                 </span>
               </div>
               <div className="pt-2 text-[11px] text-stone-400 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-stone-400" />
-                <span>Discreet billing and packaging guaranteed</span>
+                <span>Discreet billing and packaging standard</span>
               </div>
             </div>
           </div>

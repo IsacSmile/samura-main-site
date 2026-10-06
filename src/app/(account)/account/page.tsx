@@ -54,6 +54,7 @@ export default async function AccountPage() {
         paymentStatus: o.paymentStatus,
         paymentMethod: o.paymentMethod,
         totalPaise: o.totalPaise,
+        itemCount: o.itemCount,
         createdAt: o.createdAt,
         courierName: o.courierName,
         trackingNumber: o.trackingNumber,

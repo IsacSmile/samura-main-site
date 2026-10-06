@@ -68,8 +68,8 @@ export function ProductAccordion({
 
   return (
     <div className="space-y-4">
-      {/* 1. Absorption & Flow Guide */}
-      {(absorptionGuide || flowType) && (
+      {/* 1. Absorption & Flow Guide (Render strictly when field has content) */}
+      {Boolean(absorptionGuide?.trim() || parsedFeatures.length > 0) && (
         <div className="rounded-3xl border border-pink-light bg-white overflow-hidden shadow-xs transition-all">
           <button
             onClick={() => toggleSection("absorption")}
@@ -77,7 +77,7 @@ export function ProductAccordion({
             aria-expanded={openSections.absorption}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-brand shrink-0">
+              <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-rose shrink-0">
                 <Droplets className="w-5 h-5" />
               </div>
               <div>
@@ -85,22 +85,22 @@ export function ProductAccordion({
                   Absorption &amp; Flow Guide
                 </h3>
                 {flowType && (
-                  <span className="text-xs font-medium text-brand">
-                    Suitable for: {flowType}
+                  <span className="text-xs font-medium text-muted">
+                    Flow: {flowType}
                   </span>
                 )}
               </div>
             </div>
             <ChevronDown
               className={`w-5 h-5 text-muted transition-transform duration-300 ${
-                openSections.absorption ? "rotate-180 text-brand" : ""
+                openSections.absorption ? "rotate-180 text-ink" : ""
               }`}
             />
           </button>
 
           {openSections.absorption && (
             <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-muted border-t border-blush leading-relaxed space-y-3">
-              <p>{absorptionGuide || "Designed with rapid fluid-wicking channels to keep your skin comfortably dry."}</p>
+              {absorptionGuide && <p>{absorptionGuide}</p>}
               {parsedFeatures.length > 0 && (
                 <div className="pt-2">
                   <span className="font-semibold text-ink block mb-2">Key Protection Features:</span>
@@ -116,8 +116,8 @@ export function ProductAccordion({
         </div>
       )}
 
-      {/* 2. Honest Ingredients */}
-      {ingredients && (
+      {/* 2. Honest Ingredients (Render strictly when field has content) */}
+      {Boolean(ingredients?.trim()) && (
         <div className="rounded-3xl border border-pink-light bg-white overflow-hidden shadow-xs transition-all">
           <button
             onClick={() => toggleSection("ingredients")}
@@ -133,13 +133,13 @@ export function ProductAccordion({
                   Carefully Selected Ingredients &amp; Materials
                 </h3>
                 <span className="text-xs font-medium text-emerald-700">
-                  Zero Chlorine • Zero Phthalates • Zero Artificial Perfume
+                  Skin-Friendly Composition
                 </span>
               </div>
             </div>
             <ChevronDown
               className={`w-5 h-5 text-muted transition-transform duration-300 ${
-                openSections.ingredients ? "rotate-180 text-brand" : ""
+                openSections.ingredients ? "rotate-180 text-ink" : ""
               }`}
             />
           </button>
@@ -165,8 +165,8 @@ export function ProductAccordion({
         </div>
       )}
 
-      {/* 3. Usage & Eco Disposal Instructions */}
-      {usageGuide && (
+      {/* 3. Usage & Eco Disposal Instructions (Render strictly when field has content) */}
+      {Boolean(usageGuide?.trim()) && (
         <div className="rounded-3xl border border-pink-light bg-white overflow-hidden shadow-xs transition-all">
           <button
             onClick={() => toggleSection("usage")}
@@ -174,7 +174,7 @@ export function ProductAccordion({
             aria-expanded={openSections.usage}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-brand shrink-0">
+              <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-rose shrink-0">
                 <FileText className="w-5 h-5" />
               </div>
               <div>
@@ -182,13 +182,13 @@ export function ProductAccordion({
                   How to Use &amp; Safe Disposal
                 </h3>
                 <span className="text-xs text-muted">
-                  Simple, mindful steps for hygiene and planet care
+                  Simple, mindful steps for hygiene and care
                 </span>
               </div>
             </div>
             <ChevronDown
               className={`w-5 h-5 text-muted transition-transform duration-300 ${
-                openSections.usage ? "rotate-180 text-brand" : ""
+                openSections.usage ? "rotate-180 text-ink" : ""
               }`}
             />
           </button>
@@ -201,7 +201,7 @@ export function ProductAccordion({
         </div>
       )}
 
-      {/* 4. Frequently Asked Questions */}
+      {/* 4. Frequently Asked Questions (Render strictly when field has content) */}
       {parsedFaq.length > 0 && (
         <div className="rounded-3xl border border-pink-light bg-white overflow-hidden shadow-xs transition-all">
           <button
@@ -210,7 +210,7 @@ export function ProductAccordion({
             aria-expanded={openSections.faq}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-brand shrink-0">
+              <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-rose shrink-0">
                 <HelpCircle className="w-5 h-5" />
               </div>
               <div>
@@ -218,13 +218,13 @@ export function ProductAccordion({
                   Frequently Asked Questions
                 </h3>
                 <span className="text-xs text-muted">
-                  Common questions answered by our wellness team
+                  Common questions answered by our care team
                 </span>
               </div>
             </div>
             <ChevronDown
               className={`w-5 h-5 text-muted transition-transform duration-300 ${
-                openSections.faq ? "rotate-180 text-brand" : ""
+                openSections.faq ? "rotate-180 text-ink" : ""
               }`}
             />
           </button>

@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Honeypot verification (bots fill hidden fields)
     if (hp_website && hp_website.trim().length > 0) {
-      // Silently accept without saving to database
+      // Silently accept, bypassing storage to database
       return NextResponse.json({
         success: true,
         message: "Review submitted successfully and is awaiting moderation.",
@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
     const sanitizedTitle = title ? sanitizeText(title) : null;
     const sanitizedBody = sanitizeText(body);
 
-    // 5. Server-side verification check
-    // Verified ONLY if the authenticated user has a delivered order containing this product
+    // 5. Server-side purchase confirmation check
+    // Confirmed ONLY if the authenticated user has a delivered order containing this product
     let isVerified = false;
     let userId: string | null = null;
 

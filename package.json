@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "check-claims": "tsx scripts/check-claims.ts",
+    "check-claims:db": "tsx scripts/check-claims-db.ts",
     "check": "tsx scripts/check-claims.ts && npm run lint && tsc --noEmit",
     "build": "tsx scripts/check-claims.ts && next build",
     "start": "next start",

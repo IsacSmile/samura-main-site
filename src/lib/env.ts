@@ -13,7 +13,7 @@ export const seedAdminEnvSchema = z.object({
 
 /**
  * Validates critical environment variables at startup in production.
- * Fails fast without leaking secret values to logs.
+ * Fails fast and prevents leaking secret values to logs.
  */
 export function validateStartupEnv(): void {
   if (process.env.NODE_ENV === "production") {

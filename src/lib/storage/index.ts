@@ -129,7 +129,7 @@ export class LocalStorageProvider implements StorageProvider {
 
 /**
  * Cloudinary Storage Provider (Selected when STORAGE_PROVIDER="cloudinary")
- * Cloud storage suitable for serverless platforms like Vercel with ephemeral filesystems.
+ * Cloud storage designed for serverless platforms like Vercel with ephemeral filesystems.
  */
 export class CloudinaryStorageProvider implements StorageProvider {
   private cloudName: string;

@@ -2,6 +2,7 @@
 
 import { Printer, ArrowLeft } from "lucide-react";
 import { formatPaiseToRupees } from "@/lib/utils/money";
+import { formatPaymentStatus, formatPaymentMethod } from "@/lib/utils/statusLabels";
 
 export interface InvoiceItem {
   id: string;
@@ -129,8 +130,8 @@ export function InvoiceView({ data }: { data: InvoiceData }) {
                 <strong className="text-stone-900">Invoice Date:</strong> {invoiceDate}
               </p>
               <p>
-                <strong className="text-stone-900">Payment:</strong> {data.paymentMethod.toUpperCase()} (
-                <span className="capitalize">{data.paymentStatus}</span>)
+                <strong className="text-stone-900">Payment:</strong> {formatPaymentMethod(data.paymentMethod)} (
+                <span>{formatPaymentStatus(data.paymentStatus)}</span>)
               </p>
             </div>
           </div>
@@ -160,7 +161,7 @@ export function InvoiceView({ data }: { data: InvoiceData }) {
 
           <div className="sm:text-right">
             <h3 className="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-2">
-              Discreet Shipping Guarantee:
+              Discreet Shipping Standard:
             </h3>
             <p className="text-stone-600 leading-relaxed">
               Package dispatched in neutral, unmarked tamper-evident outer packaging with no mention

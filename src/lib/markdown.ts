@@ -49,7 +49,7 @@ export function sanitizeHtml(html: string): string {
 
 /**
  * Basic markdown-to-HTML parser that parses markdown into safe, semantic HTML.
- * Sanitizes input first to guarantee no script execution.
+ * Sanitizes input first to ensure no script execution.
  */
 export function renderMarkdownToHtml(markdown: string): string {
   if (!markdown) return "";

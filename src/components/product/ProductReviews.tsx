@@ -98,7 +98,7 @@ export function ProductReviews({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h3 className="font-heading font-bold text-xl sm:text-2xl text-ink">
-              Verified Customer Reviews
+              Customer Reviews
             </h3>
             {reviewCount > 0 && (
               <span className="px-2.5 py-0.5 rounded-full bg-blush text-brand text-xs font-bold border border-pink-light">
@@ -107,7 +107,7 @@ export function ProductReviews({
             )}
           </div>
           <p className="text-xs text-muted">
-            Honest feedback from real customers across India. Zero sponsored or fake reviews.
+            Honest feedback from customers across India.
           </p>
         </div>
 
@@ -115,10 +115,10 @@ export function ProductReviews({
           onClick={() => setIsWriteModalOpen(true)}
           variant="secondary"
           size="sm"
-          className="shrink-0"
+          className="shrink-0 inline-flex items-center gap-1.5"
         >
-          <MessageSquarePlus className="w-4 h-4 mr-1.5 text-brand" />
-          Write a Review
+          <MessageSquarePlus className="w-4 h-4 text-ink-muted shrink-0" strokeWidth={1.75} />
+          <span>Write a Review</span>
         </Button>
       </div>
 
@@ -147,7 +147,7 @@ export function ProductReviews({
                 ))}
               </div>
               <span className="text-xs text-muted block">
-                Based on {reviewCount} verified {reviewCount === 1 ? "review" : "reviews"}
+                Based on {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
               </span>
             </div>
 
@@ -155,10 +155,10 @@ export function ProductReviews({
 
             <div className="text-xs text-muted space-y-1 text-center sm:text-left">
               <span className="font-semibold text-ink flex items-center justify-center sm:justify-start gap-1">
-                <CheckCircle2 className="w-4 h-4 text-success" /> Verified Experiences
+                <CheckCircle2 className="w-4 h-4 text-success" /> Customer Experiences
               </span>
               <p>
-                Every review on Samaura is submitted by verified customers and strictly moderated for authentic product feedback.
+                Every review on Samaura is submitted by real buyers and moderated for authentic product feedback.
               </p>
             </div>
           </div>
@@ -205,7 +205,7 @@ export function ProductReviews({
                     {rev.isVerified && (
                       <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                         <CheckCircle2 className="w-3 h-3 text-success" />
-                        Verified Buyer
+                        Buyer
                       </span>
                     )}
                   </div>

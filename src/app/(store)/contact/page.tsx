@@ -6,15 +6,35 @@ import { ContactForm } from "@/components/store/ContactForm";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Contact & Confidential Helpline | Samaura Healthcare",
+  title: "Contact & Enquiries | Samaura Healthcare",
   description:
-    "Get in touch with Samaura Healthcare. Confidential WhatsApp helpline, customer care support, and order assistance.",
+    "Get in touch with Samaura Healthcare. Enquire about menstrual health education, awareness sessions, menstrual cups, and gift collections.",
 };
 
-export default async function ContactPage() {
-  const whatsappNumber = await getSetting("whatsapp_number", "919876543210");
-  const contactPhone = await getSetting("contact_phone", "+91 98765 43210");
-  const contactEmail = await getSetting("contact_email", "care@samaura.com");
+interface ContactPageProps {
+  searchParams?: Promise<{
+    topic?: string;
+  }>;
+}
+
+export default async function ContactPage({ searchParams }: ContactPageProps) {
+  const resolvedParams = searchParams ? await searchParams : {};
+  const rawTopic = (resolvedParams.topic || "").toLowerCase().trim();
+
+  let initialTopic = "General";
+  if (rawTopic.includes("awareness")) {
+    initialTopic = "Awareness session";
+  } else if (rawTopic.includes("gift")) {
+    initialTopic = "Gift pack";
+  } else if (rawTopic.includes("institution") || rawTopic.includes("csr")) {
+    initialTopic = "Institutional/CSR";
+  } else if (rawTopic.includes("cup")) {
+    initialTopic = "Menstrual cup";
+  }
+
+  const whatsappNumber = await getSetting("whatsapp_number", "");
+  const contactPhone = await getSetting("contact_phone", "+91 6282132510");
+  const contactEmail = await getSetting("contact_email", "samaurahealthcare@gmail.com");
   const helplineHours = await getSetting("helpline_hours", "Monday to Saturday, 9:00 AM – 7:00 PM IST");
   const storeAddress = await getSetting("store_address", "");
 
@@ -27,13 +47,13 @@ export default async function ContactPage() {
         <div className="text-center space-y-4 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Customer Care &amp; Support</span>
+            <span>Customer Care &amp; Enquiries</span>
           </div>
           <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-ink">
-            Contact &amp; Helpline
+            Contact Us
           </h1>
           <p className="text-muted text-sm sm:text-base leading-relaxed">
-            Need sizing advice, order tracking updates, or confidential guidance? Our dedicated care team is here to assist.
+            Have questions about menstrual cups, awareness sessions, or institutional gift kits? Our dedicated care team is here to assist.
           </p>
         </div>
 
@@ -126,7 +146,7 @@ export default async function ContactPage() {
         </div>
 
         {/* Contact Form Component */}
-        <ContactForm />
+        <ContactForm initialTopic={initialTopic} />
 
         {/* Physical Address if configured */}
         {storeAddress && (

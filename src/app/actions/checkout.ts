@@ -9,6 +9,7 @@ import {
   cancelOrderPayment,
   cleanupAbandonedOrders,
   updateOrderStatus,
+  CreateOrderResult,
 } from "@/lib/services/orders";
 import { getUserAddresses, saveUserAddress } from "@/lib/services/addresses";
 import { isOnlinePaymentConfigured, getPaymentProvider } from "@/lib/payments";
@@ -46,11 +47,12 @@ const checkoutActionSchema = z.object({
     .min(1, "Your cart is empty"),
   idempotencyKey: z.string().min(10, "Idempotency key is required"),
   saveAddress: z.boolean().optional(),
+  confirmAddressMismatch: z.boolean().optional(),
 });
 
 export type CheckoutActionInput = z.infer<typeof checkoutActionSchema>;
 
-export async function processCheckoutAction(rawInput: unknown) {
+export async function processCheckoutAction(rawInput: unknown): Promise<CreateOrderResult> {
   try {
     // 1. Zod Validation
     const parsed = checkoutActionSchema.safeParse(rawInput);
@@ -61,16 +63,27 @@ export async function processCheckoutAction(rawInput: unknown) {
 
     const data = parsed.data;
 
-    // Validate PIN code against state
+    // Validate PIN code against state (allows address confirmation override)
     const pinCheck = validatePincodeState(data.postalCode, data.state);
-    if (!pinCheck.isValid) {
-      return { success: false, error: pinCheck.error || "PIN code does not match the selected state." };
+    if (!pinCheck.isValid && !data.confirmAddressMismatch) {
+      return {
+        success: false,
+        error: pinCheck.error || "PIN code does not match the selected state.",
+        warningMismatch: true,
+        expectedStates: pinCheck.expectedStates,
+      };
     }
 
     // 2. Extract Client IP
-    const headerList = await headers();
-    const forwarded = headerList.get("x-forwarded-for");
-    const ip = forwarded ? forwarded.split(",")[0].trim() : headerList.get("x-real-ip") || "127.0.0.1";
+    let ip = "127.0.0.1";
+    try {
+      const headerList = await headers();
+      const forwarded = headerList.get("x-forwarded-for");
+      ip = forwarded ? forwarded.split(",")[0].trim() : headerList.get("x-real-ip") || "127.0.0.1";
+    } catch {
+      // Non-request context (e.g. test environment)
+      ip = "127.0.0.1";
+    }
 
     // 3. Rate Limit per IP
     const ipCheck = await checkRateLimit(`checkout_ip:${ip}`, 10, 600);
@@ -92,7 +105,12 @@ export async function processCheckoutAction(rawInput: unknown) {
     }
 
     // 5. Auth / Session Check
-    const session = await auth();
+    let session = null;
+    try {
+      session = await auth();
+    } catch {
+      session = null;
+    }
     const userId = session?.user?.id || null;
 
     // If user asked to save address and is logged in
@@ -246,10 +264,11 @@ export async function getCheckoutConfigAction() {
   const session = await auth();
   const userId = session?.user?.id;
 
-  const [savedAddresses, codEnabledSetting, codMaxOrderPaiseSetting] = await Promise.all([
+  const [savedAddresses, codEnabledSetting, codMaxOrderPaiseSetting, dispatchTimeTextSetting] = await Promise.all([
     userId ? getUserAddresses(userId) : [],
     getSetting("cod_enabled", "true"),
     getSetting("cod_max_order_paise", "250000"),
+    getSetting("dispatch_time_text", ""),
   ]);
 
   const onlineConfigured = isOnlinePaymentConfigured();
@@ -264,6 +283,7 @@ export async function getCheckoutConfigAction() {
     providerName: provider?.name || null,
     codEnabled: codEnabledSetting === "true",
     codMaxOrderPaise: parseInt(codMaxOrderPaiseSetting, 10) || 250000,
+    dispatchTimeText: dispatchTimeTextSetting ? dispatchTimeTextSetting.trim() : "",
   };
 }
 

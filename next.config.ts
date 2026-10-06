@@ -7,7 +7,7 @@ const hasGa = Boolean(process.env.NEXT_PUBLIC_GA_ID);
 const scriptSrc = [
   "'self'",
   "'unsafe-inline'",
-  "'unsafe-eval'",
+  ...(isProduction ? [] : ["'unsafe-eval'"]),
   "https://checkout.razorpay.com",
   ...(hasGa ? ["https://www.googletagmanager.com", "https://www.google-analytics.com"] : []),
 ].join(" ");
@@ -73,6 +73,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   images: {
     remotePatterns: [
       {
@@ -80,6 +81,30 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
       },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/product/organic-cotton-ultra-thin-day-pads",
+        destination: "/product/pure-cotton-ultra-thin-day-pads",
+        statusCode: 301,
+      },
+      {
+        source: "/product/curved-flex-organic-cotton-liners",
+        destination: "/product/curved-flex-cotton-liners",
+        statusCode: 301,
+      },
+      {
+        source: "/product/natural-period-cramp-relief-roll-on",
+        destination: "/product/comfort-massage-roll-on",
+        statusCode: 301,
+      },
+      {
+        source: "/product/gentle-foaming-intimate-wash-ph-3-5",
+        destination: "/product/gentle-foaming-intimate-wash",
+        statusCode: 301,
+      },
+    ];
   },
   async headers() {
     return [

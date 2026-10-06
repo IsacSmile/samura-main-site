@@ -80,6 +80,7 @@ export default async function AdminEditProductPage({ params }: PageProps) {
     isFeatured: product.isFeatured,
     isBestseller: product.isBestseller,
     isActive: product.isActive,
+    isSample: product.isSample,
     variants: variants.map((v) => ({
       id: v.id,
       name: v.name,

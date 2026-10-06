@@ -1,53 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F2F8F6" />
-      <stop offset="50%" stop-color="#FAFCFB" />
-      <stop offset="1" stop-color="#E2F2ED" />
+    <linearGradient id="bg_crv" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFF8F9" />
+      <stop offset="1" stop-color="#FFEBF0" />
     </linearGradient>
-    <linearGradient id="packGrad" x1="0%" y1="0%" x2="0%" y2="1">
-      <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="1" stop-color="#F8FBF9" />
+    <linearGradient id="box_crv" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#FFE4EB" />
     </linearGradient>
-    <linearGradient id="mintGrad" x1="0%" y1="0%" x2="1" y2="0%">
-      <stop offset="0%" stop-color="#349377" />
-      <stop offset="1" stop-color="#5BBF9F" />
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="20" stdDeviation="25" flood-color="#349377" flood-opacity="0.2" />
+    <filter id="sh_crv" x="-15%" y="-15%" width="135%" height="135%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#5A0D1B" flood-opacity="0.18" />
     </filter>
   </defs>
 
-  <rect width="800" height="800" fill="url(#bg)" />
-  <circle cx="680" cy="140" r="180" fill="#D3EDE4" opacity="0.4" filter="blur(40px)" />
-  <circle cx="120" cy="680" r="160" fill="#FFD9E2" opacity="0.3" filter="blur(40px)" />
+  <!-- Background -->
+  <rect width="600" height="600" fill="url(#bg_crv)" />
+  <circle cx="490" cy="120" r="130" fill="#FFD9E2" opacity="0.38" />
+  <circle cx="100" cy="490" r="110" fill="#FFF1F4" opacity="0.6" />
 
-  <g transform="translate(180, 140)" filter="url(#shadow)">
-    <rect width="440" height="520" rx="36" fill="url(#packGrad)" stroke="#C2E6DB" stroke-width="2" />
+  <!-- Packaging Box -->
+  <g transform="translate(140, 90)" filter="url(#sh_crv)">
+    <rect width="320" height="420" rx="28" fill="url(#box_crv)" stroke="#E896AA" stroke-width="2" />
     
-    <path d="M0 36 C0 16 16 0 36 0 L404 0 C424 0 440 16 440 36 L440 120 L0 120 Z" fill="url(#mintGrad)" />
-    
-    <text x="220" y="65" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="3">SAMAURA</text>
-    <text x="220" y="92" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#E2F5EF" text-anchor="middle" letter-spacing="2">ACTIVE ANATOMIC FIT</text>
+    <!-- Top Accent Band -->
+    <path d="M0 28 C0 12 12 0 28 0 L292 0 C308 0 320 12 320 28 L320 80 L0 80 Z" fill="#C8202F" />
+    <text x="160" y="48" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">SAMAURA</text>
 
-    <!-- Curved Outline -->
-    <g transform="translate(220, 260)">
-      <path d="M -55 -100 C -35 -50 -35 50 -55 100 C 0 110 0 110 55 100 C 35 50 35 -50 55 -100 C 0 -110 0 -110 -55 -100 Z" fill="#EEF7F4" stroke="#A7DAC9" stroke-width="2" stroke-dasharray="3 3" />
-      <path d="M -30 -60 C -15 -30 -15 30 -30 60 C 0 65 0 65 30 60 C 15 30 15 -30 30 -60 C 0 -65 0 -65 -30 -60 Z" fill="#FFFFFF" stroke="#C2E6DB" stroke-width="1.5" />
+    <!-- Packaging Motif: Curved Contour Flex Liner -->
+    <g transform="translate(160, 210)">
+      <path d="M 0 -75 C 38 -75 42 -35 28 0 C 14 35 38 75 0 75 C -38 75 -14 35 -28 0 C -42 -35 -38 -75 0 -75 Z" fill="#FFFFFF" stroke="#FFD9E2" stroke-width="2" />
+      <path d="M 0 -50 C 20 -50 22 -20 14 0 C 6 20 20 50 0 50 C -20 50 -6 20 -14 0 C -22 -20 -20 -50 0 -50 Z" fill="#FFF8F9" stroke="#F5A3B7" stroke-width="1.2" stroke-dasharray="3 3" />
     </g>
 
-    <text x="220" y="415" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#3B1F2B" text-anchor="middle">Curved Flex Cotton Liners</text>
-    <text x="220" y="440" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#6B5B62" text-anchor="middle">180mm • Anatomical Contoured Edge</text>
-
-    <g transform="translate(220, 480)">
-      <rect x="-160" y="-14" width="95" height="28" rx="14" fill="#E8F8F3" stroke="#A7E4D3" stroke-width="1" />
-      <text x="-112" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#2D7A61" text-anchor="middle">ZERO SHIFT</text>
-
-      <rect x="-50" y="-14" width="100" height="28" rx="14" fill="#FFF1F4" stroke="#FFD9E2" stroke-width="1" />
-      <text x="0" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#C8202F" text-anchor="middle">BREATHABLE</text>
-
-      <rect x="65" y="-14" width="95" height="28" rx="14" fill="#F4F4F6" stroke="#E2E2E6" stroke-width="1" />
-      <text x="112" y="4" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#4B4B52" text-anchor="middle">24 LINERS</text>
-    </g>
+    <!-- Product Wordmark Bottom -->
+    <text x="160" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#2C1820" text-anchor="middle" letter-spacing="1">CURVED LINERS</text>
+    <circle cx="160" cy="370" r="4" fill="#C8202F" />
   </g>
 </svg>

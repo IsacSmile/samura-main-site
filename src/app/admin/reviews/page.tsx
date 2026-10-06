@@ -71,7 +71,7 @@ export default async function AdminReviewsPage() {
           Customer Reviews Moderation
         </h1>
         <p className="text-xs text-muted mt-1">
-          Review authentic feedback from verified customers, approve genuine testimonials, and moderate submissions before they appear on storefront product pages.
+          Review authentic feedback from store customers, approve genuine testimonials, and moderate submissions before they appear on storefront product pages.
         </p>
       </div>
 

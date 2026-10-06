@@ -10,6 +10,7 @@ interface EnquiryRecord {
   name: string;
   email: string;
   phone: string | null;
+  topic?: string | null;
   subject: string;
   message: string;
   status: "new" | "read" | "responded";
@@ -95,6 +96,7 @@ export function AdminEnquiriesView({ initialEnquiries }: { initialEnquiries: Enq
               <tr className="border-b border-pink-light bg-blush/30 text-ink/70 uppercase tracking-wider font-semibold text-[11px]">
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Sender</th>
+                <th className="py-3 px-4">Topic</th>
                 <th className="py-3 px-4">Subject</th>
                 <th className="py-3 px-4">Message Snippet</th>
                 <th className="py-3 px-4">Status</th>
@@ -104,7 +106,7 @@ export function AdminEnquiriesView({ initialEnquiries }: { initialEnquiries: Enq
             <tbody className="divide-y divide-blush">
               {enquiries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-muted">
+                  <td colSpan={7} className="py-8 text-center text-muted">
                     No customer enquiries in your inbox.
                   </td>
                 </tr>
@@ -122,6 +124,11 @@ export function AdminEnquiriesView({ initialEnquiries }: { initialEnquiries: Enq
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <div className="font-semibold text-ink">{enq.name}</div>
                       <div className="text-[11px] text-muted">{enq.email}</div>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="text-[11px] font-semibold text-brand bg-blush px-2 py-0.5 rounded-full border border-pink-light">
+                        {enq.topic || "General"}
+                      </span>
                     </td>
                     <td className="py-3.5 px-4 font-semibold text-ink max-w-45 truncate">
                       {enq.subject}
@@ -187,6 +194,12 @@ export function AdminEnquiriesView({ initialEnquiries }: { initialEnquiries: Enq
               <div className="flex items-center gap-2 text-ink">
                 <span className="font-semibold w-16">Customer:</span>
                 <span>{selectedEnquiry.name}</span>
+              </div>
+              <div className="flex items-center gap-2 text-ink">
+                <span className="font-semibold w-16">Topic:</span>
+                <span className="font-semibold text-brand bg-white px-2 py-0.5 rounded-full border border-pink-light">
+                  {selectedEnquiry.topic || "General"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-ink">
                 <Mail className="w-3.5 h-3.5 text-muted shrink-0" />

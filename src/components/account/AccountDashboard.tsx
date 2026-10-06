@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { formatPaiseToRupees } from "@/lib/utils/money";
 import { formatIndianPhone, cleanIndianPhoneDigits } from "@/lib/utils/phone";
+import { formatOrderStatus, formatPaymentStatus, formatPaymentMethod } from "@/lib/utils/statusLabels";
 import {
   saveCustomerAddressAction,
   updateCustomerAddressAction,
@@ -283,31 +284,34 @@ export function AccountDashboard({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Welcome Banner */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-light shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <div className="w-16 h-16 rounded-full shrink-0 bg-brand text-white flex items-center justify-center font-bold text-2xl font-heading shadow-md">
               {user.name.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-ink">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1
+                  className="font-heading font-extrabold text-2xl sm:text-3xl text-ink wrap-break-word min-w-0"
+                  title={user.name}
+                >
                   Hello, {user.name}
                 </h1>
                 {user.role === "admin" && (
-                  <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                  <span className="shrink-0 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
                     Admin
                   </span>
                 )}
               </div>
-              <p className="text-xs text-muted flex items-center gap-3 mt-1">
-                <span className="inline-flex items-center gap-1">
-                  <Mail className="w-3.5 h-3.5 text-brand" /> {user.email}
+              <div className="text-xs text-muted flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                <span className="inline-flex items-center gap-1 break-all">
+                  <Mail className="w-3.5 h-3.5 text-brand shrink-0" /> {user.email}
                 </span>
                 {user.phone && (
-                  <span className="inline-flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-brand" /> {formatIndianPhone(user.phone)}
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                    <Phone className="w-3.5 h-3.5 text-brand shrink-0" /> {formatIndianPhone(user.phone)}
                   </span>
                 )}
-              </p>
+              </div>
             </div>
           </div>
 
@@ -328,9 +332,10 @@ export function AccountDashboard({
               variant="outline"
               size="sm"
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="text-stone-600 hover:text-red-700 hover:border-red-200"
+              leftIcon={<LogOut className="w-3.5 h-3.5" />}
+              className="inline-flex items-center gap-1.5 text-stone-600 hover:text-red-700 hover:border-red-200"
             >
-              <LogOut className="w-4 h-4 mr-1.5" /> Sign Out
+              Sign Out
             </Button>
           </div>
         </div>
@@ -341,9 +346,9 @@ export function AccountDashboard({
             <div className="flex items-start gap-3.5">
               <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-bold text-amber-900">Email Verification Required</h4>
+                <h4 className="text-xs font-bold text-amber-900">Email Confirmation Required</h4>
                 <p className="text-xs text-amber-800 mt-1 leading-relaxed">
-                  Your email ({user.email}) is currently unverified. Check your inbox for the confirmation link. Previous guest orders placed with this email address will be linked to your account once verified.
+                  Your email ({user.email}) is currently unconfirmed. Check your inbox for the confirmation link. Previous guest orders placed with this email address will be linked to your account once confirmed.
                 </p>
                 {verificationNotice && (
                   <p className="text-xs font-semibold text-amber-900 mt-2 bg-amber-100/80 p-2 rounded-xl">
@@ -408,7 +413,7 @@ export function AccountDashboard({
                 </div>
                 <h3 className="font-heading font-bold text-lg text-ink">No orders found</h3>
                 <p className="text-xs text-muted max-w-md mx-auto">
-                  You haven&apos;t placed any orders yet. Discover our gentle, pH-balanced organic feminine care products.
+                  You haven&apos;t placed any orders yet. Discover our gentle, breathable pure cotton feminine care products.
                 </p>
                 <Link href="/shop" className="inline-block pt-2">
                   <Button size="md">Start Shopping Now</Button>
@@ -442,7 +447,7 @@ export function AccountDashboard({
                               : "bg-stone-100 text-stone-800"
                           }`}
                         >
-                          {ord.status}
+                          {formatOrderStatus(ord.status)}
                         </span>
                         {/* Payment Status Badge */}
                         <span
@@ -456,7 +461,7 @@ export function AccountDashboard({
                               : "bg-amber-50 text-amber-700 border border-amber-200"
                           }`}
                         >
-                          Payment: {ord.paymentStatus} ({ord.paymentMethod.toUpperCase()})
+                          Payment: {formatPaymentStatus(ord.paymentStatus)} ({formatPaymentMethod(ord.paymentMethod)})
                         </span>
                       </div>
 
@@ -469,7 +474,9 @@ export function AccountDashboard({
                           })}
                         </span>
                         <span>•</span>
-                        <span>{ord.itemCount} item(s)</span>
+                        <span>
+                          {ord.itemCount ?? 1} {(ord.itemCount ?? 1) === 1 ? "item" : "items"}
+                        </span>
                         <span>•</span>
                         <span className="font-semibold text-ink">
                           Total: {formatPaiseToRupees(ord.totalPaise)}
@@ -661,7 +668,7 @@ export function AccountDashboard({
                       className="bg-stone-50 text-stone-500 cursor-not-allowed"
                     />
                     <p className="text-[11px] text-muted">
-                      Email address cannot be modified once verified.
+                      Email address cannot be modified once confirmed.
                     </p>
                   </div>
 

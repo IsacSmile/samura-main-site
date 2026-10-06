@@ -32,6 +32,7 @@ export interface ProductListItem {
   basePricePaise: number;
   salePricePaise: number | null;
   isActive: boolean;
+  isSample?: boolean;
   isFeatured: boolean;
   isBestseller: boolean;
   totalStock: number;
@@ -218,12 +219,19 @@ export function ProductListTable({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <Link
-                            href={`/admin/products/${prod.id}/edit`}
-                            className="font-semibold text-ink hover:text-brand transition-colors block truncate max-w-xs"
-                          >
-                            {prod.name}
-                          </Link>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link
+                              href={`/admin/products/${prod.id}/edit`}
+                              className="font-semibold text-ink hover:text-brand transition-colors block truncate max-w-xs"
+                            >
+                              {prod.name}
+                            </Link>
+                            {(prod.isSample || prod.id.startsWith("prod_")) && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                Sample data. Replace with client product details.
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[11px] text-muted font-mono truncate">
                             /{prod.slug}
                           </div>

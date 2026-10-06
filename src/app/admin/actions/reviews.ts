@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/auth";
 import { recomputeProductRating } from "@/lib/services/products";
 
-export async function approveReviewAction(reviewId: string) {
+export async function publishReviewAction(reviewId: string) {
   await requireAdmin();
 
   if (!reviewId) {
@@ -52,6 +52,8 @@ export async function approveReviewAction(reviewId: string) {
     message: "Review published to storefront.",
   };
 }
+
+export const approveReviewAction = publishReviewAction;
 
 export async function rejectReviewAction(reviewId: string) {
   await requireAdmin();

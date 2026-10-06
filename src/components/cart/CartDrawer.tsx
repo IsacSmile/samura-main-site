@@ -18,6 +18,7 @@ import {
 import { useCartStore } from "@/lib/cart/store";
 import { useCartPricing } from "@/lib/cart/useCartPricing";
 import { formatRupees } from "@/lib/utils/money";
+import { EmptyStateIllustration } from "@/components/ui/EmptyStateIllustration";
 
 export function CartDrawer() {
   const isOpen = useCartStore((s) => s.isOpen);
@@ -77,7 +78,7 @@ export function CartDrawer() {
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-brand" />
               <h2 className="font-heading font-semibold text-lg text-ink">
-                Your Bag ({itemCount})
+                Your Bag ({itemCount} {itemCount === 1 ? "item" : "items"})
               </h2>
               {loading && <Loader2 className="w-4 h-4 animate-spin text-brand ml-2" />}
             </div>
@@ -129,15 +130,13 @@ export function CartDrawer() {
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             {items.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
-                <div className="w-20 h-20 rounded-full bg-blush flex items-center justify-center text-brand border border-pink-light">
-                  <ShoppingBag className="w-10 h-10 opacity-60" />
-                </div>
+                <EmptyStateIllustration type="cart" className="w-24 h-24 mx-auto" />
                 <div className="space-y-1">
                   <h3 className="font-heading font-semibold text-lg text-ink">
                     Your bag is empty
                   </h3>
                   <p className="text-xs text-muted max-w-xs">
-                    Treat your intimate skin with gentle, breathable pure cotton care. Explore our bestsellers.
+                    Care for your intimate skin with gentle, breathable pure cotton care. Explore our bestsellers.
                   </p>
                 </div>
                 <Link
@@ -184,7 +183,7 @@ export function CartDrawer() {
                           <Link
                             href={`/product/${item.productSlug}`}
                             onClick={closeCart}
-                            className="font-medium text-sm text-ink hover:text-brand transition-colors line-clamp-1"
+                            className="font-medium text-sm text-ink hover:text-brand transition-colors line-clamp-2"
                           >
                             {item.productName}
                           </Link>
@@ -287,10 +286,10 @@ export function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={closeCart}
-                  className="btn-brand text-xs font-semibold py-3 text-center flex items-center justify-center gap-1.5"
+                  className="btn-brand text-xs font-semibold py-3 text-center flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
                   <span>Checkout</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                 </Link>
               </div>
             </div>

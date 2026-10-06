@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
                 If an account exists for <strong className="text-emerald-900">{email}</strong>, we have sent password reset instructions to your inbox.
               </p>
               <p className="text-[11px] text-emerald-600">
-                (In local development mode without Resend API keys, the link is logged directly to your terminal console.)
+                (In local development mode lacking Resend API keys, the link is logged directly to your terminal console.)
               </p>
             </div>
 

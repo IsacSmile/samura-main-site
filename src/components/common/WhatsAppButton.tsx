@@ -10,25 +10,35 @@ interface WhatsAppButtonProps {
 }
 
 export function WhatsAppButton({
-  phoneNumber = "+919876543210",
-  defaultMessage = "Hi Samaura Healthcare, I have a confidential question about your products.",
+  phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "",
+  defaultMessage = "Hi Samaura Healthcare, I have an enquiry regarding menstrual health and hygiene products.",
 }: WhatsAppButtonProps) {
   const [showTooltip, setShowTooltip] = useState(true);
   const pathname = usePathname();
+
+  // Hide when phone number is empty / unconfirmed
+  const cleanPhone = (phoneNumber || "").replace(/[^0-9]/g, "");
+  if (!cleanPhone) {
+    return null;
+  }
 
   // Hide on checkout and cart pages to avoid distracting from conversion or overlapping action buttons
   if (pathname && (pathname.startsWith("/checkout") || pathname.startsWith("/cart"))) {
     return null;
   }
 
-  // Clean phone number for link
-  const cleanPhone = phoneNumber.replace(/[^0-9]/g, "");
   const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
     defaultMessage
   )}`;
 
+  const isProductPage = Boolean(pathname?.startsWith("/product/"));
+
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex items-end gap-2.5 max-w-[calc(100vw-2rem)] pointer-events-none">
+    <div
+      className={`fixed right-4 z-40 flex items-end gap-2.5 max-w-[calc(100vw-2rem)] pointer-events-none ${
+        isProductPage ? "bottom-20 sm:bottom-4" : "bottom-4"
+      }`}
+    >
       {/* Floating confidential help tooltip - hidden on mobile screens */}
       {showTooltip && (
         <div className="hidden md:flex items-center gap-2 bg-white text-ink text-xs font-medium py-2 px-3.5 rounded-2xl shadow-xl border border-pink-light pointer-events-auto max-w-[calc(100vw-6rem)] animate-in fade-in slide-in-from-right-4 duration-300">

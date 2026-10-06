@@ -28,6 +28,7 @@ async function runPhase7TestSuite() {
   const {
     users,
     orders,
+    products,
     productVariants,
     emailVerificationTokens,
     invoiceCounters,
@@ -259,12 +260,37 @@ Here is a test with <script>alert(2)</script> and <iframe src="x"></iframe> and 
   await db.delete(invoiceCounters).where(eq(invoiceCounters.year, currentYear));
   await db.delete(orders);
 
-  // Get active variant
-  const [variant] = await db
+  // Get active variant or create fixture
+  let [variant] = await db
     .select()
     .from(productVariants)
     .where(eq(productVariants.sku, "SAM-PAD-DAY-12"))
     .limit(1);
+
+  if (!variant) {
+    const testProdId = `prod_test_p7_${Date.now()}`;
+    await db.insert(products).values({
+      id: testProdId,
+      categoryId: "cat_menstrual_cups",
+      name: "Phase 7 Test Cup",
+      slug: `p7-cup-${Date.now()}`,
+      description: "Test cup description",
+      basePricePaise: 29900,
+    });
+    const testVarId = `var_test_p7_${Date.now()}`;
+    await db.insert(productVariants).values({
+      id: testVarId,
+      productId: testProdId,
+      name: "Pack of 12",
+      sku: "SAM-PAD-DAY-12",
+      pricePaise: 29900,
+      stock: 100,
+    });
+    [variant] = await db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.id, testVarId));
+  }
 
   // Place 5 orders concurrently using Promise.all
   const concurrentOrderPromises = Array.from({ length: 5 }).map((_, index) =>
@@ -463,11 +489,7 @@ Here is a test with <script>alert(2)</script> and <iframe src="x"></iframe> and 
 }
 
 runPhase7TestSuite()
-  .catch((err) => {
-    console.error("Test Suite Fatal Error:", err);
-    process.exit(1);
-  })
-  .finally(() => {
+  .then(() => {
     if (fs.existsSync(testDbPath)) {
       try {
         fs.unlinkSync(testDbPath);
@@ -475,4 +497,9 @@ runPhase7TestSuite()
         // ignore
       }
     }
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("Test Suite Fatal Error:", err);
+    process.exit(1);
   });

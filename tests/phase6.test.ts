@@ -28,6 +28,7 @@ async function runPhase6TestSuite() {
   const {
     users,
     orders,
+    products,
     productVariants,
     emailVerificationTokens,
     passwordResetTokens,
@@ -68,8 +69,29 @@ async function runPhase6TestSuite() {
     }
   }
 
-  // Fetch a test variant
-  const [variant] = await db.select().from(productVariants).limit(1);
+  // Fetch a test variant or create fixture
+  let [variant] = await db.select().from(productVariants).limit(1);
+  if (!variant) {
+    const testProdId = `prod_test_p6_${Date.now()}`;
+    await db.insert(products).values({
+      id: testProdId,
+      categoryId: "cat_menstrual_cups",
+      name: "Phase 6 Test Cup",
+      slug: `p6-cup-${Date.now()}`,
+      description: "Test cup description",
+      basePricePaise: 29900,
+    });
+    const testVarId = `var_test_p6_${Date.now()}`;
+    await db.insert(productVariants).values({
+      id: testVarId,
+      productId: testProdId,
+      name: "Size S",
+      sku: `SKU-P6-${Date.now()}`,
+      pricePaise: 29900,
+      stock: 100,
+    });
+    [variant] = await db.select().from(productVariants).where(eq(productVariants.id, testVarId));
+  }
 
   // ---------------------------------------------------------------------------
   // TEST SUITE 1: FIX A - Guest-Order Linking & Email Verification
@@ -573,6 +595,7 @@ Here is normal text with **bold** and *italic*.
   if (failed > 0) {
     process.exit(1);
   }
+  process.exit(0);
 }
 
 runPhase6TestSuite().catch((err) => {
