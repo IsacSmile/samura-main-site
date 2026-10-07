@@ -1,23 +1,106 @@
 # Samaura Healthcare — Production E-Commerce Platform
 
-Samaura Healthcare is an enterprise-grade e-commerce web application for gentle, plant-derived female hygiene care. Built on Next.js 16 (App Router), React 19, TypeScript strict mode, Tailwind CSS v4 tokens, LibSQL / SQLite with Drizzle ORM, NextAuth (Auth.js), and integrated with Razorpay and Resend.
+Samaura Healthcare is an enterprise-grade e-commerce web application for plant-derived female hygiene care. Built on Next.js 16 (App Router), React 19, TypeScript strict mode, Tailwind CSS v4, LibSQL / SQLite with Drizzle ORM, NextAuth (Auth.js v5), Razorpay payments, and Resend email infrastructure.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Server Components & Actions)
+- **UI Library**: [React 19](https://react.dev/) + [Tailwind CSS v4](https://tailwindcss.com/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict Mode)
+- **Database & ORM**: [LibSQL / SQLite](https://turso.tech/) + [Drizzle ORM](https://orm.drizzle.team/)
+- **Authentication**: [Auth.js (NextAuth v5)](https://authjs.dev/) with bcrypt hashing & role-based authorization
+- **Payments**: [Razorpay](https://razorpay.com/) (Cards, UPI, Net Banking) + Cash on Delivery (COD)
+- **Email Service**: [Resend](https://resend.com/) transactional email integration
+- **Validation**: [Zod](https://zod.dev/) schema validation
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) for cart & UI state
+
+---
+
+## ✨ Key Features
+
+- **Storefront & Catalog**: Category navigation, product filtering, dynamic variants, inventory tracking, customer reviews moderation, and structured JSON-LD schemas.
+- **Cart & Dynamic Checkout**: Dynamic cart drawer, coupon code validation, atomic stock lock in 1 DB transaction, and automatic shipping rate calculation.
+- **Admin Control Panel**: Comprehensive metrics dashboard, product & variant manager, order processing state machine, customer management, coupons CRUD, banner manager, and CMS page editor.
+- **Order State Machine**: Status tracking (`pending_payment`, `paid`, `processing`, `shipped`, `delivered`, `cancelled`, `refunded`) with courier tracking & restock rules.
+- **Automated PDF Tax Invoices**: Printable invoice generator (`/order/[token]/invoice` & `/admin/orders/[id]/invoice`) with sequential numbering (`INV-YYYY-XXXXX`).
+- **Email Dispatch System**: Transactional email templates for customer order confirmations, admin notifications, status updates, and password resets.
+- **Interactive Admin Manual**: Embedded operating manual accessible at `/admin/help`.
 
 ---
 
 ## 📸 Client Photography Requirement Before Launch
 
-> **IMPORTANT LAUNCH NOTICE FOR CLIENT (Data_for_website.docx):**
-> In accordance with project requirements, none of the images from `Data_for_website.docx` were used. The application strictly utilizes branded blush typographic cards and clean SVG vector artwork across all pages.
+> **IMPORTANT LAUNCH NOTICE FOR CLIENT (`Data_for_website.docx`):**
+> In accordance with project requirements, none of the images from `Data_for_website.docx` were used. The application strictly utilizes branded typographic cards and clean SVG vector artwork across all pages.
 > **The client must supply real, high-resolution photography before production launch** for Samaura Menstrual Cups, educational publications/books, and gift hampers/kits. Real photos can be uploaded via the admin panel or added to `/public`.
 
 ---
 
 ## 🛡️ Marketing & Copy Compliance Guard
 
-This codebase includes an automated compliance scanner (`scripts/check-claims.ts`) enforcing zero unvalidated medical claims or exaggerated marketing terminology.
-- Prohibited phrasing includes unverified certifications, absolute percentages, medical claims, and unsupported longevity claims.
+This codebase includes an automated compliance scanner (`scripts/check-claims.ts`) enforcing unvalidated claim prevention and terminology standards.
+- Prohibited phrasing includes unverified assertions, unsupported percentages, and absolute claims.
 - The guard runs automatically on `npm run check`, `npm run check-claims`, and during `npm run build`.
 - To register client-authorized and substantiated phrases, add them with verification references in `config/claims-allowlist.json`.
+
+---
+
+## 💻 Local Development Setup
+
+### Prerequisites
+- **Node.js**: v20 or higher
+- **npm**: v10 or higher
+
+### Step 1: Clone & Install Dependencies
+```bash
+git clone git@github.com:IsacSmile/samura-main-site.git
+cd samura-main-site
+npm install
+```
+
+### Step 2: Environment Setup
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+Ensure `DATABASE_URL="file:data/samaura.db"` is set for local development.
+
+### Step 3: Database Migration & Seeding
+Run the database migrations and populate seed data:
+```bash
+npm run db:migrate
+npm run db:seed
+```
+
+Default Admin Credentials:
+- **Email**: `admin@samaura.com`
+- **Password**: `Admin@123456`
+
+### Step 4: Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📋 Available NPM Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Starts Next.js development server |
+| `npm run build` | Scans copy compliance and builds production bundle |
+| `npm run start` | Starts Next.js production server |
+| `npm run check` | Runs copy compliance scan, ESLint, and TypeScript check |
+| `npm run check-claims` | Runs marketing claims scanner on source files |
+| `npm run check-claims:db` | Runs marketing claims scanner on DB contents |
+| `npm run lint` | Runs ESLint analysis |
+| `npm run db:migrate` | Runs Drizzle Kit database migrations |
+| `npm run db:seed` | Seeds database with initial categories, products, and admin account |
+| `npm run db:backup` | Creates timestamped local SQLite backup in `backups/` |
+| `npm run db:backup:turso` | Downloads point-in-time snapshot from Turso DB |
 
 ---
 
@@ -106,10 +189,10 @@ samaura.com, www.samaura.com {
 
 ## 🔒 Rate Limiting & Trusted Proxy Configuration
 
-Samaura derives client IP addresses strictly from trusted reverse proxy headers to prevent IP spoofing:
+Samaura derives client IP addresses strictly from trusted reverse proxy headers:
 
 1. **Vercel**: Evaluates `x-vercel-forwarded-for` and `x-real-ip` provided by the Vercel Edge Network.
-2. **Caddy / Nginx**: Evaluates the leftmost client IP in `x-forwarded-for` only when forwarded from configured `trusted_proxies`. Ensure your reverse proxy strips untrusted client-supplied headers.
+2. **Caddy / Nginx**: Evaluates the client IP in `x-forwarded-for` only when forwarded from configured `trusted_proxies`. Ensure your reverse proxy strips untrusted client-supplied headers.
 
 Expired rate limit records are automatically pruned via a background sweeping utility in `src/lib/rateLimit.ts`.
 
@@ -174,7 +257,7 @@ The Content-Security-Policy header in `next.config.ts` includes the required Raz
 - **Apex domain**: `A` record pointing to Vercel IP (`76.76.21.21`) or VPS IP.
 - **www subdomain**: `CNAME` pointing to `cname.vercel-dns.com` or apex.
 
-### Resend Email SPF / DKIM / DMARC Setup
+### Resend Email Setup
 To ensure transactional emails reach the customer inbox:
 1. Verify domain in [resend.com/domains](https://resend.com/domains).
 2. Add DNS records:
