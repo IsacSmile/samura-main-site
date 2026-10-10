@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import type { StorefrontTestimonial } from "@/lib/services/testimonials";
 
 interface ReviewsCarouselProps {
@@ -196,7 +196,7 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
     const firstChild = track.firstElementChild as HTMLElement | null;
     if (firstChild) {
       const cardWidth = firstChild.getBoundingClientRect().width;
-      const gap = 24; // gap-6
+      const gap = typeof window !== "undefined" && window.innerWidth >= 640 ? 24 : 10;
       const newIndex = Math.round(scrollLeft / (cardWidth + gap));
       if (newIndex >= 0 && newIndex !== currentIndexRef.current) {
         currentIndexRef.current = newIndex;
@@ -245,29 +245,6 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
               Real feedback on our prompt delivery, discreet packaging, and dedicated care.
             </p>
           </div>
-
-          {/* Controls: Prev, Next */}
-          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-            {/* Prev Button */}
-            <button
-              onClick={handlePrev}
-              aria-label="Previous review"
-              className="w-11 h-11 min-w-11 min-h-11 rounded-full border border-pink-light bg-white text-ink hover:bg-blush hover:border-brand/40 flex items-center justify-center transition-all shadow-xs active:scale-95"
-              title="Previous review"
-            >
-              <ChevronLeft className="w-5 h-5 text-ink" />
-            </button>
-
-            {/* Next Button */}
-            <button
-              onClick={handleNext}
-              aria-label="Next review"
-              className="w-11 h-11 min-w-11 min-h-11 rounded-full border border-pink-light bg-white text-ink hover:bg-blush hover:border-brand/40 flex items-center justify-center transition-all shadow-xs active:scale-95"
-              title="Next review"
-            >
-              <ChevronRight className="w-5 h-5 text-ink" />
-            </button>
-          </div>
         </div>
 
         {/* CSS Scroll-Snap Track inside overflow-hidden container */}
@@ -275,7 +252,7 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
           <div
             ref={trackRef}
             onScroll={handleScroll}
-            className="flex gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar py-2 px-0.5 items-stretch"
+            className="flex gap-2.5 sm:gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar py-2 px-0.5 items-stretch"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -284,12 +261,12 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
             {displayItems.map((item, index) => (
               <div
                 key={`${item.id}-${index}`}
-                className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] shrink-0 snap-start flex flex-col min-w-0"
+                className="w-[calc(50%-5px)] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] shrink-0 snap-start flex flex-col min-w-0"
               >
-                <div className="card-soft h-full flex flex-col justify-between bg-white p-3.5 sm:py-3.5 sm:px-4.5 rounded-2xl border border-blush/80 shadow-xs hover:border-pink-light transition-all duration-300 relative min-w-0">
+                <div className="card-soft h-full flex flex-col justify-between bg-white p-3 sm:py-3.5 sm:px-4.5 rounded-2xl border border-rose/50 shadow-xs hover:border-rose/80 transition-all duration-300 relative min-w-0">
                   <div className="space-y-1.5 min-w-0">
                     {/* Top Row: Stars + Quote Icon */}
-                    <div className="flex items-center justify-between gap-2 min-w-0">
+                    <div className="flex items-center justify-between gap-1.5 min-w-0">
                       {/* Star Rating with WCAG aria-label */}
                       <div
                         className="flex items-center gap-0.5 shrink-0"
@@ -314,18 +291,18 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
                     </div>
 
                     {/* Review Body */}
-                    <p className="text-xs sm:text-[13px] text-ink-muted leading-relaxed line-clamp-3 min-w-0">
+                    <p className="text-[11px] sm:text-[13px] text-ink-muted leading-relaxed line-clamp-3 min-w-0">
                       &ldquo;{item.body}&rdquo;
                     </p>
                   </div>
 
                   {/* Customer Meta */}
-                  <div className="pt-2 mt-2 border-t border-blush/60 flex items-baseline justify-between gap-2 min-w-0">
-                    <span className="font-heading font-semibold text-xs sm:text-[13px] text-ink truncate min-w-0">
+                  <div className="pt-2 mt-2 border-t border-rose/25 flex items-baseline justify-between gap-1.5 min-w-0">
+                    <span className="font-heading font-semibold text-[11px] sm:text-[13px] text-ink truncate min-w-0">
                       {item.name}
                     </span>
                     {item.city && (
-                      <span className="text-[11px] text-muted shrink-0">
+                      <span className="text-[10px] sm:text-[11px] text-muted shrink-0">
                         {item.city}
                       </span>
                     )}

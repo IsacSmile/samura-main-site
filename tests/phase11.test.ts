@@ -357,8 +357,7 @@ async function runPhase11TestSuite() {
     assert(carouselSrc.includes('role="region"'), "ReviewsCarousel has role='region'");
     assert(carouselSrc.includes('aria-roledescription="carousel"'), "ReviewsCarousel has aria-roledescription='carousel'");
     assert(carouselSrc.includes('aria-label="What Our Customers Say"'), "ReviewsCarousel has aria-label='What Our Customers Say'");
-    assert(!carouselSrc.includes("Pause") && carouselSrc.includes("ChevronLeft"), "ReviewsCarousel header controls are simplified without manual pause button per user request");
-    assert(carouselSrc.includes("min-w-11 min-h-11"), "Carousel controls have 44px touch targets (min-w-11 min-h-11)");
+    assert(!carouselSrc.includes("ChevronLeft") && !carouselSrc.includes("ChevronRight"), "Next and prev icons deleted per user request");
 
     // =========================================================================
     // TEST SUITE 7: REAL BROWSER COMPUTED LAYOUT & OVERFLOW AUDIT
@@ -422,22 +421,21 @@ async function runPhase11TestSuite() {
             return Math.round(trackWidth / cardWidth);
           });
 
-          let expectedCarouselCards = 1;
+          let expectedCarouselCards = 2;
           if (vp >= 1024) expectedCarouselCards = 3;
           else if (vp >= 640) expectedCarouselCards = 2;
+          else expectedCarouselCards = 2;
 
           assert(carouselCardsPerView === expectedCarouselCards, `[${vp}px] Carousel displays ${expectedCarouselCards} cards per view (got ${carouselCardsPerView})`);
         }
 
-        // Check touch targets
+        // Check prev and next buttons removed per user request
         await page.setViewportSize({ width: 1024, height: 800 });
         const prevBtn = await page.$('button[aria-label="Previous review"]');
         const nextBtn = await page.$('button[aria-label="Next review"]');
-        const prevBox = await prevBtn?.boundingBox();
-        const nextBox = await nextBtn?.boundingBox();
 
-        assert(Boolean(prevBox && prevBox.width >= 44 && prevBox.height >= 44), `Prev button touch target >= 44px (got ${prevBox?.width}x${prevBox?.height}px)`);
-        assert(Boolean(nextBox && nextBox.width >= 44 && nextBox.height >= 44), `Next button touch target >= 44px (got ${nextBox?.width}x${nextBox?.height}px)`);
+        assert(!prevBtn, "Previous review button is deleted per user request");
+        assert(!nextBtn, "Next review button is deleted per user request");
       } finally {
         await browser.close();
       }
