@@ -1,8 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Filter, X, RotateCcw, Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import {
+  Filter,
+  X,
+  RotateCcw,
+  Search,
+  SlidersHorizontal,
+  ArrowUpDown,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export interface FilterCategory {
@@ -16,6 +25,13 @@ export interface ProductFiltersProps {
   allFlowTypes: string[];
   totalProducts: number;
 }
+
+export const SORT_OPTIONS = [
+  { value: "newest", label: "Newest" },
+  { value: "popular", label: "Popular" },
+  { value: "price_asc", label: "Price: Low-High" },
+  { value: "price_desc", label: "Price: High-Low" },
+] as const;
 
 export function ProductFilters({
   categories,
@@ -34,11 +50,38 @@ export function ProductFilters({
   const currentMaxPrice = searchParams.get("maxPrice") || "";
   const currentQ = searchParams.get("q") || "";
 
-  // Local state for interactive mobile drawer
+  // Local state for interactive mobile drawer & custom sort dropdown
   const [isOpenMobile, setIsOpenMobile] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
   const [searchInput, setSearchInput] = useState(currentQ);
   const [minPriceInput, setMinPriceInput] = useState(currentMinPrice);
   const [maxPriceInput, setMaxPriceInput] = useState(currentMaxPrice);
+
+  // Close sort dropdown on click outside or Escape
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsSortOpen(false);
+      }
+    }
+    if (isSortOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isSortOpen]);
+
+  const currentSortLabel =
+    SORT_OPTIONS.find((opt) => opt.value === currentSort)?.label || "Newest";
 
   const hasActiveFilters = Boolean(
     (currentCategory && currentCategory !== "all") ||
@@ -144,23 +187,62 @@ export function ProductFilters({
               {totalProducts} products
             </span>
 
-            {/* Sort Selector */}
-            <div className="flex items-center gap-1.5 bg-blush/40 border border-pink-light rounded-full px-2.5 sm:px-3 py-1.5 min-w-0 shrink-0">
-              <ArrowUpDown className="w-3.5 h-3.5 text-brand shrink-0" />
-              <label htmlFor="shop-sort" className="sr-only">
-                Sort Products
-              </label>
-              <select
-                id="shop-sort"
-                value={currentSort}
-                onChange={(e) => updateQuery({ sort: e.target.value })}
-                className="bg-transparent text-xs font-semibold text-ink focus:outline-none cursor-pointer min-w-0"
+            {/* Custom Sort Selector */}
+            <div ref={sortRef} className="relative min-w-0 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsSortOpen((prev) => !prev)}
+                aria-haspopup="listbox"
+                aria-expanded={isSortOpen}
+                aria-label="Sort products"
+                className="flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-blush/60 border border-pink-light rounded-full px-3 py-1.5 min-w-0 shrink-0 transition-all shadow-xs hover:border-brand/40 focus:outline-none focus:ring-1 focus:ring-brand/40 cursor-pointer"
               >
-                <option value="newest">Newest</option>
-                <option value="popular">Popular</option>
-                <option value="price_asc">Price: Low-High</option>
-                <option value="price_desc">Price: High-Low</option>
-              </select>
+                <ArrowUpDown className="w-3.5 h-3.5 text-brand shrink-0" strokeWidth={1.75} />
+                <span className="text-xs font-semibold text-ink truncate max-w-[110px] sm:max-w-none">
+                  {currentSortLabel}
+                </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-muted transition-transform duration-200 shrink-0 ${
+                    isSortOpen ? "rotate-180 text-brand" : ""
+                  }`}
+                  strokeWidth={1.75}
+                />
+              </button>
+
+              {/* Custom Dropdown Menu Panel */}
+              {isSortOpen && (
+                <div
+                  role="listbox"
+                  aria-label="Sort options"
+                  className="absolute right-0 top-full mt-1.5 z-30 w-44 bg-white border border-pink-light rounded-2xl shadow-xl p-1.5 space-y-0.5 animate-in fade-in-0 zoom-in-95 duration-150"
+                >
+                  {SORT_OPTIONS.map((opt) => {
+                    const isSelected = currentSort === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => {
+                          updateQuery({ sort: opt.value });
+                          setIsSortOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer text-left ${
+                          isSelected
+                            ? "bg-blush text-brand font-semibold"
+                            : "text-ink hover:bg-blush/50 hover:text-brand"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isSelected && (
+                          <Check className="w-3.5 h-3.5 text-brand shrink-0" strokeWidth={2} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
