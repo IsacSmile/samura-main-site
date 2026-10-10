@@ -37,20 +37,38 @@ export default async function AwarenessPage() {
   const rawContent = awarenessPage?.content?.trim() || "";
 
   return (
-    <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Header */}
-        <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
-            <Users className="w-3.5 h-3.5" />
-            <span>Community Education &amp; Workshops</span>
-          </div>
-          <h1 className="font-heading font-extrabold text-3xl sm:text-5xl text-ink leading-tight">
+    <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-8 sm:py-14">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        {/* Left-Aligned Hero Section inspired by reference UI */}
+        <div className="space-y-3.5 text-left">
+          {/* Reference-style Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-muted tracking-wider uppercase">
+            <span className="text-muted/40">[</span>
+            <Link href="/" className="hover:text-brand transition-colors text-muted hover:underline">
+              HOME
+            </Link>
+            <span className="text-muted/30">/</span>
+            <span className="text-brand font-bold">AWARENESS &amp; SUPPORT</span>
+            <span className="text-muted/40">]</span>
+          </nav>
+
+          {/* Heading */}
+          <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-ink tracking-tight uppercase">
             {title}
           </h1>
-          <p className="text-muted text-sm sm:text-base leading-relaxed">
+
+          {/* Subtitle / Description */}
+          <p className="text-muted text-sm sm:text-base leading-relaxed max-w-2xl">
             {defaultText}
           </p>
+
+          {/* Category Pill Tag */}
+          <div className="pt-1">
+            <div className="inline-flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
+              <Users className="w-3.5 h-3.5" />
+              <span>Community Education &amp; Workshops</span>
+            </div>
+          </div>
         </div>
 
         {/* Highlight Card */}

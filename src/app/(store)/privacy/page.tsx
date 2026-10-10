@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { AlertTriangle } from "lucide-react";
 import { db } from "@/lib/db";
 import { pages } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -27,12 +26,6 @@ export default async function PrivacyPolicyPage() {
   return (
     <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Required Mandatory Legal Review Draft Banner */}
-        <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs font-semibold text-amber-900 flex items-center gap-3 shadow-xs">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-          <span>Draft, review with a legal professional before launch. Replace with client content.</span>
-        </div>
-
         <div className="text-center space-y-3">
           <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-ink">
             {title}
