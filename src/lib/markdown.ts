@@ -54,11 +54,8 @@ export function sanitizeHtml(html: string): string {
 export function renderMarkdownToHtml(markdown: string): string {
   if (!markdown) return "";
 
-  // Sanitize raw input first
-  let text = sanitizeHtml(markdown);
-
   // Normalize line endings
-  text = text.replace(/\r\n/g, "\n");
+  const text = markdown.replace(/\r\n/g, "\n");
 
   const lines = text.split("\n");
   const htmlParts: string[] = [];
@@ -135,9 +132,6 @@ export function renderMarkdownToHtml(markdown: string): string {
 function formatInlineMarkdown(text: string): string {
   let res = text;
 
-  // Escape raw HTML entities if any remained
-  res = res.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
   // Bold: **text** or __text__
   res = res.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
   res = res.replace(/__(.*?)__/g, '<strong class="font-semibold text-ink">$1</strong>');
@@ -154,7 +148,7 @@ function formatInlineMarkdown(text: string): string {
     // Only allow safe protocols
     const cleanHref = href.trim();
     if (/^(https?:|\/|mailto:)/i.test(cleanHref)) {
-      return `<a href="${cleanHref}" class="text-brand hover:underline font-medium" rel="noopener noreferrer">${label}</a>`;
+      return `<a href="${cleanHref}" class="text-brand hover:underline underline-offset-4 font-medium" rel="noopener noreferrer">${label}</a>`;
     }
     return label;
   });

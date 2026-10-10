@@ -1,11 +1,17 @@
 import React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Sparkles, BookOpen, ArrowRight } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { db } from "@/lib/db";
 import { pages } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { renderMarkdownToHtml } from "@/lib/markdown";
+import { filterDuplicateTitleAndLead } from "@/lib/utils/cms";
+import {
+  PageHero,
+  ContentSection,
+  CtaBand,
+  Reveal,
+} from "@/components/content";
 
 export const revalidate = 60;
 
@@ -32,91 +38,82 @@ export default async function LearnPage() {
     .limit(1);
 
   const title = learnPage?.title || "Learn Before You Transition";
-  const defaultText =
+  const defaultLead =
     "Access educational resources, FAQs, and guidance to help you make an informed decision about menstrual cups.";
   const rawContent = learnPage?.content?.trim() || "";
 
-  // Check if client has provided custom content beyond the default overview
-  const hasCustomContent =
-    rawContent.length > 0 &&
-    rawContent !== defaultText &&
-    !rawContent.toLowerCase().includes("resources coming soon");
+  // Skip title and lead if they duplicate hero
+  const filteredContent = filterDuplicateTitleAndLead(rawContent, title, defaultLead);
+
+  // Check if custom resources/FAQ content exists beyond the standard introduction
+  const hasResources =
+    filteredContent.length > 0 &&
+    (filteredContent.toLowerCase().includes("faq") ||
+      filteredContent.toLowerCase().includes("guide") ||
+      filteredContent.toLowerCase().includes("resource"));
 
   return (
-    <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-10 sm:py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        {/* Header */}
-        <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Menstrual Cup Education</span>
-          </div>
-          <h1 className="font-heading font-extrabold text-3xl sm:text-5xl text-ink leading-tight">
-            {title}
-          </h1>
-          <p className="text-muted text-sm sm:text-base leading-relaxed">
-            {defaultText}
-          </p>
-        </div>
+    <main className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <PageHero
+        breadcrumbLabel="Learn"
+        eyebrow="Educational resources"
+        title={title}
+        lead={defaultLead}
+      />
 
-        {/* Content / Resources Section */}
-        {hasCustomContent ? (
-          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-pink-light shadow-xs">
-            <div
-              className="prose prose-sm sm:prose-base max-w-none text-ink leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: renderMarkdownToHtml(rawContent) }}
+      {/* Main Content Section */}
+      <ContentSection ariaLabelledBy="learn-content-heading" className="py-10 sm:py-16">
+        <h2 id="learn-content-heading" className="sr-only">
+          Educational resources and transition guidance
+        </h2>
+
+        <div className="space-y-12 sm:space-y-16">
+          {/* Body Text in single readable column (max-w-prose) on clean white surface */}
+          {filteredContent && (
+            <Reveal>
+              <div
+                className="prose prose-sm sm:prose-base max-w-prose text-muted font-sans font-normal leading-relaxed [&>h2]:font-heading [&>h2]:font-semibold [&>h2]:text-ink [&>h3]:font-heading [&>h3]:font-semibold [&>h3]:text-ink [&>strong]:text-ink"
+                dangerouslySetInnerHTML={{
+                  __html: renderMarkdownToHtml(filteredContent),
+                }}
+              />
+            </Reveal>
+          )}
+
+          {/* Resources Area: compact note if no dedicated FAQ/resources content exists */}
+          {!hasResources && (
+            <Reveal delayMs={100}>
+              <div className="flex items-center gap-2.5 text-xs sm:text-sm text-muted bg-[#FFF8FA] border border-pink-light/70 rounded-xl px-4 py-2.5 max-w-prose">
+                <Sparkles
+                  className="w-5 h-5 text-rose-700 shrink-0"
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                />
+                <span>
+                  Resources coming soon &mdash; user guides and care FAQs will be published here.
+                </span>
+              </div>
+            </Reveal>
+          )}
+
+          {/* Closing CTA Band with existing actions */}
+          <Reveal delayMs={150}>
+            <CtaBand
+              title="Ready to explore reusable hygiene?"
+              description="Learn more about Samaura Menstrual Cups or attend an awareness workshop."
+              secondaryAction={{
+                label: "Awareness & Support",
+                href: "/awareness",
+              }}
+              primaryAction={{
+                label: "View Products",
+                href: "/category/menstrual-cups",
+              }}
             />
-          </div>
-        ) : (
-          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-pink-light shadow-xs space-y-6 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-blush text-brand mx-auto flex items-center justify-center">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div className="space-y-2 max-w-md mx-auto">
-              <h2 className="font-heading font-bold text-xl text-ink">
-                Resources coming soon
-              </h2>
-              <p className="text-xs sm:text-sm text-muted leading-relaxed">
-                Comprehensive menstrual cup user guides, sizing recommendations, care instructions, and transition FAQs will be published here.
-              </p>
-            </div>
-            <div className="pt-2">
-              <Link
-                href="/contact?topic=cup"
-                className="btn-brand inline-flex items-center gap-2 text-xs sm:text-sm font-semibold py-2.5 px-6 shadow-xs"
-              >
-                Ask a Question <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Action strip */}
-        <div className="bg-blush rounded-3xl p-6 sm:p-8 border border-pink-light flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <h3 className="font-heading font-semibold text-sm text-ink">
-              Ready to explore reusable hygiene?
-            </h3>
-            <p className="text-xs text-muted">
-              Learn more about Samaura Menstrual Cups or attend an awareness workshop.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/awareness"
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-pink-light hover:bg-blush text-ink transition-colors"
-            >
-              Awareness &amp; Support
-            </Link>
-            <Link
-              href="/category/menstrual-cups"
-              className="btn-brand text-xs font-semibold py-2 px-4 shadow-xs"
-            >
-              View Products
-            </Link>
-          </div>
+          </Reveal>
         </div>
-      </div>
-    </div>
+      </ContentSection>
+    </main>
   );
 }
