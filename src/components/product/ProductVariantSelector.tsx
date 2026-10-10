@@ -90,7 +90,7 @@ export function ProductVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         sku: selectedVariant.sku,
-        image: product.image || "/products/day-pads.svg",
+        image: product.image || "/products/menstrual-cup.svg",
         pricePaise: selectedVariant.pricePaise,
         salePricePaise: selectedVariant.salePricePaise,
         stock: selectedVariant.stock,
@@ -112,7 +112,7 @@ export function ProductVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         sku: selectedVariant.sku,
-        image: product.image || "/products/day-pads.svg",
+        image: product.image || "/products/menstrual-cup.svg",
         pricePaise: selectedVariant.pricePaise,
         salePricePaise: selectedVariant.salePricePaise,
         stock: selectedVariant.stock,
@@ -129,7 +129,7 @@ export function ProductVariantSelector({
       {/* Price & Savings Row */}
       <div className="space-y-2 pb-5 border-b border-blush">
         <div className="flex items-baseline gap-3">
-          <span className="font-heading font-extrabold text-3xl sm:text-4xl text-ink">
+          <span className="font-heading font-medium text-3xl sm:text-4xl text-ink tracking-tight">
             {formatRupees(currentPrice)}
           </span>
           {hasDiscount && (
@@ -144,7 +144,7 @@ export function ProductVariantSelector({
           )}
         </div>
         <p className="text-xs text-muted">
-          Inclusive of all taxes. Free discreet delivery on orders above ₹499.
+          Inclusive of all taxes. Free delivery on orders above ₹499.
         </p>
       </div>
 
@@ -204,7 +204,7 @@ export function ProductVariantSelector({
                   } ${varOutOfStock ? "opacity-40 cursor-not-allowed bg-gray-50" : "cursor-pointer"}`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-xs sm:text-sm text-ink line-clamp-1">
+                    <span className="font-medium text-xs sm:text-sm text-ink line-clamp-1">
                       {variant.name}
                     </span>
                     {isSelected && (
@@ -214,7 +214,7 @@ export function ProductVariantSelector({
                     )}
                   </div>
                   <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-pink-light/40">
-                    <span className="text-xs font-bold text-ink">
+                    <span className="text-xs font-semibold text-ink">
                       {formatRupees(varPrice)}
                     </span>
                     {variant.salePricePaise && (
@@ -320,7 +320,7 @@ export function ProductVariantSelector({
       {/* Mobile Sticky Bottom "Add to Bag" Bar */}
       <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-pink-light p-3 sm:hidden flex items-center justify-between gap-3 shadow-lg">
         <div className="min-w-0">
-          <div className="font-heading font-extrabold text-base text-ink">
+          <div className="font-heading font-medium text-base text-ink tracking-tight">
             {formatRupees(currentPrice)}
           </div>
           <div className="text-[10px] text-muted truncate">

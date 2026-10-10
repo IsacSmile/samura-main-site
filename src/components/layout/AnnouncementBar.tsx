@@ -5,13 +5,13 @@ import { getAllSettings } from "@/lib/services/settings";
 
 export async function AnnouncementBar() {
   const settings = await getAllSettings();
-  const leftBadge = settings.announcement_left_badge || "Gentle & Breathable Cotton";
-  const rightBadge = settings.announcement_right_badge || "Delivered in Plain Discreet Packaging";
+  const leftBadge = settings.announcement_left_badge || "Menstrual Health Education & Care";
+  const rightBadge = settings.announcement_right_badge || "Pan-India Delivery Available";
   const announcementText =
-    settings.announcement_text || "Free Discreet Shipping on orders above ₹499 | Code: WELCOME15";
+    settings.announcement_text || "✨ Menstrual Health Education, Awareness & Sustainable Menstrual Cups";
 
   return (
-    <div className="bg-brand text-white text-xs py-2 px-3 sm:px-4 font-medium transition-all overflow-hidden w-full max-w-full">
+    <div className="bg-brand text-white text-xs h-9 py-2 px-3 sm:px-4 font-medium transition-all overflow-hidden w-full max-w-full flex items-center">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 overflow-hidden w-full">
         {leftBadge && (
           <div className="hidden lg:flex items-center gap-1.5 text-white/90 shrink-0 truncate max-w-xs">

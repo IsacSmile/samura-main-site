@@ -20,6 +20,7 @@ Last updated: Phase 1 (Foundation) Complete.
 | **Phase 8: Compliance & Security Verification** | Automated PIN code vs State validation, URL protocol sanitization, rel=noopener noreferrer sanitization, analytics consent guard. | **DONE** | `tests/phase8.test.ts` (41 passed, 0 failed) • Claims guard checks |
 | **Phase 9: Reviews Lifecycle, Art-Direction & SEO Slugs** | Reviews moderation lifecycle with DB recomputation, image-only hero banner art-direction with `<picture>`, customer status label mapping, shared-circle postal validation, and 301 SEO redirects. | **DONE** | `tests/phase9.test.ts` (87 passed, 0 failed) |
 | **Phase 10: Client Content Application (`Data_for_website.docx`)** | Applied exact client text into `pages` and `settings` tables (admin-editable). Added `topic` to contact enquiries, admin email, and admin view. Configured 2 categories only ("Menstrual Cups" & "Gift Collections"), removed sample products from dev DB & seed. Built `/learn`, `/awareness`, `/gifts`. Implemented image-only hero + 3 Initiatives + 3 Explore cards + 3 Gift collections on home page. Hidden empty sections. Verified claims allowlist (`sustainable`, `free from`, `free-from` per client document). | **DONE** | `npm run lint` (0 errors, 0 warnings) • `npx tsc --noEmit` (0 errors) • `npm run build` (Passed, 44 routes) • `check-claims` (Passed) • `check-claims:db` (Passed) • All 6 test suites passed |
+| **Phase 11: Home Layout, Testimonials & Clean Gates** | Hero banner (`100vh - header - top notch`), Top Products (featured) & Bestsellers grids (2 cols mobile, 3 sm-md, 4 lg+), Reviews Carousel using standalone `testimonials` table with 44px touch targets & auto-pause (hover/touch/focus/motion), admin Testimonials Manager with claims check, clean single-pass verification gates with re-entry guard. | **DONE** | `npx tsc --noEmit` (0 errors) • `npm run lint` (0 errors) • `npm run check-claims` (0 violations) • `npm run check-claims:db` (0 violations) • `npm run build` (Passed, 45 routes) • All 9 test suites passed (569 assertions) |
 
 
 ---
@@ -819,7 +820,7 @@ Automated headless browser check executing `document.documentElement.scrollWidth
 - [x] `tests/phase6.test.ts` -> **52 passed, 0 failed**
 - [x] `tests/phase7.test.ts` -> **40 passed, 0 failed**
 - [x] `tests/phase8.test.ts` -> **41 passed, 0 failed**
-- [x] `tests/phase9.test.ts` -> **87 passed, 0 failed**
+- [x] `tests/phase9.test.ts` -> **91 passed, 0 failed**
 - [x] Updated `README.md` note stating client must supply real photos before launch.
 
 ### 9. Viewports for Manual Verification
@@ -848,6 +849,116 @@ Automated headless browser check executing `document.documentElement.scrollWidth
 - Shipping & Returns: `/shipping-returns`
 - Terms & Conditions: `/terms`
 - Admin Enquiries Inbox: `/admin/enquiries`
+
+---
+
+## Detailed Phase 10.1 Checklist: Sample Products for Testing
+
+### 1. Categories & Sample Products Overview
+- [x] **Categories**:
+  - `Menstrual Cups` (`cat_menstrual_cups`, slug: `menstrual-cups`)
+  - `Gift Collections` (`cat_gift_collections`, slug: `gift-collections`)
+  - `Books & Learning` (`cat_books_learning`, slug: `books-learning`) - Added for the publications initiative.
+- [x] **8 Sample Products** (seeded strictly in non-production environments with `isSample = true` and `SMP-` SKUs):
+  1. `Samaura Menstrual Cup` (Menstrual Cups): Variants Small, Medium, Large. Price ₹499 (49900 paise), sale ₹399 (39900 paise). Stock 40 each. Featured & Bestseller.
+  2. `Samaura Menstrual Cup, Pack of 2` (Menstrual Cups): Variants Small + Small (stock 25), Medium + Medium (stock 3 to test low-stock state). Price ₹899 (89900 paise), sale ₹749 (74900 paise).
+  3. `Cup Storage Pouch` (Menstrual Cups): Variant Standard. Price ₹149 (14900 paise). Stock 60.
+  4. `Menstrual Health Guide` (Books & Learning): Variant Paperback. Price ₹199 (19900 paise). Stock 30.
+  5. `Activity Book for Young Readers` (Books & Learning): Variant Paperback. Price ₹249 (24900 paise), no sale. Stock 0 to test out-of-stock state.
+  6. `My First Period Gift Box` (Gift Collections): Variants Standard (stock 15, ₹999 base, ₹899 sale), Deluxe (stock 15, ₹1499 base). Featured & Bestseller.
+  7. `Self-Care Celebration Hamper` (Gift Collections): Variants Small (stock 10, ₹1299 base), Large (stock 10, ₹1999 base).
+  8. `Mini Gift Pack` (Gift Collections): Variant Standard (stock 20, ₹499 base).
+
+### 2. Packaging Vector Assets (`/public/products`)
+- [x] Reused `menstrual-cup.svg` for primary cup.
+- [x] Created `menstrual-cup-duo.svg`, `storage-pouch.svg`, `health-guide-book.svg`, `activity-book.svg`, `first-period-gift.svg`, `celebration-hamper.svg`, `mini-gift-pack.svg`.
+- [x] Neutral, brand-harmonious blush/pink SVG art with product name/wordmark only, zero unverified claim text.
+- [x] All SVGs pass `check-claims` with 0 matches.
+
+### 3. Cleanup Utility & Safety Guardrails
+- [x] Script `npm run db:remove-samples`:
+  - Dry-run by default (lists all 8 sample products, deletes nothing).
+  - Requires `--confirm` to delete `isSample = true` rows, associated variants, images, and empty sample-only categories (`books-learning`).
+  - Prints sanitized DB host only (never secrets or auth tokens).
+- [x] Production seed guard (`process.env.NODE_ENV === "production"`) creates 0 sample products.
+- [x] Documentation added in `README.md` and `/admin/help` detailing how to remove sample data before client launch.
+
+### 4. Verification Gates & Test Results
+- [x] `npm run check-claims` -> **PASSED (0 violations)**
+- [x] `npm run check-claims:db` -> **PASSED (0 violations on Turso DEV DB)**
+- [x] `npm run lint` -> **PASSED (0 errors, 0 warnings)**
+- [x] `npx tsc --noEmit` -> **PASSED (0 errors)**
+- [x] `npm run build` -> **PASSED (44 routes compiled/prerendered)**
+- [x] `tests/phase10-1.test.ts` -> **121 passed, 0 failed**
+- [x] `tests/phase4-checkout.test.ts` -> **26 passed, 0 failed**
+- [x] `tests/phase5.test.ts` -> **46 passed, 0 failed**
+- [x] `tests/phase6.test.ts` -> **52 passed, 0 failed**
+- [x] `tests/phase7.test.ts` -> **40 passed, 0 failed**
+- [x] `tests/phase8.test.ts` -> **41 passed, 0 failed**
+- [x] `tests/phase9.test.ts` -> **91 passed, 0 failed**
+
+### 5. URLs for Verification
+- Shop Catalog: `http://localhost:3000/shop`
+- Category - Menstrual Cups: `http://localhost:3000/category/menstrual-cups`
+- Category - Gift Collections: `http://localhost:3000/category/gift-collections`
+- Category - Books & Learning: `http://localhost:3000/category/books-learning`
+- Product with 3 variants: `http://localhost:3000/product/samaura-menstrual-cup`
+- Out-of-Stock product: `http://localhost:3000/product/activity-book-young-readers`
+- Home page featured section: `http://localhost:3000/`
+
+---
+
+## Detailed Phase 11 Checklist: Home Layout, Testimonials & Clean Gates
+
+### 1. Home Page Structure & Responsive Grids
+- [x] **Hero Banner**:
+  - Image-only, art-directed `<picture>` with responsive desktop & mobile banners.
+  - Viewport height calculation: `calc(100vh - var(--header-height) - var(--top-notch-height))` and `calc(100dvh - ...)`.
+- [x] **Product Grids**:
+  - Top Products (`isFeatured = true`, active, max 8) & Bestsellers (`isBestseller = true`, active, max 8) queried independently.
+  - Responsive grid: 2 columns on mobile, 3 columns on sm-md, 4 columns on lg+.
+  - `ProductCard`: compact mobile padding `p-3 sm:p-5`, 44px touch targets (`min-w-11 min-h-11`), `line-clamp-2` title, `truncate` variant.
+- [x] **Reviews Carousel**:
+  - Standalone `testimonials` table completely isolated from product `reviews` table (never touches JSON-LD Product aggregateRating or product rating/reviewCount).
+  - WCAG-compliant controls: Previous and Next navigation buttons (44px touch target).
+  - Auto-advance (4s) automatically pauses on card hover, touch, focus, tab visibility change, out of view, and `prefers-reduced-motion`.
+  - Manual pause button removed per user request.
+  - Dev mode displays sample testimonials with sample indicator; production mode strictly displays 0 sample testimonials.
+- [x] **Closing CTA Banner**:
+  - "Creating a Society Where Menstruation is Handled with Dignity" banner linking to `/about`.
+- [x] **Cleaned Sections**:
+  - Removed "Explore Samaura", "Our Key Initiatives" (moved to `/about`), and "Gift Collections" from home page.
+
+### 2. Admin Testimonials Manager & Schema
+- [x] Drizzle table `testimonials` (`id`, `name`, `city`, `rating`, `body`, `isPublished`, `isSample`, `sortOrder`, `createdAt`, `updatedAt`).
+- [x] Migration `0005_testimonials.sql` created and tracked in journal.
+- [x] Admin Testimonials Manager at `/admin/testimonials` with full CRUD, revalidation, and marketing claims scanner.
+- [x] Admin Sidebar updated with Testimonials link.
+
+### 3. Cycle Prevention & Re-entry Guards
+- [x] Re-entry guard added to check scripts: exits immediately if `CHECK_RUNNING=1` is already set.
+- [x] Linting decoupled: `lint` runs only via `npm run lint`; `check` runs claims + lint + tsc once; `build` runs `check-claims` and Next.js build.
+- [x] Tests never invoke lint/check/build.
+- [x] Zero pre/post hooks causing circular re-entry.
+
+### 4. Verification Gates & Test Results
+- [x] `npx tsc --noEmit` -> **PASSED (0 errors)**
+- [x] `npm run lint` -> **PASSED (0 errors, 0 warnings)**
+- [x] `npm run check-claims` -> **PASSED (0 violations)**
+- [x] `npm run check-claims:db` -> **PASSED (0 violations on Turso DEV DB)**
+- [x] `npm run build` -> **PASSED (45 routes compiled/prerendered)**
+- [x] `tests/phase4-checkout.test.ts` -> **26 passed, 0 failed**
+- [x] `tests/phase5.test.ts` -> **46 passed, 0 failed**
+- [x] `tests/phase6.test.ts` -> **52 passed, 0 failed**
+- [x] `tests/phase7.test.ts` -> **40 passed, 0 failed**
+- [x] `tests/phase8.test.ts` -> **41 passed, 0 failed**
+- [x] `tests/phase9.test.ts` -> **91 passed, 0 failed**
+- [x] `tests/phase10-1.test.ts` -> **121 passed, 0 failed**
+- [x] `tests/phase10-2.test.ts` -> **55 passed, 0 failed**
+- [x] `tests/phase11.test.ts` -> **97 passed, 0 failed**
+- [x] **Total: 569 automated assertions passed, 0 failed**
+
+
 
 
 

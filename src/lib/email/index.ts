@@ -103,7 +103,7 @@ export async function sendOrderConfirmationEmail(props: OrderEmailProps): Promis
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #FFD9E2; border-radius: 20px; background-color: #FFFFFF;">
           <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #FFF1F4;">
             <h1 style="color: #C8202F; margin: 0; font-size: 24px; font-weight: bold;">Samaura Healthcare</h1>
-            <p style="color: #6B5B62; font-size: 13px; margin-top: 4px;">Gentle & Soft Cotton Personal Care</p>
+            <p style="color: #6B5B62; font-size: 13px; margin-top: 4px;">Menstrual Hygiene & Health Education</p>
           </div>
 
           <div style="background-color: #FFF1F4; padding: 18px; border-radius: 14px; margin: 20px 0;">
@@ -239,7 +239,7 @@ export async function sendOrderStatusUpdateEmail(props: StatusUpdateEmailProps):
     subject = `Delivered: Order #${safeOrderNumber} | Samaura Healthcare`;
     statusMessage = `
       <p style="color: #6B5B62; font-size: 14px;">Your order <strong>#${safeOrderNumber}</strong> has been marked as delivered.</p>
-      <p style="color: #6B5B62; font-size: 13px;">We hope our pure cotton products bring you lasting comfort and peace of mind.</p>
+      <p style="color: #6B5B62; font-size: 13px;">We hope our products bring you lasting comfort and confidence.</p>
     `;
   } else if (status === "cancelled") {
     subject = `Order #${safeOrderNumber} Cancelled | Samaura Healthcare`;

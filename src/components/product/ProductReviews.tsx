@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Star, CheckCircle2, MessageSquarePlus, MessageSquare, X } from "lucide-react";
+import { Star, CheckCircle2, MessageSquarePlus, MessageSquare, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export interface ReviewItem {
@@ -216,26 +216,73 @@ export function ProductReviews({
           </div>
         </div>
       ) : (
-        /* Empty State: No reviews yet (Never fake data) */
-        <div className="p-8 sm:p-12 text-center rounded-3xl bg-blush/30 border border-pink-light space-y-4">
-          <div className="w-14 h-14 rounded-full bg-white mx-auto flex items-center justify-center text-brand border border-pink-light shadow-xs">
-            <MessageSquare className="w-6 h-6" />
+        /* Empty State: No reviews yet (Bespoke Editorial Conversation Invite) */
+        <div className="relative rounded-3xl bg-linear-to-b from-white via-blush/30 to-blush/60 border border-pink-light/80 p-8 sm:p-12 text-center overflow-hidden shadow-xs">
+          {/* Ambient subtle light glows */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-rose/10 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-brand-light/70 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-lg mx-auto space-y-5">
+            {/* Visual Header Vignette: Rating Prompt & Craft Pill */}
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-pink-light text-brand shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
+                <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.16em] uppercase">
+                  First Impressions
+                </span>
+              </div>
+
+              {/* 5-Star Invitation Row */}
+              <div className="flex items-center justify-center gap-1.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="w-5 h-5 fill-blush text-pink-300"
+                    strokeWidth={1.5}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Typography */}
+            <div className="space-y-2">
+              <h4 className="font-heading font-semibold text-xl sm:text-2xl text-ink tracking-tight">
+                No Reviews Yet
+              </h4>
+              <p className="text-xs sm:text-sm text-ink-muted leading-relaxed max-w-md mx-auto">
+                Be the first to share your honest experience with <span className="font-semibold text-ink">{productName}</span>. Your feedback helps fellow women and young people make mindful, informed choices.
+              </p>
+            </div>
+
+            {/* Micro Reassurance Chips */}
+            <div className="pt-1 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[11px] text-muted">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-pink-light/60 shadow-2xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Order-linked feedback</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-pink-light/60 shadow-2xs">
+                <MessageSquare className="w-3.5 h-3.5 text-brand shrink-0" />
+                <span>Honest community ratings</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-pink-light/60 shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5 text-rose shrink-0" />
+                <span>Takes ~60 seconds</span>
+              </span>
+            </div>
+
+            {/* Call to Action Button */}
+            <div className="pt-2">
+              <Button
+                onClick={() => setIsWriteModalOpen(true)}
+                variant="primary"
+                size="md"
+                className="shadow-md hover:shadow-lg transition-all gap-2 px-7 text-xs sm:text-sm"
+              >
+                <MessageSquarePlus className="w-4 h-4 shrink-0" />
+                <span>Leave the First Review</span>
+              </Button>
+            </div>
           </div>
-          <div className="space-y-1.5 max-w-sm mx-auto">
-            <h4 className="font-heading font-bold text-base text-ink">
-              No Reviews Yet
-            </h4>
-            <p className="text-xs text-muted leading-relaxed">
-              Be the first to share your honest experience with {productName}. Your review helps fellow women make mindful choices.
-            </p>
-          </div>
-          <Button
-            onClick={() => setIsWriteModalOpen(true)}
-            variant="secondary"
-            size="sm"
-          >
-            Leave the First Review
-          </Button>
         </div>
       )}
 

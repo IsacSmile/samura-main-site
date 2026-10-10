@@ -160,6 +160,7 @@ async function runPhase4Tests() {
     // Attempt to order excess quantity (requested 15, stock 10)
     const excessPricing = await computePricing({
       items: [{ variantId: v1Id, quantity: 15 }],
+      strict: true,
     });
     assert(excessPricing.isValid === false, "Quantity exceeding available stock is rejected");
     assert(

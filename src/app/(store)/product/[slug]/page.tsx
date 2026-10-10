@@ -31,7 +31,7 @@ export async function generateMetadata({
     };
   }
 
-  const primaryImage = product.images.find((i) => i.isPrimary)?.url || "/products/day-pads.svg";
+  const primaryImage = product.images.find((i) => i.isPrimary)?.url || "/products/menstrual-cup.svg";
 
   return {
     title: `${product.name} | Samaura Healthcare`,
@@ -66,7 +66,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const primaryImage = product.images.find((i) => i.isPrimary)?.url || "/products/day-pads.svg";
+  const primaryImage = product.images.find((i) => i.isPrimary)?.url || "/products/menstrual-cup.svg";
   const defaultVar = product.variants.find((v) => v.isDefault) || product.variants[0];
   const pricePaise = defaultVar?.pricePaise ?? product.basePricePaise;
   const salePricePaise = defaultVar?.salePricePaise ?? product.salePricePaise;
@@ -86,7 +86,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       : null;
 
   // JSON-LD Product Schema
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://samaura.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.samaurahealthcare.com";
   const jsonLd = {
     "@context": "https://schema.org/",
     "@type": "Product",
@@ -154,7 +154,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </>
           )}
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-ink font-semibold truncate max-w-50 sm:max-w-xs">
+          <span className="text-ink font-medium truncate max-w-50 sm:max-w-xs">
             {product.name}
           </span>
         </nav>
@@ -185,7 +185,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               )}
 
               {/* Product Headline */}
-              <h1 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-ink tracking-tight leading-snug">
+              <h1 className="font-heading font-semibold text-2xl sm:text-3xl lg:text-4xl text-ink tracking-tight leading-snug">
                 {product.name}
               </h1>
 

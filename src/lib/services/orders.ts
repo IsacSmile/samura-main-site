@@ -140,7 +140,33 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   }
 
   if (pricing.items.length === 0) {
-    return { success: false, error: "Your cart is empty." };
+    return { success: false, error: "Your bag is empty." };
+  }
+
+  // Strict all-or-nothing check: if any line is invalid at order time, reject order
+  if (pricing.removed.length > 0 || pricing.adjusted.length > 0) {
+    const parts: string[] = [];
+    const oos = pricing.removed.filter((r) => r.reason === "out_of_stock");
+    const unavail = pricing.removed.filter((r) => r.reason === "unavailable");
+    const adj = pricing.adjusted;
+
+    if (oos.length > 0) {
+      const names = oos.map((i) => (i.productName ? `"${i.productName}"` : "An item")).join(", ");
+      parts.push(`${names} is currently out of stock`);
+    }
+    if (unavail.length > 0) {
+      const names = unavail.map((i) => (i.productName ? `"${i.productName}"` : "An item")).join(", ");
+      parts.push(`${names} is no longer available`);
+    }
+    if (adj.length > 0) {
+      const names = adj.map((i) => (i.productName ? `"${i.productName}"` : "An item")).join(", ");
+      parts.push(`Available stock for ${names} has changed`);
+    }
+
+    return {
+      success: false,
+      error: `${parts.join(". ")}. Please review your bag before placing your order.`,
+    };
   }
 
   // Check COD max limit against authoritative total

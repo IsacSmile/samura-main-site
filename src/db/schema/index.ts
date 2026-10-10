@@ -92,6 +92,7 @@ export const products = sqliteTable("products", {
   isBestseller: integer("is_bestseller", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   isSample: integer("is_sample", { mode: "boolean" }).notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
   rating: real("rating").notNull().default(0),
   reviewCount: integer("review_count").notNull().default(0),
   badge: text("badge"),
@@ -479,5 +480,20 @@ export const invoiceCounters = sqliteTable("invoice_counters", {
 // Legacy aliases for backward compatibility if needed
 export const blogPosts = posts;
 export const staticPages = pages;
+
+// -----------------------------------------------------------------------------
+// 23. Testimonials (Store customer testimonials, separate from product reviews)
+// -----------------------------------------------------------------------------
+export const testimonials = sqliteTable("testimonials", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  city: text("city"),
+  rating: integer("rating").notNull().default(5),
+  body: text("body").notNull(),
+  isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
+  isSample: integer("is_sample", { mode: "boolean" }).notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
 
 

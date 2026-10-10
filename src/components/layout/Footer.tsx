@@ -181,6 +181,11 @@ export async function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/category/books-learning" className="hover:text-ink transition-colors">
+                  Books &amp; Learning
+                </Link>
+              </li>
+              <li>
                 <Link href="/gifts" className="hover:text-ink transition-colors">
                   Gift Collections
                 </Link>

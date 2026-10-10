@@ -75,6 +75,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  serverExternalPackages: ["@libsql/client"],
   images: {
     remotePatterns: [
       {

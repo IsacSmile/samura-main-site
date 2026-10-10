@@ -1,3 +1,9 @@
+// Re-entry guard: exit immediately if CHECK_RUNNING=1 is already set
+if (process.env.CHECK_RUNNING === "1") {
+  console.log("[Re-entry Guard] CHECK_RUNNING=1 is already set; exiting check-claims:db immediately.");
+  process.exit(0);
+}
+
 import fs from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
@@ -95,7 +101,7 @@ async function runDbScan() {
   });
 
   // Client/catalog tables to scan (strictly excludes customer reviews per CCPA/Privacy guidelines)
-  const tables = ["settings", "pages", "banners", "categories", "products", "posts", "product_images"];
+  const tables = ["settings", "pages", "banners", "categories", "products", "posts", "product_images", "testimonials"];
 
   for (const table of tables) {
     try {

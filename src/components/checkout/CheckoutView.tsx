@@ -18,8 +18,6 @@ import {
   Loader2,
   AlertCircle,
   AlertTriangle,
-  ChevronRight,
-  ShoppingBag,
 } from "lucide-react";
 
 interface SavedAddress {
@@ -405,26 +403,24 @@ export function CheckoutView() {
     }
   };
 
-  // If cart is empty
-  if (!pricingLoading && (!items || items.length === 0)) {
+  // If cart has no valid items or is empty, redirect to /cart with notice
+  useEffect(() => {
+    if (!pricingLoading && (items.length === 0 || (pricing && pricing.items.length === 0))) {
+      router.replace("/cart");
+    }
+  }, [pricingLoading, items.length, pricing, router]);
+
+  // If cart is empty or has no valid lines
+  if (!pricingLoading && (!items || items.length === 0 || (pricing && pricing.items.length === 0))) {
     return (
       <div className="max-w-xl mx-auto py-20 px-4 text-center space-y-4">
         <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-          <ShoppingBag className="w-8 h-8" />
+          <Loader2 className="w-8 h-8 animate-spin text-brand" />
         </div>
-        <h1 className="text-2xl font-bold font-serif text-stone-900">Your Cart is Empty</h1>
+        <h1 className="text-2xl font-bold font-serif text-stone-900">Redirecting to Bag...</h1>
         <p className="text-sm text-stone-500">
-          Add gentle menstrual care items to your cart before proceeding to checkout.
+          Reviewing your bag before checkout.
         </p>
-        <div className="pt-2">
-          <Link
-            href="/shop"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-stone-900 text-white text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 transition-colors"
-          >
-            <span>Browse Products</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
       </div>
     );
   }

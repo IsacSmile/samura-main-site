@@ -151,7 +151,7 @@ export function ProductAccordion({
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-[11px] font-semibold text-emerald-800">
                 <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-success" /> Pure Cotton
+                  <Sparkles className="w-3.5 h-3.5 text-success" /> Hygienic Care
                 </span>
                 <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-success" /> Skin-Friendly

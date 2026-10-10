@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { db } from "../index";
 import {
   users,
@@ -11,9 +12,10 @@ import {
   pages,
   settings,
   shippingRules,
+  testimonials,
 } from "../schema";
 import bcrypt from "bcryptjs";
-import { notInArray } from "drizzle-orm";
+import { eq, notInArray } from "drizzle-orm";
 
 export async function runSeed() {
   console.log("🌱 Seeding Samaura Healthcare database (Phase 10 - Client Content)...");
@@ -69,14 +71,15 @@ export async function runSeed() {
 
   await db.insert(users).values(initialUsers).onConflictDoNothing();
 
-  // 2. Clear sample products & variants (Phase 10: remove pads, liners, wash, roll-on)
-  console.log("2. Removing sample products per Phase 10 requirements...");
+  // 2. Clear sample products, variants & sample testimonials
+  console.log("2. Removing sample products and sample testimonials...");
   await db.delete(productImages);
   await db.delete(productVariants);
   await db.delete(products);
+  await db.delete(testimonials).where(eq(testimonials.isSample, true));
 
-  // 3. Seed ONLY 2 Categories: Menstrual Cups and Gift Collections
-  console.log("3. Seeding Categories (Menstrual Cups & Gift Collections only)...");
+  // 3. Seed Categories: Menstrual Cups, Gift Collections & Books & Learning
+  console.log("3. Seeding Categories (Menstrual Cups, Gift Collections, Books & Learning)...");
   const categoryData = [
     {
       id: "cat_menstrual_cups",
@@ -91,14 +94,22 @@ export async function runSeed() {
       name: "Gift Collections",
       slug: "gift-collections",
       description: "Thoughtfully curated gift packs for girls approaching menarche and for girls and women on special occasions.",
-      image: "/products/gift-pack.svg",
+      image: "/products/first-period-gift.svg",
       sortOrder: 2,
+    },
+    {
+      id: "cat_books_learning",
+      name: "Books & Learning",
+      slug: "books-learning",
+      description: "Educational publications, activity workbooks, and guides promoting menstrual health awareness.",
+      image: "/products/health-guide-book.svg",
+      sortOrder: 3,
     },
   ];
 
   if (process.env.NODE_ENV !== "production") {
     // Delete legacy categories no longer in catalogue
-    await db.delete(categories).where(notInArray(categories.id, ["cat_menstrual_cups", "cat_gift_collections"]));
+    await db.delete(categories).where(notInArray(categories.id, ["cat_menstrual_cups", "cat_gift_collections", "cat_books_learning"]));
   }
 
   for (const cat of categoryData) {
@@ -115,6 +126,434 @@ export async function runSeed() {
           sortOrder: cat.sortOrder,
         },
       });
+  }
+
+  // 3b. Seed Sample Testing Products (Phase 10.1 - Non-production only)
+  if (process.env.NODE_ENV !== "production") {
+    console.log("3b. Seeding Sample Products for Testing (Phase 10.1)...");
+
+    const sampleProductsData = [
+      {
+        id: "smp_menstrual_cup",
+        categoryId: "cat_menstrual_cups",
+        name: "Samaura Menstrual Cup",
+        slug: "samaura-menstrual-cup",
+        shortDescription: "A reusable menstrual cup for menstrual hygiene care.",
+        description: "A reusable menstrual cup for menstrual hygiene care.",
+        basePricePaise: 49900,
+        salePricePaise: 39900,
+        isFeatured: true,
+        isBestseller: true,
+        sortOrder: 1,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        badge: "Bestseller",
+        variants: [
+          {
+            id: "var_smp_cup_sm",
+            name: "Small",
+            sku: "SMP-CUP-SM",
+            size: "Small",
+            packQty: 1,
+            pricePaise: 49900,
+            salePricePaise: 39900,
+            stock: 40,
+            sortOrder: 1,
+            isDefault: true,
+          },
+          {
+            id: "var_smp_cup_md",
+            name: "Medium",
+            sku: "SMP-CUP-MD",
+            size: "Medium",
+            packQty: 1,
+            pricePaise: 49900,
+            salePricePaise: 39900,
+            stock: 40,
+            sortOrder: 2,
+            isDefault: false,
+          },
+          {
+            id: "var_smp_cup_lg",
+            name: "Large",
+            sku: "SMP-CUP-LG",
+            size: "Large",
+            packQty: 1,
+            pricePaise: 49900,
+            salePricePaise: 39900,
+            stock: 40,
+            sortOrder: 3,
+            isDefault: false,
+          },
+        ],
+        image: "/products/menstrual-cup.svg",
+      },
+      {
+        id: "smp_menstrual_cup_pack_2",
+        categoryId: "cat_menstrual_cups",
+        name: "Samaura Menstrual Cup, Pack of 2",
+        slug: "samaura-menstrual-cup-pack-of-2",
+        shortDescription: "A set of two reusable menstrual cups for menstrual hygiene.",
+        description: "A set of two reusable menstrual cups for menstrual hygiene.",
+        basePricePaise: 89900,
+        salePricePaise: 74900,
+        isFeatured: false,
+        isBestseller: true,
+        sortOrder: 3,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        variants: [
+          {
+            id: "var_smp_cup2_sm",
+            name: "Small + Small",
+            sku: "SMP-CUP2-SM",
+            size: "Small + Small",
+            packQty: 2,
+            pricePaise: 89900,
+            salePricePaise: 74900,
+            stock: 25,
+            sortOrder: 1,
+            isDefault: true,
+          },
+          {
+            id: "var_smp_cup2_md",
+            name: "Medium + Medium",
+            sku: "SMP-CUP2-MD",
+            size: "Medium + Medium",
+            packQty: 2,
+            pricePaise: 89900,
+            salePricePaise: 74900,
+            stock: 3,
+            sortOrder: 2,
+            isDefault: false,
+          },
+        ],
+        image: "/products/menstrual-cup-duo.svg",
+      },
+      {
+        id: "smp_cup_storage_pouch",
+        categoryId: "cat_menstrual_cups",
+        name: "Cup Storage Pouch",
+        slug: "cup-storage-pouch",
+        shortDescription: "A fabric drawstring pouch designed for cup storage.",
+        description: "A fabric drawstring pouch designed for cup storage.",
+        basePricePaise: 14900,
+        salePricePaise: null,
+        isFeatured: false,
+        isBestseller: true,
+        sortOrder: 5,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        variants: [
+          {
+            id: "var_smp_pouch_std",
+            name: "Standard",
+            sku: "SMP-POUCH-STD",
+            size: "Standard",
+            packQty: 1,
+            pricePaise: 14900,
+            salePricePaise: null,
+            stock: 60,
+            sortOrder: 1,
+            isDefault: true,
+          },
+        ],
+        image: "/products/storage-pouch.svg",
+      },
+      {
+        id: "smp_menstrual_health_guide",
+        categoryId: "cat_books_learning",
+        name: "Menstrual Health Guide",
+        slug: "menstrual-health-guide",
+        shortDescription: "An educational publication covering menstrual health, puberty, and hygiene awareness.",
+        description: "An educational publication covering menstrual health, puberty, and hygiene awareness.",
+        basePricePaise: 19900,
+        salePricePaise: null,
+        isFeatured: true,
+        isBestseller: false,
+        sortOrder: 4,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        variants: [
+          {
+            id: "var_smp_book_guide",
+            name: "Paperback",
+            sku: "SMP-BOOK-GUIDE",
+            size: "Paperback",
+            packQty: 1,
+            pricePaise: 19900,
+            salePricePaise: null,
+            stock: 30,
+            sortOrder: 1,
+            isDefault: true,
+          },
+        ],
+        image: "/products/health-guide-book.svg",
+      },
+      {
+        id: "smp_activity_book_readers",
+        categoryId: "cat_books_learning",
+        name: "Activity Book for Young Readers",
+        slug: "activity-book-young-readers",
+        shortDescription: "An illustrated activity workbook designed for menstrual education and learning.",
+        description: "An illustrated activity workbook designed for menstrual education and learning.",
+        basePricePaise: 24900,
+        salePricePaise: null,
+        isFeatured: false,
+        isBestseller: false,
+        sortOrder: 6,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        variants: [
+          {
+            id: "var_smp_book_act",
+            name: "Paperback",
+            sku: "SMP-BOOK-ACT",
+            size: "Paperback",
+            packQty: 1,
+            pricePaise: 24900,
+            salePricePaise: null,
+            stock: 0,
+            sortOrder: 1,
+            isDefault: true,
+          },
+        ],
+        image: "/products/activity-book.svg",
+      },
+      {
+        id: "smp_first_period_box",
+        categoryId: "cat_gift_collections",
+        name: "My First Period Gift Box",
+        slug: "my-first-period-gift-box",
+        shortDescription: "A curated gift pack combining educational reading materials and personal-care essentials.",
+        description: "A curated gift pack combining educational reading materials and personal-care essentials.",
+        basePricePaise: 99900,
+        salePricePaise: 89900,
+        isFeatured: true,
+        isBestseller: true,
+        sortOrder: 2,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        badge: "Curated Kit",
+        variants: [
+          {
+            id: "var_smp_gift_first_std",
+            name: "Standard",
+            sku: "SMP-GIFT-FIRST-STD",
+            size: "Standard",
+            packQty: 1,
+            pricePaise: 99900,
+            salePricePaise: 89900,
+            stock: 15,
+            sortOrder: 1,
+            isDefault: true,
+          },
+          {
+            id: "var_smp_gift_first_dlx",
+            name: "Deluxe",
+            sku: "SMP-GIFT-FIRST-DLX",
+            size: "Deluxe",
+            packQty: 1,
+            pricePaise: 149900,
+            salePricePaise: null,
+            stock: 15,
+            sortOrder: 2,
+            isDefault: false,
+          },
+        ],
+        image: "/products/first-period-gift.svg",
+      },
+      {
+        id: "smp_celebration_hamper",
+        categoryId: "cat_gift_collections",
+        name: "Self-Care Celebration Hamper",
+        slug: "self-care-celebration-hamper",
+        shortDescription: "A curated celebration hamper designed for women and girls on special occasions.",
+        description: "A curated celebration hamper designed for women and girls on special occasions.",
+        basePricePaise: 129900,
+        salePricePaise: null,
+        isFeatured: true,
+        isBestseller: false,
+        sortOrder: 3,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        variants: [
+          {
+            id: "var_smp_gift_hmp_sm",
+            name: "Small",
+            sku: "SMP-GIFT-HAMPER-SM",
+            size: "Small",
+            packQty: 1,
+            pricePaise: 129900,
+            salePricePaise: null,
+            stock: 10,
+            sortOrder: 1,
+            isDefault: true,
+          },
+          {
+            id: "var_smp_gift_hmp_lg",
+            name: "Large",
+            sku: "SMP-GIFT-HAMPER-LG",
+            size: "Large",
+            packQty: 1,
+            pricePaise: 199900,
+            salePricePaise: null,
+            stock: 10,
+            sortOrder: 2,
+            isDefault: false,
+          },
+        ],
+        image: "/products/celebration-hamper.svg",
+      },
+      {
+        id: "smp_mini_gift_pack",
+        categoryId: "cat_gift_collections",
+        name: "Mini Gift Pack",
+        slug: "mini-gift-pack",
+        shortDescription: "A compact curated gift pack for personal-care and educational gifting.",
+        description: "A compact curated gift pack for personal-care and educational gifting.",
+        basePricePaise: 49900,
+        salePricePaise: null,
+        isFeatured: false,
+        isBestseller: true,
+        sortOrder: 4,
+        isActive: true,
+        isSample: true,
+        rating: 0,
+        reviewCount: 0,
+        variants: [
+          {
+            id: "var_smp_gift_mini_std",
+            name: "Standard",
+            sku: "SMP-GIFT-MINI-STD",
+            size: "Standard",
+            packQty: 1,
+            pricePaise: 49900,
+            salePricePaise: null,
+            stock: 20,
+            sortOrder: 1,
+            isDefault: true,
+          },
+        ],
+        image: "/products/mini-gift-pack.svg",
+      },
+    ];
+
+    for (const prod of sampleProductsData) {
+      const { variants: prodVariants, image: prodImage, ...prodData } = prod;
+      await db.insert(products).values(prodData).onConflictDoUpdate({
+        target: products.id,
+        set: prodData,
+      });
+
+      for (const v of prodVariants) {
+        await db.insert(productVariants).values({
+          ...v,
+          productId: prod.id,
+        }).onConflictDoUpdate({
+          target: productVariants.id,
+          set: { ...v, productId: prod.id },
+        });
+      }
+
+      await db.insert(productImages).values({
+        id: `img_${prod.id}`,
+        productId: prod.id,
+        url: prodImage,
+        alt: prod.name,
+        sortOrder: 1,
+        isPrimary: true,
+      }).onConflictDoUpdate({
+        target: productImages.id,
+        set: { url: prodImage, alt: prod.name },
+      });
+    }
+
+    // 3c. Seed Sample Testimonials (Phase 11 - Non-production only)
+    console.log("3c. Seeding Sample Testimonials (Phase 11)...");
+    const sampleTestimonialsData = [
+      {
+        id: "tst_sample_1",
+        name: "Anjali R.",
+        city: "Bengaluru",
+        rating: 5,
+        body: "The package arrived on time and in discreet cardboard packaging. The tracking updates via SMS were helpful.",
+        isPublished: true,
+        isSample: true,
+        sortOrder: 1,
+      },
+      {
+        id: "tst_sample_2",
+        name: "Pooja M.",
+        city: "Pune",
+        rating: 5,
+        body: "Ordering through the website was straightforward. Customer care responded promptly to my delivery query.",
+        isPublished: true,
+        isSample: true,
+        sortOrder: 2,
+      },
+      {
+        id: "tst_sample_3",
+        name: "Sneha K.",
+        city: "Kochi",
+        rating: 5,
+        body: "Carefully packed parcel received in good condition within three days. Appreciate the prompt dispatch.",
+        isPublished: true,
+        isSample: true,
+        sortOrder: 3,
+      },
+      {
+        id: "tst_sample_4",
+        name: "Divya S.",
+        city: "Hyderabad",
+        rating: 4,
+        body: "Clear delivery notifications and smooth checkout. The parcel was delivered on schedule.",
+        isPublished: true,
+        isSample: true,
+        sortOrder: 4,
+      },
+      {
+        id: "tst_sample_5",
+        name: "Meera T.",
+        city: "Jaipur",
+        rating: 5,
+        body: "Smooth online order process and timely courier delivery. Customer support was polite and helpful.",
+        isPublished: true,
+        isSample: true,
+        sortOrder: 5,
+      },
+      {
+        id: "tst_sample_6",
+        name: "Kavita N.",
+        city: "Chennai",
+        rating: 5,
+        body: "The dispatch was quick and the packaging was neat and sturdy. Good communication throughout.",
+        isPublished: true,
+        isSample: true,
+        sortOrder: 6,
+      },
+    ];
+
+    for (const item of sampleTestimonialsData) {
+      await db.insert(testimonials).values(item).onConflictDoUpdate({
+        target: testimonials.id,
+        set: item,
+      });
+    }
   }
 
   // 4. Seed Coupons (Non-production only)
@@ -468,7 +907,7 @@ The content on this website is for educational and hygiene awareness purposes. S
       });
   }
 
-  console.log("✅ Seed completed successfully! (2 categories: Menstrual Cups & Gift Collections, 0 sample products, client content applied)");
+  console.log("✅ Seed completed successfully! (Categories: Menstrual Cups, Gift Collections, Books & Learning, 8 sample products in non-production, client content applied)");
 }
 
 // Execute if run directly

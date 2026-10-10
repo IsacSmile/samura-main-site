@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed/index.ts",
     "db:backup": "tsx scripts/db-backup.ts",
-    "db:backup:turso": "tsx scripts/turso-backup.ts"
+    "db:backup:turso": "tsx scripts/turso-backup.ts",
+    "db:remove-samples": "tsx scripts/db-remove-samples.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

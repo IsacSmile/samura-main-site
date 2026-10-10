@@ -34,6 +34,34 @@
 :root {
   --background: #FFFFFF;
   --foreground: #2C1820;
+  --top-notch-height: 36px;
+  --header-height: 64px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-height: 80px;
+  }
+}
+
+.hero-banner-height {
+  height: calc(100vh - var(--header-height) - var(--top-notch-height));
+  height: calc(100dvh - var(--header-height) - var(--top-notch-height));
+  min-height: 420px;
+}
+
+.shop-hero-banner-height {
+  height: auto;
+  aspect-ratio: 2752 / 1536;
+}
+
+@media (min-width: 768px) {
+  .shop-hero-banner-height {
+    height: calc(80vh - var(--header-height) - var(--top-notch-height));
+    height: calc(80dvh - var(--header-height) - var(--top-notch-height));
+    min-height: 440px;
+    aspect-ratio: auto;
+  }
 }
 
 body {

@@ -74,6 +74,7 @@ export interface InitialProductData {
   isFeatured: boolean;
   isBestseller: boolean;
   isActive: boolean;
+  sortOrder?: number;
   isSample?: boolean;
   variants: VariantItem[];
   images: ProductImageItem[];
@@ -115,6 +116,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
   const [isFeatured, setIsFeatured] = useState(initialData?.isFeatured ?? false);
   const [isBestseller, setIsBestseller] = useState(initialData?.isBestseller ?? false);
+  const [sortOrder, setSortOrder] = useState<number>(initialData?.sortOrder ?? 0);
 
   // Educational & Specification Guides
   const [ingredients, setIngredients] = useState(initialData?.ingredients || "");
@@ -442,6 +444,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
         isActive,
         isFeatured,
         isBestseller,
+        sortOrder,
         variants: variants.map((v, i) => ({
           id: v.id,
           name: v.name.trim(),
@@ -661,7 +664,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                 onChange={(e) => setIsFeatured(e.target.checked)}
                 className="w-4 h-4 rounded text-brand focus:ring-brand accent-brand cursor-pointer"
               />
-              <span>Feature on Homepage</span>
+              <span>Show in Top Products</span>
             </label>
 
             <label className="flex items-center gap-2.5 cursor-pointer text-xs font-medium text-ink select-none">
@@ -671,8 +674,19 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                 onChange={(e) => setIsBestseller(e.target.checked)}
                 className="w-4 h-4 rounded text-brand focus:ring-brand accent-brand cursor-pointer"
               />
-              <span>Mark as Bestseller</span>
+              <span>Show in Bestsellers</span>
             </label>
+
+            <div className="flex items-center gap-2 text-xs font-medium text-ink">
+              <label htmlFor="product-sort-order" className="whitespace-nowrap">Sort Order:</label>
+              <input
+                id="product-sort-order"
+                type="number"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(Number(e.target.value) || 0)}
+                className="w-16 px-2 py-1 border border-blush rounded-md text-xs"
+              />
+            </div>
           </div>
         </div>
 

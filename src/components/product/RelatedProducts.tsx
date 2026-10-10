@@ -11,7 +11,7 @@ export interface RelatedProductsProps {
 export function RelatedProducts({
   products,
   title = "You May Also Like",
-  subtitle = "Gentle cotton favorites for your wellness routine",
+  subtitle = "Thoughtful menstrual hygiene and care items",
 }: RelatedProductsProps) {
   if (products.length === 0) return null;
 

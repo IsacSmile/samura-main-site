@@ -12,7 +12,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Period Care Guides & Blog | Samaura Healthcare",
   description:
-    "Evidence-based menstrual health guides, pure cotton care tips, and feminine hygiene education.",
+    "Evidence-based menstrual health guides, menstrual cup transition tips, and hygiene education.",
 };
 
 const POSTS_PER_PAGE = 6;

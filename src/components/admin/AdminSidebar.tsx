@@ -105,6 +105,12 @@ const NAV_ITEMS = [
     exact: false,
   },
   {
+    name: "Customer Testimonials",
+    href: "/admin/testimonials",
+    icon: MessageSquareCheck,
+    exact: false,
+  },
+  {
     name: "Settings & Store",
     href: "/admin/settings",
     icon: Settings,

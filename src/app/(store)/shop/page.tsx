@@ -1,11 +1,14 @@
 import React from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { getImageProps } from "next/image";
 import { getShopProducts, type ShopFilterParams } from "@/lib/services/products";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductFilters } from "@/components/product/ProductFilters";
 import { Pagination } from "@/components/product/Pagination";
 import { ShopEmptyState } from "@/components/product/ShopEmptyState";
-import { Sparkles, ShieldCheck } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { SHOP_HERO_BANNER_CONFIG } from "@/config/banners";
 
 export const revalidate = 60; // ISR cache revalidation
 
@@ -57,11 +60,72 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     activeCategory,
   } = await getShopProducts(filterParams);
 
+  // Shop Hero Banner image props for <picture> art direction
+  const commonBannerProps = {
+    alt: SHOP_HERO_BANNER_CONFIG.alt,
+    sizes: "100vw",
+    priority: true,
+  };
+
+  const {
+    props: { srcSet: desktopBannerSrcSet },
+  } = getImageProps({
+    ...commonBannerProps,
+    width: SHOP_HERO_BANNER_CONFIG.desktop.width,
+    height: SHOP_HERO_BANNER_CONFIG.desktop.height,
+    src: SHOP_HERO_BANNER_CONFIG.desktop.src,
+  });
+
+  const {
+    props: { srcSet: mobileBannerSrcSet, ...mobileBannerRest },
+  } = getImageProps({
+    ...commonBannerProps,
+    width: SHOP_HERO_BANNER_CONFIG.mobile.width,
+    height: SHOP_HERO_BANNER_CONFIG.mobile.height,
+    src: SHOP_HERO_BANNER_CONFIG.mobile.src,
+  });
+
   return (
-    <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-8 sm:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen pb-12 sm:pb-16">
+      {/* ----------------------------------------------------------------- */}
+      {/* HERO BANNER SECTION (FULL WIDTH, 80vh ON DESKTOP) */}
+      {/* ----------------------------------------------------------------- */}
+      <section
+        aria-label="Shop Collection Banner"
+        className="w-full shop-hero-banner-height overflow-hidden border-b border-pink-light/60 bg-blush relative"
+      >
+        <Link
+          href="#products-grid"
+          aria-label={SHOP_HERO_BANNER_CONFIG.ariaLabel}
+          className="block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 group"
+        >
+          <picture className="block w-full h-full">
+            <source
+              media="(min-width: 768px)"
+              srcSet={desktopBannerSrcSet}
+              width={SHOP_HERO_BANNER_CONFIG.desktop.width}
+              height={SHOP_HERO_BANNER_CONFIG.desktop.height}
+            />
+            <source
+              media="(max-width: 767px)"
+              srcSet={mobileBannerSrcSet}
+              width={SHOP_HERO_BANNER_CONFIG.mobile.width}
+              height={SHOP_HERO_BANNER_CONFIG.mobile.height}
+            />
+            <img
+              {...mobileBannerRest}
+              fetchPriority="high"
+              decoding="async"
+              alt={SHOP_HERO_BANNER_CONFIG.alt}
+              className="w-full h-full block object-cover object-center transition-transform duration-500 group-hover:scale-[1.01]"
+            />
+          </picture>
+        </Link>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10 pt-6 sm:pt-10">
         {/* Page Header */}
-        <div className="space-y-3">
+        <div id="products-grid" className="space-y-3 scroll-mt-24">
           <div className="inline-flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-pink-light shadow-xs text-xs font-semibold text-brand">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Reusable Menstrual Cups • Thoughtful Gifting</span>
@@ -99,27 +163,6 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         ) : (
           <ShopEmptyState query={resolvedParams.q} />
         )}
-
-        {/* Discreet Delivery Trust Banner */}
-        <div className="mt-16 rounded-3xl bg-blush border border-pink-light p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-          <div className="space-y-1">
-            <div className="flex items-center justify-center sm:justify-start gap-2 text-brand font-semibold text-sm">
-              <ShieldCheck className="w-5 h-5" />
-              <span>Confidential &amp; Discreet Packaging</span>
-            </div>
-            <p className="text-xs text-muted max-w-xl">
-              All Samaura shipments are delivered in completely plain exterior cardboard boxes with no product description, logo stamps, or mentions of feminine hygiene on the outside.
-            </p>
-          </div>
-          <div className="shrink-0 flex items-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-full bg-white text-xs font-bold text-ink border border-pink-light">
-              Pan-India Delivery
-            </span>
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 text-xs font-bold text-emerald-700 border border-emerald-200">
-              COD Available
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

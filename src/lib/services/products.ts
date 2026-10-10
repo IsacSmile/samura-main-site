@@ -91,10 +91,10 @@ export async function getShopProducts(params: ShopFilterParams = {}) {
 
   if (params.category && params.category !== "all") {
     const normalizedCatSlug =
-      params.category === "intimate-hygiene" || params.category === "wellness"
-        ? "intimate-care"
-        : params.category === "combos"
-        ? "sanitary-pads"
+      params.category === "intimate-hygiene" || params.category === "wellness" || params.category === "intimate-care"
+        ? "menstrual-cups"
+        : params.category === "combos" || params.category === "sanitary-pads"
+        ? "gift-collections"
         : params.category;
 
     const foundCat = await db
@@ -215,7 +215,7 @@ export async function getShopProducts(params: ShopFilterParams = {}) {
         ...prod,
         rating: reviewStats ? Number(reviewStats.avgRating) : 0,
         reviewCount: reviewStats ? Number(reviewStats.reviewCount) : 0,
-        image: primaryImg?.url ?? "/products/day-pads.svg",
+        image: primaryImg?.url ?? "/products/menstrual-cup.svg",
         category: cat ?? null,
         defaultVariant: defaultVar ?? null,
       };
@@ -347,7 +347,7 @@ export async function getRelatedProducts(
         ...prod,
         rating: reviewStats ? Number(reviewStats.avgRating) : 0,
         reviewCount: reviewStats ? Number(reviewStats.reviewCount) : 0,
-        image: primaryImg?.url ?? "/products/day-pads.svg",
+        image: primaryImg?.url ?? "/products/menstrual-cup.svg",
         defaultVariant: defaultVar ?? null,
       };
     })
@@ -357,10 +357,10 @@ export async function getRelatedProducts(
 export async function getCategoryBySlug(slug: string) {
   // Graceful alias mapping for navigation links
   const normalizedSlug =
-    slug === "intimate-hygiene" || slug === "wellness"
-      ? "intimate-care"
-      : slug === "combos"
-      ? "sanitary-pads"
+    slug === "intimate-hygiene" || slug === "wellness" || slug === "intimate-care"
+      ? "menstrual-cups"
+      : slug === "combos" || slug === "sanitary-pads"
+      ? "gift-collections"
       : slug;
 
   const [category] = await db
@@ -406,4 +406,90 @@ export async function recomputeProductRating(productId: string) {
     .where(eq(products.id, productId));
 
   return { rating: avg, reviewCount: total };
+}
+
+export async function getFeaturedProducts(limit = 8) {
+  const prods = await db
+    .select()
+    .from(products)
+    .where(and(eq(products.isFeatured, true), eq(products.isActive, true)))
+    .orderBy(asc(products.sortOrder), desc(products.createdAt))
+    .limit(limit);
+
+  return Promise.all(
+    prods.map(async (prod) => {
+      const [defaultVar] = await db
+        .select()
+        .from(productVariants)
+        .where(eq(productVariants.productId, prod.id))
+        .orderBy(desc(productVariants.isDefault), asc(productVariants.sortOrder))
+        .limit(1);
+
+      const [primaryImg] = await db
+        .select()
+        .from(productImages)
+        .where(eq(productImages.productId, prod.id))
+        .orderBy(desc(productImages.isPrimary), asc(productImages.sortOrder))
+        .limit(1);
+
+      const [reviewStats] = await db
+        .select({
+          avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+          reviewCount: count(),
+        })
+        .from(reviews)
+        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "published")));
+
+      return {
+        ...prod,
+        rating: reviewStats ? Number(reviewStats.avgRating) : 0,
+        reviewCount: reviewStats ? Number(reviewStats.reviewCount) : 0,
+        image: primaryImg?.url ?? "/products/menstrual-cup.svg",
+        defaultVariant: defaultVar ?? null,
+      };
+    })
+  );
+}
+
+export async function getBestsellerProducts(limit = 8) {
+  const prods = await db
+    .select()
+    .from(products)
+    .where(and(eq(products.isBestseller, true), eq(products.isActive, true)))
+    .orderBy(asc(products.sortOrder), desc(products.createdAt))
+    .limit(limit);
+
+  return Promise.all(
+    prods.map(async (prod) => {
+      const [defaultVar] = await db
+        .select()
+        .from(productVariants)
+        .where(eq(productVariants.productId, prod.id))
+        .orderBy(desc(productVariants.isDefault), asc(productVariants.sortOrder))
+        .limit(1);
+
+      const [primaryImg] = await db
+        .select()
+        .from(productImages)
+        .where(eq(productImages.productId, prod.id))
+        .orderBy(desc(productImages.isPrimary), asc(productImages.sortOrder))
+        .limit(1);
+
+      const [reviewStats] = await db
+        .select({
+          avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+          reviewCount: count(),
+        })
+        .from(reviews)
+        .where(and(eq(reviews.productId, prod.id), eq(reviews.status, "published")));
+
+      return {
+        ...prod,
+        rating: reviewStats ? Number(reviewStats.avgRating) : 0,
+        reviewCount: reviewStats ? Number(reviewStats.reviewCount) : 0,
+        image: primaryImg?.url ?? "/products/menstrual-cup.svg",
+        defaultVariant: defaultVar ?? null,
+      };
+    })
+  );
 }

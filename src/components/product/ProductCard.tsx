@@ -64,9 +64,9 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="card-soft group flex flex-col justify-between h-full overflow-hidden bg-white p-3.5 sm:p-5 relative transition-all duration-300 min-w-0 w-full">
+    <div className="card-soft group flex flex-col justify-between h-full overflow-hidden bg-white p-3 sm:p-5 relative transition-all duration-300 min-w-0 w-full">
       {/* Top Badge: at most one badge */}
-      <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5 items-start max-w-[75%]">
+      <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5 items-start max-w-[75%] min-w-0">
         {product.badge ? (
           <span className="badge-brand text-[10px] tracking-wide uppercase font-bold shadow-xs truncate max-w-full">
             {product.badge}
@@ -81,7 +81,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Image */}
       <Link
         href={`/product/${product.slug}`}
-        className="block relative w-full aspect-square rounded-2xl overflow-hidden bg-blush/50 mb-3.5 sm:mb-4 border border-pink-light/40 shrink-0"
+        className="block relative w-full aspect-square rounded-2xl overflow-hidden bg-blush/50 mb-3 sm:mb-4 border border-pink-light/40 shrink-0 min-w-0"
       >
         <Image
           src={product.image || "/samaura-logo.png"}
@@ -93,12 +93,12 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* Product Details */}
-      <div className="flex-1 flex flex-col justify-between space-y-3 min-w-0">
+      <div className="flex-1 flex flex-col justify-between space-y-2.5 sm:space-y-3 min-w-0">
         <div className="space-y-1.5 min-w-0">
           {/* Flow Type Tag & Rating */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 text-xs text-muted min-w-0">
             {product.flowType ? (
-              <span className="text-[10px] font-medium leading-tight text-ink-muted bg-blush px-2 py-0.5 rounded-full border border-pink-light/60 max-w-fit line-clamp-2 break-normal">
+              <span className="text-[10px] font-medium leading-tight text-ink-muted bg-blush px-2 py-0.5 rounded-full border border-pink-light/60 max-w-fit truncate">
                 {product.flowType}
               </span>
             ) : (
@@ -122,7 +122,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Product Name */}
           <Link
             href={`/product/${product.slug}`}
-            className="block font-heading font-semibold text-sm sm:text-base text-ink group-hover:text-brand-dark transition-colors line-clamp-2 min-w-0"
+            className="block font-heading font-medium text-sm sm:text-base text-ink group-hover:text-brand-dark transition-colors line-clamp-2 min-w-0 leading-snug tracking-tight"
           >
             {product.name}
           </Link>
@@ -138,18 +138,18 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Pricing & Add Button */}
         <div className="pt-2 border-t border-blush flex items-center justify-between gap-2 min-w-0 mt-auto">
           <div className="min-w-0 flex-1">
-            <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="font-heading font-bold text-base sm:text-lg text-ink whitespace-nowrap">
+            <div className="flex items-baseline gap-1 sm:gap-1.5 flex-wrap min-w-0">
+              <span className="font-heading font-medium text-sm sm:text-lg text-ink whitespace-nowrap tracking-tight">
                 {formatRupees(currentPrice)}
               </span>
               {hasDiscount && (
-                <span className="text-xs text-muted line-through whitespace-nowrap">
+                <span className="text-[11px] sm:text-xs text-muted line-through whitespace-nowrap">
                   {formatRupees(pricePaise)}
                 </span>
               )}
             </div>
             {product.defaultVariant && (
-              <span className="text-[10px] text-muted block line-clamp-2 break-normal">
+              <span className="text-[10px] text-muted block truncate min-w-0">
                 {product.defaultVariant.name}
               </span>
             )}
@@ -158,7 +158,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleQuickAdd}
             disabled={!product.defaultVariant || product.defaultVariant.stock <= 0}
-            className={`min-w-10 min-h-10 sm:min-w-11 sm:min-h-11 rounded-full transition-all duration-200 flex items-center justify-center shadow-xs active:scale-95 shrink-0 ${
+            className={`w-11 h-11 min-w-11 min-h-11 rounded-full transition-all duration-200 flex items-center justify-center shadow-xs active:scale-95 shrink-0 ${
               added
                 ? "bg-emerald-600 text-white"
                 : "bg-blush text-ink hover:bg-brand hover:text-white border border-pink-light"

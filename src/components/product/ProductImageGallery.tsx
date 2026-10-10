@@ -27,7 +27,7 @@ export function ProductImageGallery({
   // If no images exist, provide a fallback
   const displayImages = images.length > 0
     ? images
-    : [{ id: "fallback", url: "/products/day-pads.svg", alt: productName }];
+    : [{ id: "fallback", url: "/products/menstrual-cup.svg", alt: productName }];
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);

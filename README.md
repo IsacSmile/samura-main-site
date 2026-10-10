@@ -1,6 +1,6 @@
 # Samaura Healthcare — Production E-Commerce Platform
 
-Samaura Healthcare is an enterprise-grade e-commerce web application for plant-derived female hygiene care. Built on Next.js 16 (App Router), React 19, TypeScript strict mode, Tailwind CSS v4, LibSQL / SQLite with Drizzle ORM, NextAuth (Auth.js v5), Razorpay payments, and Resend email infrastructure.
+Samaura Healthcare is an enterprise-grade e-commerce and education web application for menstrual health awareness, educational publications, Samaura Menstrual Cups, and thoughtful gifting. Built on Next.js 16 (App Router), React 19, TypeScript strict mode, Tailwind CSS v4, LibSQL / SQLite with Drizzle ORM, NextAuth (Auth.js v5), Razorpay payments, and Resend email infrastructure.
 
 ---
 
@@ -35,6 +35,13 @@ Samaura Healthcare is an enterprise-grade e-commerce web application for plant-d
 > **IMPORTANT LAUNCH NOTICE FOR CLIENT (`Data_for_website.docx`):**
 > In accordance with project requirements, none of the images from `Data_for_website.docx` were used. The application strictly utilizes branded typographic cards and clean SVG vector artwork across all pages.
 > **The client must supply real, high-resolution photography before production launch** for Samaura Menstrual Cups, educational publications/books, and gift hampers/kits. Real photos can be uploaded via the admin panel or added to `/public`.
+
+### 🧹 Removing Sample Products Before Launch
+To delete all test/sample products (`isSample = true`) and sample-only categories before production launch:
+```bash
+npm run db:remove-samples -- --confirm
+```
+*(Omitting `--confirm` performs a safe dry-run listing all sample items while leaving the database untouched).*
 
 ---
 

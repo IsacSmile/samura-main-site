@@ -1,3 +1,9 @@
+// Re-entry guard: exit immediately if CHECK_RUNNING=1 is already set
+if (process.env.CHECK_RUNNING === "1") {
+  console.log("[Re-entry Guard] CHECK_RUNNING=1 is already set; exiting check-claims immediately.");
+  process.exit(0);
+}
+
 import fs from "node:fs";
 import path from "node:path";
 

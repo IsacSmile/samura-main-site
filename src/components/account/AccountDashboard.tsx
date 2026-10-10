@@ -413,7 +413,7 @@ export function AccountDashboard({
                 </div>
                 <h3 className="font-heading font-bold text-lg text-ink">No orders found</h3>
                 <p className="text-xs text-muted max-w-md mx-auto">
-                  You haven&apos;t placed any orders yet. Discover our gentle, breathable pure cotton feminine care products.
+                  You haven&apos;t placed any orders yet. Discover our menstrual cups and curated gift collections.
                 </p>
                 <Link href="/shop" className="inline-block pt-2">
                   <Button size="md">Start Shopping Now</Button>

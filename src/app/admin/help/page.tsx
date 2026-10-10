@@ -160,6 +160,30 @@ export default function AdminHelpPage() {
             </ul>
           </div>
         </div>
+
+        {/* Guide 7: Removing Sample Testing Products Before Launch */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-light shadow-xs space-y-4 md:col-span-2">
+          <div className="w-10 h-10 rounded-2xl bg-blush flex items-center justify-center text-brand">
+            <Package className="w-5 h-5" />
+          </div>
+          <h2 className="font-heading font-bold text-xl text-ink">
+            7. Removing Sample Products Before Launch
+          </h2>
+          <div className="text-xs sm:text-sm text-muted space-y-2.5 leading-relaxed">
+            <p>
+              Sample test products marked with <em>&quot;Sample data. Replace with client product details.&quot;</em> must be deleted before production customer onboarding.
+            </p>
+            <p>
+              To purge all sample records, run the automated CLI utility:
+            </p>
+            <pre className="bg-blush/60 p-3 rounded-xl font-mono text-xs text-ink overflow-x-auto">
+              npm run db:remove-samples -- --confirm
+            </pre>
+            <p className="text-xs text-muted">
+              Omitting <code>--confirm</code> executes a safe dry-run that lists all sample items while preserving the database untouched.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Safety Notice Card */}

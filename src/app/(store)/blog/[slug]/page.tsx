@@ -178,7 +178,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             href="/shop"
             className="btn-brand text-xs font-semibold py-2 px-5 shadow-xs"
           >
-            Explore Pure Cotton Care →
+            Explore Menstrual Care →
           </Link>
         </div>
       </div>

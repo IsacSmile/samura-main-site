@@ -65,6 +65,9 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [cartBumped, setCartBumped] = useState(false);
 
+  const items = useCartStore((state) => state.items);
+  const validItemCount = useCartStore((state) => state.validItemCount);
+  const isPricingLoading = useCartStore((state) => state.isPricingLoading);
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const openCart = useCartStore((state) => state.openCart);
   const prevCountRef = useRef(cartItemCount);
@@ -232,7 +235,7 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search pads, cups..."
+                    placeholder="Search cups, gifts, guides..."
                     className="bg-transparent text-xs text-ink focus:outline-none w-32 sm:w-48 placeholder:text-muted"
                     autoFocus
                   />
@@ -279,10 +282,16 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
                 }`}
                 strokeWidth={1.75}
               />
-              {isMounted && cartItemCount > 0 && (
-                <span className="absolute top-1 right-1 bg-brand text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs pointer-events-none">
-                  {cartItemCount > 99 ? "99+" : cartItemCount}
-                </span>
+              {isMounted && (
+                isPricingLoading && items.length > 0 && validItemCount === null ? (
+                  <span className="absolute top-1 right-1 bg-brand/50 w-4 h-4 rounded-full animate-pulse shadow-xs pointer-events-none" />
+                ) : (
+                  cartItemCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-brand text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs pointer-events-none">
+                      {cartItemCount > 99 ? "99+" : cartItemCount}
+                    </span>
+                  )
+                )
               )}
             </button>
 

@@ -91,6 +91,7 @@ export async function upsertProductAction(input: unknown) {
         isFeatured: data.isFeatured,
         isBestseller: data.isBestseller,
         isActive: data.isActive,
+        sortOrder: data.sortOrder ?? 0,
         updatedAt: new Date(),
       })
       .where(eq(products.id, data.id!));
@@ -114,6 +115,7 @@ export async function upsertProductAction(input: unknown) {
       isFeatured: data.isFeatured,
       isBestseller: data.isBestseller,
       isActive: data.isActive,
+      sortOrder: data.sortOrder ?? 0,
     });
   }
 
@@ -167,6 +169,7 @@ export async function upsertProductAction(input: unknown) {
   }
 
   // Revalidate affected routes
+  revalidatePath("/");
   revalidatePath("/shop");
   revalidatePath("/category/[slug]", "page");
   revalidatePath(`/product/${data.slug}`);
@@ -207,6 +210,7 @@ export async function toggleProductStatusAction(id: string) {
     })
     .where(eq(products.id, id));
 
+  revalidatePath("/");
   revalidatePath("/shop");
   revalidatePath(`/product/${product.slug}`);
   revalidatePath("/admin/products");
@@ -246,6 +250,7 @@ export async function deleteProductAction(id: string, softDelete = true) {
     await db.delete(products).where(eq(products.id, id));
   }
 
+  revalidatePath("/");
   revalidatePath("/shop");
   revalidatePath(`/product/${product.slug}`);
   revalidatePath("/admin/products");

@@ -182,6 +182,7 @@ export const adminProductUpsertSchema = z.object({
   isFeatured: z.boolean().default(false),
   isBestseller: z.boolean().default(false),
   isActive: z.boolean().default(true),
+  sortOrder: z.number().int().default(0),
   variants: z
     .array(
       z.object({
@@ -317,5 +318,16 @@ export const adminOrderStatusSchema = z.object({
     "refund_pending",
   ]),
   notes: z.string().optional(),
+});
+
+export const testimonialUpsertSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().trim().min(1, "Name is required").max(60, "Name must be at most 60 characters"),
+  city: z.string().trim().max(60, "City must be at most 60 characters").optional().nullable(),
+  rating: z.number().int().min(1, "Rating must be between 1 and 5").max(5, "Rating must be between 1 and 5"),
+  body: z.string().trim().min(1, "Review body is required").max(280, "Body must be at most 280 characters"),
+  isPublished: z.boolean().default(true),
+  isSample: z.boolean().default(false),
+  sortOrder: z.number().int().default(0),
 });
 

@@ -48,7 +48,7 @@ export default async function AdminProductsPage() {
         ...p,
         totalStock,
         variantCount: variants.length,
-        primaryImage: primaryImg?.url || "/products/day-pads.svg",
+        primaryImage: primaryImg?.url || "/products/menstrual-cup.svg",
       };
     })
   );

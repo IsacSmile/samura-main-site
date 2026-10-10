@@ -26,6 +26,20 @@ export interface PricingLineItem {
   stock: number;
 }
 
+export interface RemovedCartLine {
+  variantId: string;
+  productName?: string;
+  reason: "unavailable" | "out_of_stock";
+}
+
+export interface AdjustedCartLine {
+  variantId: string;
+  productName?: string;
+  from: number;
+  to: number;
+  reason: "quantity_reduced";
+}
+
 export interface ComputePricingParams {
   items: CartItemInput[];
   couponCode?: string | null;
@@ -34,12 +48,17 @@ export interface ComputePricingParams {
     postalCode?: string;
   } | null;
   userId?: string | null;
+  strict?: boolean;
 }
 
 export interface PricingSummary {
   isValid: boolean;
   error?: string;
+  notice?: string;
+  lines: PricingLineItem[];
   items: PricingLineItem[];
+  removed: RemovedCartLine[];
+  adjusted: AdjustedCartLine[];
   itemCount: number;
   subtotalPaise: number;
   couponCode: string | null;
@@ -57,12 +76,15 @@ export interface PricingSummary {
  * Never accepts client-provided prices. Re-reads variants, stock, coupons, and shipping rules from DB.
  */
 export async function computePricing(params: ComputePricingParams): Promise<PricingSummary> {
-  const { items: inputItems, couponCode, userId } = params;
+  const { items: inputItems, couponCode, userId, strict = false } = params;
 
   const thresholdPaise = await getFreeShippingThresholdPaise();
   const baseResult: PricingSummary = {
     isValid: true,
+    lines: [],
     items: [],
+    removed: [],
+    adjusted: [],
     itemCount: 0,
     subtotalPaise: 0,
     couponCode: couponCode ? couponCode.trim().toUpperCase() : null,
@@ -77,19 +99,28 @@ export async function computePricing(params: ComputePricingParams): Promise<Pric
     return baseResult;
   }
 
-  // 1. Validate & load all variants from DB
+  // 1. Validate & load all variants from DB independently
   const validatedItems: PricingLineItem[] = [];
+  const removedItems: RemovedCartLine[] = [];
+  const adjustedItems: AdjustedCartLine[] = [];
   let subtotal = 0;
   let totalCount = 0;
 
   for (const item of inputItems) {
     const qty = Math.floor(Number(item.quantity));
     if (!qty || qty <= 0) {
-      return {
-        ...baseResult,
-        isValid: false,
-        error: `Invalid quantity for item ${item.variantId}.`,
-      };
+      if (strict) {
+        return {
+          ...baseResult,
+          isValid: false,
+          error: "Invalid item quantity.",
+        };
+      }
+      removedItems.push({
+        variantId: item.variantId,
+        reason: "unavailable",
+      });
+      continue;
     }
 
     const [v] = await db
@@ -113,27 +144,58 @@ export async function computePricing(params: ComputePricingParams): Promise<Pric
       .limit(1);
 
     if (!v || !v.isProductActive) {
-      return {
-        ...baseResult,
-        isValid: false,
-        error: `Product or variant (${item.variantId}) is unavailable or inactive.`,
-      };
+      if (strict) {
+        return {
+          ...baseResult,
+          isValid: false,
+          error: "Product or variant is unavailable or inactive.",
+        };
+      }
+      removedItems.push({
+        variantId: item.variantId,
+        productName: v ? v.productName : undefined,
+        reason: "unavailable",
+      });
+      continue;
     }
+
+    const displayName = v.variantName && v.variantName !== "Default" && v.variantName !== "Standard" && v.variantName !== v.productName
+      ? `${v.productName} (${v.variantName})`
+      : v.productName;
 
     if (v.stock <= 0) {
-      return {
-        ...baseResult,
-        isValid: false,
-        error: `"${v.productName} (${v.variantName})" is currently out of stock.`,
-      };
+      if (strict) {
+        return {
+          ...baseResult,
+          isValid: false,
+          error: `"${displayName}" is currently out of stock.`,
+        };
+      }
+      removedItems.push({
+        variantId: item.variantId,
+        productName: displayName,
+        reason: "out_of_stock",
+      });
+      continue;
     }
 
+    let effectiveQty = qty;
     if (qty > v.stock) {
-      return {
-        ...baseResult,
-        isValid: false,
-        error: `Requested quantity (${qty}) for "${v.productName} (${v.variantName})" exceeds available stock (${v.stock}).`,
-      };
+      if (strict) {
+        return {
+          ...baseResult,
+          isValid: false,
+          error: `Requested quantity (${qty}) for "${displayName}" exceeds available stock (${v.stock}).`,
+        };
+      }
+      adjustedItems.push({
+        variantId: item.variantId,
+        productName: displayName,
+        from: qty,
+        to: v.stock,
+        reason: "quantity_reduced",
+      });
+      effectiveQty = v.stock;
     }
 
     // Get primary image
@@ -144,10 +206,11 @@ export async function computePricing(params: ComputePricingParams): Promise<Pric
       .orderBy(desc(productImages.isPrimary))
       .limit(1);
 
-    const effectivePrice = v.salePricePaise !== null && v.salePricePaise !== undefined
-      ? v.salePricePaise
-      : v.pricePaise;
-    const lineTotal = effectivePrice * qty;
+    const effectivePrice =
+      v.salePricePaise !== null && v.salePricePaise !== undefined
+        ? v.salePricePaise
+        : v.pricePaise;
+    const lineTotal = effectivePrice * effectiveQty;
 
     validatedItems.push({
       variantId: v.variantId,
@@ -163,15 +226,68 @@ export async function computePricing(params: ComputePricingParams): Promise<Pric
       salePricePaise: v.salePricePaise,
       effectivePricePaise: effectivePrice,
       lineTotalPaise: lineTotal,
-      quantity: qty,
+      quantity: effectiveQty,
       stock: v.stock,
     });
 
     subtotal += lineTotal;
-    totalCount += qty;
+    totalCount += effectiveQty;
   }
 
-  // 2. Validate Coupon server-side
+  // If no valid lines remain
+  if (validatedItems.length === 0) {
+    let emptyMsg = "Your bag is empty.";
+    if (removedItems.length > 0) {
+      const allOos = removedItems.every((r) => r.reason === "out_of_stock");
+      if (allOos) {
+        const first = removedItems[0];
+        emptyMsg = first.productName
+          ? `"${first.productName}" is currently out of stock.`
+          : "An item in your bag is currently out of stock.";
+      } else {
+        emptyMsg = "An item in your bag is no longer available.";
+      }
+    }
+    return {
+      ...baseResult,
+      isValid: false,
+      error: emptyMsg,
+      removed: removedItems,
+      adjusted: adjustedItems,
+    };
+  }
+
+  // Build friendly notice if items were removed or adjusted
+  let noticeMsg: string | undefined;
+  const noticeParts: string[] = [];
+
+  if (removedItems.length > 0) {
+    const namedRemoved = removedItems.map((r) => r.productName).filter(Boolean) as string[];
+    const uniqueNames = Array.from(new Set(namedRemoved));
+    if (uniqueNames.length === 1) {
+      noticeParts.push(`"${uniqueNames[0]}" is no longer available and was removed from your bag.`);
+    } else if (uniqueNames.length > 1) {
+      noticeParts.push(`"${uniqueNames.join('", "')}" are no longer available and were removed from your bag.`);
+    } else {
+      noticeParts.push("An item in your bag is no longer available.");
+    }
+  }
+
+  if (adjustedItems.length > 0) {
+    if (adjustedItems.length === 1) {
+      const adj = adjustedItems[0];
+      const pName = adj.productName ? ` of "${adj.productName}"` : "";
+      noticeParts.push(`Only ${adj.to} left${pName}, quantity updated.`);
+    } else {
+      noticeParts.push("Some item quantities were updated to available stock.");
+    }
+  }
+
+  if (noticeParts.length > 0) {
+    noticeMsg = noticeParts.join(" ");
+  }
+
+  // 2. Validate Coupon server-side on valid subtotal
   let couponDiscount = 0;
   let couponErr: string | undefined;
 
@@ -239,7 +355,11 @@ export async function computePricing(params: ComputePricingParams): Promise<Pric
 
   return {
     isValid: true,
+    lines: validatedItems,
     items: validatedItems,
+    removed: removedItems,
+    adjusted: adjustedItems,
+    notice: noticeMsg,
     itemCount: totalCount,
     subtotalPaise: subtotal,
     couponCode: couponDiscount > 0 ? (couponCode ? couponCode.trim().toUpperCase() : null) : null,
