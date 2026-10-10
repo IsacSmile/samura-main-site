@@ -124,7 +124,7 @@ export function ProductReviews({
               setSubmitMessage("");
               setSubmitError("");
             }}
-            className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-full border border-pink-light bg-white text-ink hover:bg-blush font-medium text-xs sm:text-sm transition-colors touch-manipulation cursor-pointer"
+            className="w-full sm:w-auto min-h-11 px-5 py-2.5 rounded-full border border-pink-light bg-white text-ink hover:bg-blush font-medium text-xs sm:text-sm transition-colors touch-manipulation cursor-pointer"
           >
             Write a review
           </button>
@@ -174,7 +174,7 @@ export function ProductReviews({
                       setFormRating(Math.max(1, formRating - 1));
                     }
                   }}
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-blush transition-colors touch-manipulation focus:outline-none focus:ring-1 focus:ring-brand"
+                  className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-lg hover:bg-blush transition-colors touch-manipulation focus:outline-none focus:ring-1 focus:ring-brand"
                 >
                   <Star
                     className={`w-6 h-6 ${
@@ -201,7 +201,7 @@ export function ProductReviews({
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               placeholder="Your name"
-              className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand placeholder:text-muted/60"
+              className="w-full min-h-11 bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand placeholder:text-muted/60"
             />
           </div>
 
@@ -231,7 +231,7 @@ export function ProductReviews({
               value={formBody}
               onChange={(e) => setFormBody(e.target.value)}
               placeholder="Share your experience (10 to 1000 characters)"
-              className="w-full min-h-[110px] bg-white border border-pink-light rounded-xl p-3.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand placeholder:text-muted/60 resize-y"
+              className="w-full min-h-27.5 bg-white border border-pink-light rounded-xl p-3.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand placeholder:text-muted/60 resize-y"
             />
             <div className="text-right text-[11px] text-muted">
               {formBody.length} / 1000 characters
@@ -245,14 +245,14 @@ export function ProductReviews({
                 setIsFormOpen(false);
                 setSubmitError("");
               }}
-              className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-full border border-pink-light bg-white text-muted hover:text-ink font-medium text-xs sm:text-sm transition-colors touch-manipulation cursor-pointer"
+              className="w-full sm:w-auto min-h-11 px-5 py-2.5 rounded-full border border-pink-light bg-white text-muted hover:text-ink font-medium text-xs sm:text-sm transition-colors touch-manipulation cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
+              className="w-full sm:w-auto min-h-11 px-6 py-2.5 rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
             >
               {isSubmitting ? "Submitting..." : "Submit review"}
             </button>

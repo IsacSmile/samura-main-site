@@ -76,7 +76,7 @@ function LoginForm() {
               placeholder="you@example.com"
               required
               autoComplete="email"
-              className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand transition-colors placeholder:text-muted/60"
+              className="w-full min-h-11 bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand transition-colors placeholder:text-muted/60"
             />
           </div>
 
@@ -101,7 +101,7 @@ function LoginForm() {
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
-                className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl pl-3.5 pr-11 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand transition-colors placeholder:text-muted/60"
+                className="w-full min-h-11 bg-white border border-pink-light rounded-xl pl-3.5 pr-11 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand transition-colors placeholder:text-muted/60"
               />
               <button
                 type="button"
@@ -121,7 +121,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full min-h-[44px] rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm py-2.5 px-4 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
+            className="w-full min-h-11 rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm py-2.5 px-4 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>

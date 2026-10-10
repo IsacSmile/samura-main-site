@@ -82,7 +82,7 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             disabled={isPending}
-            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand disabled:opacity-50 cursor-pointer"
+            className="w-full min-h-11 bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand disabled:opacity-50 cursor-pointer"
           >
             <option value="General">General</option>
             <option value="Menstrual cup">Menstrual cup</option>
@@ -108,7 +108,7 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
             autoComplete="name"
             disabled={isPending}
             placeholder="Your name"
-            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
+            className="w-full min-h-11 bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
           />
           {fieldErrors.name && (
             <p className="text-xs text-red-600 mt-1">{fieldErrors.name}</p>
@@ -128,7 +128,7 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
             autoComplete="email"
             disabled={isPending}
             placeholder="you@example.com"
-            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
+            className="w-full min-h-11 bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
           />
           {fieldErrors.email && (
             <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
@@ -148,7 +148,7 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
             autoComplete="tel"
             disabled={isPending}
             placeholder="Mobile number"
-            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
+            className="w-full min-h-11 bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
           />
           {fieldErrors.phone && (
             <p className="text-xs text-red-600 mt-1">{fieldErrors.phone}</p>
@@ -167,7 +167,7 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
             required
             disabled={isPending}
             placeholder="How can we help you?"
-            className="w-full min-h-[110px] bg-white border border-pink-light rounded-xl p-3.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50 resize-y"
+            className="w-full min-h-27.5 bg-white border border-pink-light rounded-xl p-3.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50 resize-y"
           />
           {fieldErrors.message && (
             <p className="text-xs text-red-600 mt-1">{fieldErrors.message}</p>
@@ -177,7 +177,7 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full min-h-[44px] rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm py-2.5 px-4 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
+          className="w-full min-h-11 rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm py-2.5 px-4 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
         >
           {isPending ? "Sending message..." : "Send message"}
         </button>
