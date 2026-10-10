@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ProductImageLightbox } from "./ProductImageLightbox";
 
 export interface GalleryImage {
   id: string;
@@ -33,6 +34,7 @@ export function ProductImageGallery({
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
   const [isHoverZooming, setIsHoverZooming] = useState(false);
   const [zoomCoords, setZoomCoords] = useState({ x: 50, y: 50 });
+  const mainImageRef = useRef<HTMLDivElement | null>(null);
 
   const activeImage = displayImages[activeIndex] || displayImages[0];
 
@@ -69,14 +71,23 @@ export function ProductImageGallery({
           ) : null}
         </div>
 
-
         {/* Interactive Hover Zoom Area */}
         <div
-          className="relative w-full h-full cursor-crosshair overflow-hidden"
+          ref={mainImageRef}
+          tabIndex={0}
+          role="button"
+          aria-label="Click to enlarge product image"
+          className="relative w-full h-full cursor-zoom-in overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           onMouseEnter={() => setIsHoverZooming(true)}
           onMouseLeave={() => setIsHoverZooming(false)}
           onMouseMove={handleMouseMove}
           onClick={() => setIsZoomModalOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setIsZoomModalOpen(true);
+            }
+          }}
         >
           <Image
             src={activeImage.url}
@@ -105,7 +116,7 @@ export function ProductImageGallery({
                 e.stopPropagation();
                 handlePrev();
               }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 backdrop-blur-xs text-ink hover:text-brand shadow-sm border border-pink-light transition-all hover:scale-105 opacity-0 group-hover:opacity-100"
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 backdrop-blur-xs text-ink hover:text-brand shadow-sm border border-pink-light transition-all hover:scale-105 opacity-0 group-hover:opacity-100 cursor-pointer"
               aria-label="Previous image"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -115,7 +126,7 @@ export function ProductImageGallery({
                 e.stopPropagation();
                 handleNext();
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 backdrop-blur-xs text-ink hover:text-brand shadow-sm border border-pink-light transition-all hover:scale-105 opacity-0 group-hover:opacity-100"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 backdrop-blur-xs text-ink hover:text-brand shadow-sm border border-pink-light transition-all hover:scale-105 opacity-0 group-hover:opacity-100 cursor-pointer"
               aria-label="Next image"
             >
               <ChevronRight className="w-5 h-5" />
@@ -133,7 +144,7 @@ export function ProductImageGallery({
               <button
                 key={img.id || idx}
                 onClick={() => setActiveIndex(idx)}
-                className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 transition-all border-2 bg-blush/30 ${
+                className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 transition-all border-2 bg-blush/30 cursor-pointer ${
                   isActive
                     ? "border-brand shadow-pink-xs ring-2 ring-brand/20 scale-105"
                     : "border-pink-light hover:border-rose opacity-70 hover:opacity-100"
@@ -153,32 +164,16 @@ export function ProductImageGallery({
         </div>
       )}
 
-      {/* Fullscreen Zoom Modal */}
-      {isZoomModalOpen && (
-        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
-          <button
-            type="button"
-            onClick={() => setIsZoomModalOpen(false)}
-            className="absolute top-6 right-6 p-2 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors z-modal focus:outline-none touch-manipulation"
-            aria-label="Close zoomed view"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          <div
-            className="relative w-full max-w-3xl aspect-square max-h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl p-4 flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image
-              src={activeImage.url}
-              alt={activeImage.alt || productName}
-              fill
-              className="object-contain p-4"
-              sizes="(max-width: 1200px) 90vw, 800px"
-            />
-          </div>
-        </div>
-      )}
+      {/* Fullscreen Lightbox Portal */}
+      <ProductImageLightbox
+        isOpen={isZoomModalOpen}
+        onClose={() => setIsZoomModalOpen(false)}
+        images={displayImages}
+        activeIndex={activeIndex}
+        onNavigate={setActiveIndex}
+        productName={productName}
+        triggerRef={mainImageRef}
+      />
     </div>
   );
 }

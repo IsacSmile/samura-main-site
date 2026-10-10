@@ -8,7 +8,7 @@ import { ProductVariantSelector } from "@/components/product/ProductVariantSelec
 import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { ProductReviews } from "@/components/product/ProductReviews";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
-import { ChevronRight, ShieldCheck, Heart, Leaf, Award } from "lucide-react";
+import { ChevronRight, Heart, Award } from "lucide-react";
 import { calculatePercentSavings } from "@/lib/utils/money";
 import { getSiteUrl } from "@/lib/utils";
 
@@ -214,10 +214,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                     No reviews yet • Be the first to review
                   </a>
                 )}
-                <span className="text-muted">•</span>
-                <span className="text-ink font-medium flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-success" /> Gentle on Skin
-                </span>
               </div>
 
               {/* Short Description */}
@@ -228,22 +224,21 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               )}
             </div>
 
-            {/* Dynamic Product Badges from database */}
-            <div className="flex flex-wrap gap-2 pt-1">
-              {product.badge && (
-                <span className="px-3 py-1 rounded-full bg-blush text-brand text-[11px] font-semibold border border-pink-light flex items-center gap-1">
-                  <Award className="w-3 h-3 text-brand" /> {product.badge}
-                </span>
-              )}
-              {product.flowType && (
-                <span className="px-3 py-1 rounded-full bg-pink-light/30 text-ink text-[11px] font-medium border border-pink-light flex items-center gap-1">
-                  <Heart className="w-3 h-3 text-brand" /> {product.flowType}
-                </span>
-              )}
-              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-medium border border-emerald-100 flex items-center gap-1">
-                <Leaf className="w-3 h-3 text-success" /> Skin-Friendly Composition
-              </span>
-            </div>
+            {/* Dynamic Product Badges strictly from per-product admin fields */}
+            {Boolean(product.badge || product.flowType) && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {product.badge && (
+                  <span className="px-3 py-1 rounded-full bg-blush text-brand text-[11px] font-semibold border border-pink-light flex items-center gap-1">
+                    <Award className="w-3 h-3 text-brand" /> {product.badge}
+                  </span>
+                )}
+                {product.flowType && (
+                  <span className="px-3 py-1 rounded-full bg-pink-light/30 text-ink text-[11px] font-medium border border-pink-light flex items-center gap-1">
+                    <Heart className="w-3 h-3 text-brand" /> {product.flowType}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Variant Selector + Dynamic Price + Stock + Quantity Stepper + CTAs */}
             <div className="pt-2">

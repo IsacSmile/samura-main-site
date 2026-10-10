@@ -5,7 +5,6 @@ import {
   ChevronDown,
   Droplets,
   Leaf,
-  Sparkles,
   HelpCircle,
   FileText,
 } from "lucide-react";
@@ -132,9 +131,6 @@ export function ProductAccordion({
                 <h3 className="font-heading font-semibold text-base text-ink">
                   Carefully Selected Ingredients &amp; Materials
                 </h3>
-                <span className="text-xs font-medium text-emerald-700">
-                  Skin-Friendly Composition
-                </span>
               </div>
             </div>
             <ChevronDown
@@ -149,17 +145,6 @@ export function ProductAccordion({
               <p className="bg-blush/50 p-4 rounded-2xl border border-pink-light/60 text-ink">
                 {ingredients}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-[11px] font-semibold text-emerald-800">
-                <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-success" /> Hygienic Care
-                </span>
-                <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-success" /> Skin-Friendly
-                </span>
-                <span className="p-2 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-success" /> Breathable
-                </span>
-              </div>
             </div>
           )}
         </div>

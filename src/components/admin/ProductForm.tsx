@@ -125,7 +125,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
   // Highlights / Features (list of bullet strings)
   const parseInitialFeatures = (): string[] => {
-    if (!initialData?.features) return ["Pure Cotton Cover", "Chlorine-Free", "Breathable Backsheet"];
+    if (!initialData?.features) return [];
     try {
       const parsed = JSON.parse(initialData.features);
       if (Array.isArray(parsed)) return parsed;
