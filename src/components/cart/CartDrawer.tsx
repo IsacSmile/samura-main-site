@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -23,6 +24,7 @@ import { formatRupees } from "@/lib/utils/money";
 import { EmptyStateIllustration } from "@/components/ui/EmptyStateIllustration";
 
 export function CartDrawer() {
+  const pathname = usePathname();
   const isOpen = useCartStore((s) => s.isOpen);
   const closeCart = useCartStore((s) => s.closeCart);
   const validItemCount = useCartStore((s) => s.validItemCount);
@@ -57,7 +59,7 @@ export function CartDrawer() {
   );
   const remainingForFreeShipping = Math.max(0, thresholdPaise - subtotalPaise);
 
-  // Close on Escape key
+  // Close on Escape key and lock body scroll
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeCart();
@@ -68,23 +70,32 @@ export function CartDrawer() {
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
     };
   }, [isOpen, closeCart]);
+
+  // Auto-close on route change
+  const prevPathnameRef = useRef(pathname);
+  useEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname;
+      closeCart();
+    }
+  }, [pathname, closeCart]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-drawer pointer-events-none overflow-hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"
+        className="fixed inset-0 z-drawer-backdrop bg-black/40 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in pointer-events-auto"
         onClick={closeCart}
       />
 
       {/* Drawer Container */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
-        <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-md bg-white shadow-2xl flex flex-col border-l border-pink-light animate-in slide-in-from-right duration-300">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10 pointer-events-none z-drawer">
+        <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-md bg-white shadow-2xl flex flex-col border-l border-pink-light animate-in slide-in-from-right duration-300 pointer-events-auto relative z-drawer">
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-blush flex items-center justify-between bg-blush/40">
             <div className="flex items-center gap-2">
@@ -104,8 +115,9 @@ export function CartDrawer() {
               {loading && <Loader2 className="w-4 h-4 animate-spin text-brand ml-1" />}
             </div>
             <button
+              type="button"
               onClick={closeCart}
-              className="p-2 rounded-full text-muted hover:bg-white hover:text-brand transition-colors"
+              className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-muted hover:bg-white hover:text-brand transition-colors touch-manipulation"
               aria-label="Close cart drawer"
             >
               <X className="w-5 h-5" />

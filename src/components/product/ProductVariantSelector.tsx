@@ -318,7 +318,7 @@ export function ProductVariantSelector({
       </div>
 
       {/* Mobile Sticky Bottom "Add to Bag" Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-pink-light p-3 sm:hidden flex items-center justify-between gap-3 shadow-lg">
+      <div className="fixed bottom-0 inset-x-0 z-sticky bg-white/95 backdrop-blur-md border-t border-pink-light p-3 sm:hidden flex items-center justify-between gap-3 shadow-lg">
         <div className="min-w-0">
           <div className="font-heading font-medium text-base text-ink tracking-tight">
             {formatRupees(currentPrice)}

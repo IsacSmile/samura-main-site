@@ -92,7 +92,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       {/* ----------------------------------------------------------------- */}
       <section
         aria-label="Shop Collection Banner"
-        className="w-full shop-hero-banner-height overflow-hidden border-b border-pink-light/60 bg-blush relative"
+        className="w-full shop-hero-banner-height overflow-hidden border-b border-pink-light/60 bg-blush relative z-0"
       >
         <Link
           href="#products-grid"

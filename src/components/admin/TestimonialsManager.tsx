@@ -383,7 +383,7 @@ export function TestimonialsManager({ initialTestimonials }: TestimonialsManager
 
       {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+        <div className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-blush space-y-5 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-blush">
               <h3 className="font-serif text-lg font-semibold text-ink">

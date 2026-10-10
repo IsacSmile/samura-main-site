@@ -538,7 +538,7 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
 
       {/* Shipping Dialog Modal */}
       {showShippingModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-base text-ink flex items-center gap-2">
               <Truck className="w-5 h-5 text-brand" /> Dispatch Order
@@ -599,7 +599,7 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
 
       {/* Cancellation Dialog Modal */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-base text-rose-700 flex items-center gap-2">
               <XCircle className="w-5 h-5 text-rose-600" /> Cancel Order
@@ -645,7 +645,7 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
 
       {/* Refund Dialog Modal */}
       {showRefundModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-base text-ink flex items-center gap-2">
               <RotateCcw className="w-5 h-5 text-brand" /> Record Manual Refund
@@ -692,7 +692,7 @@ export function AdminOrderDetailView({ order: initialOrder }: OrderDetailViewPro
 
       {/* Return Dialog Modal */}
       {showReturnModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-base text-amber-700 flex items-center gap-2">
               <RotateCcw className="w-5 h-5 text-amber-600" /> Mark Order Returned (RTO)

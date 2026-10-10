@@ -174,7 +174,7 @@ export function AdminEnquiriesView({ initialEnquiries }: { initialEnquiries: Enq
 
       {/* Detail Modal */}
       {selectedEnquiry && (
-        <div className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-ink/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="border-b border-blush pb-3 flex items-center justify-between">
               <div>

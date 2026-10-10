@@ -246,7 +246,7 @@ export function AdminBannersView({ initialBanners }: { initialBanners: BannerRec
 
       {/* Modal */}
       {editingBanner && (
-        <div className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-ink/40 backdrop-blur-xs flex items-center justify-center p-4">
           <form
             onSubmit={handleSave}
             className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl"

@@ -206,13 +206,13 @@ export function ProductFilters({
 
       {/* Mobile Filters Drawer / Modal */}
       {isOpenMobile && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-drawer pointer-events-none lg:hidden">
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs animate-in fade-in"
+            className="fixed inset-0 z-drawer-backdrop bg-black/40 backdrop-blur-xs animate-in fade-in pointer-events-auto"
             onClick={() => setIsOpenMobile(false)}
           />
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-            <div className="w-full max-w-[calc(100vw-2rem)] sm:max-w-sm bg-white shadow-2xl p-5 sm:p-6 flex flex-col justify-between overflow-y-auto border-l border-pink-light animate-in slide-in-from-right duration-300">
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10 pointer-events-none z-drawer">
+            <div className="w-full max-w-[calc(100vw-2rem)] sm:max-w-sm bg-white shadow-2xl p-5 sm:p-6 flex flex-col justify-between overflow-y-auto border-l border-pink-light animate-in slide-in-from-right duration-300 pointer-events-auto relative z-drawer">
               <div className="space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-blush">
                   <div className="flex items-center gap-2">

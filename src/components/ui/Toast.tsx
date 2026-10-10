@@ -40,7 +40,7 @@ export function Toast({
 
   return (
     <div
-      className={`fixed bottom-6 left-6 z-50 flex items-start gap-3 p-4 rounded-2xl shadow-xl border ${borders[type]} max-w-sm animate-in slide-in-from-bottom-5 duration-300`}
+      className={`fixed bottom-6 left-6 z-toast flex items-start gap-3 p-4 rounded-2xl shadow-xl border ${borders[type]} max-w-sm animate-in slide-in-from-bottom-5 duration-300`}
       role="alert"
     >
       {icons[type]}

@@ -755,7 +755,7 @@ export function AccountDashboard({
 
       {/* ADDRESS MODAL */}
       {isAddressModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-pink-light shadow-xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-blush">
               <h3 className="font-heading font-bold text-lg text-ink">

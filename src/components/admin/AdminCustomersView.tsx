@@ -200,7 +200,7 @@ export function AdminCustomersView({ initialCustomers }: { initialCustomers: Cus
 
       {/* Customer Orders Drawer / Modal */}
       {selectedCustomer && (
-        <div className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal bg-ink/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-blush pb-4">
               <div>

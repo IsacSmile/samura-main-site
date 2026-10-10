@@ -35,7 +35,7 @@ export function WhatsAppButton({
 
   return (
     <div
-      className={`fixed right-4 z-40 flex items-end gap-2.5 max-w-[calc(100vw-2rem)] pointer-events-none ${
+      className={`fixed right-4 z-sticky flex items-end gap-2.5 max-w-[calc(100vw-2rem)] pointer-events-none ${
         isProductPage ? "bottom-20 sm:bottom-4" : "bottom-4"
       }`}
     >

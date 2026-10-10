@@ -61,7 +61,7 @@ export function CookieNotice() {
     <div
       role="region"
       aria-label="Cookie consent banner"
-      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-50 bg-white border border-pink-light/80 shadow-xl rounded-3xl p-5 text-ink animate-in fade-in slide-in-from-bottom-4 duration-300"
+      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-modal bg-white border border-pink-light/80 shadow-xl rounded-3xl p-5 text-ink animate-in fade-in slide-in-from-bottom-4 duration-300"
     >
       <div className="flex items-start gap-3.5">
         <div className="p-2 rounded-2xl bg-blush text-brand shrink-0">

@@ -164,10 +164,11 @@ export function ProductImageGallery({
 
       {/* Fullscreen Zoom Modal */}
       {isZoomModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
           <button
+            type="button"
             onClick={() => setIsZoomModalOpen(false)}
-            className="absolute top-6 right-6 p-2 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors z-50 focus:outline-none"
+            className="absolute top-6 right-6 p-2 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors z-modal focus:outline-none touch-manipulation"
             aria-label="Close zoomed view"
           >
             <X className="w-6 h-6" />
