@@ -198,7 +198,7 @@ export function ProductFilters({
                 className="flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-blush/60 border border-pink-light rounded-full px-3 py-1.5 min-w-0 shrink-0 transition-all shadow-xs hover:border-brand/40 focus:outline-none focus:ring-1 focus:ring-brand/40 cursor-pointer"
               >
                 <ArrowUpDown className="w-3.5 h-3.5 text-brand shrink-0" strokeWidth={1.75} />
-                <span className="text-xs font-semibold text-ink truncate max-w-[110px] sm:max-w-none">
+                <span className="text-xs font-semibold text-ink truncate max-w-27.5 sm:max-w-none">
                   {currentSortLabel}
                 </span>
                 <ChevronDown
