@@ -1,18 +1,13 @@
 import { db } from "@/db";
 import { testimonials } from "@/db/schema";
 import { eq, and, asc, desc } from "drizzle-orm";
+import {
+  DEFAULT_STOREFRONT_TESTIMONIALS,
+  type StorefrontTestimonial,
+} from "@/config/testimonials";
 
-export interface StorefrontTestimonial {
-  id: string;
-  name: string;
-  city: string | null;
-  rating: number;
-  body: string;
-  isPublished: boolean;
-  isSample: boolean;
-  sortOrder: number;
-  createdAt: Date;
-}
+export { DEFAULT_STOREFRONT_TESTIMONIALS };
+export type { StorefrontTestimonial };
 
 /**
  * Retrieves testimonials for the storefront carousel.

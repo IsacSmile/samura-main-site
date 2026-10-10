@@ -2,18 +2,18 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Star, Quote } from "lucide-react";
-import type { StorefrontTestimonial } from "@/lib/services/testimonials";
+import {
+  DEFAULT_STOREFRONT_TESTIMONIALS,
+  type StorefrontTestimonial,
+} from "@/config/testimonials";
 
 interface ReviewsCarouselProps {
   testimonials: StorefrontTestimonial[];
 }
 
 export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
-  // Production filter safeguard: strictly exclude sample testimonials in production
-  const isProduction = process.env.NODE_ENV === "production";
-  const items = isProduction
-    ? testimonials.filter((t) => t.isPublished && !t.isSample)
-    : testimonials.filter((t) => t.isPublished);
+  const publishedList = (testimonials || []).filter((t) => t.isPublished);
+  const items = publishedList.length > 0 ? publishedList : DEFAULT_STOREFRONT_TESTIMONIALS;
 
   const [, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);

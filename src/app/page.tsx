@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import { getAllSettings } from "@/lib/services/settings";
 import { getFeaturedProducts, getBestsellerProducts } from "@/lib/services/products";
-import { getStorefrontTestimonials } from "@/lib/services/testimonials";
+import {
+  getStorefrontTestimonials,
+  DEFAULT_STOREFRONT_TESTIMONIALS,
+} from "@/lib/services/testimonials";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 
@@ -24,8 +27,10 @@ export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts(8);
   const bestsellerProducts = await getBestsellerProducts(8);
 
-  // 5. Fetch storefront testimonials (environment-guarded)
-  const storefrontTestimonials = await getStorefrontTestimonials();
+  // 5. Fetch storefront testimonials (environment-guarded with curated fallback)
+  const dbTestimonials = await getStorefrontTestimonials();
+  const storefrontTestimonials =
+    dbTestimonials.length > 0 ? dbTestimonials : DEFAULT_STOREFRONT_TESTIMONIALS;
 
   // Hero Banner image props for <picture> art direction
   const commonHeroProps = {
@@ -177,11 +182,9 @@ export default async function HomePage() {
       {/* --------------------------------------------------------------------- */}
       {/* 4. REVIEWS CAROUSEL (WHITE BAND) */}
       {/* --------------------------------------------------------------------- */}
-      {storefrontTestimonials.length > 0 && (
-        <div className="bg-white py-10 lg:py-16 border-b border-pink-light/40">
-          <ReviewsCarousel testimonials={storefrontTestimonials} />
-        </div>
-      )}
+      <div className="bg-white py-10 lg:py-16 border-b border-pink-light/40">
+        <ReviewsCarousel testimonials={storefrontTestimonials} />
+      </div>
 
       {/* --------------------------------------------------------------------- */}
       {/* 5. CLOSING EDITORIAL MANIFESTO (PURPOSE & COMMUNITY PAVILION) */}
