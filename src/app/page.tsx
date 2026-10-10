@@ -60,7 +60,7 @@ export default async function HomePage() {
       {/* --------------------------------------------------------------------- */}
       {/* 1. HERO BANNER (IMAGE-ONLY, ART-DIRECTED, ZERO CLS, FULL-VIEWPORT) */}
       {/* --------------------------------------------------------------------- */}
-      <section className="w-full hero-banner-height overflow-hidden border-b border-pink-light/40 bg-blush">
+      <section className="w-full hero-banner-height overflow-hidden border-b border-pink-light/40 bg-blush relative z-0">
         <Link
           href={HERO_BANNER_CONFIG.href}
           aria-label={HERO_BANNER_CONFIG.ariaLabel}

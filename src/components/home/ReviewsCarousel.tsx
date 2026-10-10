@@ -15,9 +15,8 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
     ? testimonials.filter((t) => t.isPublished && !t.isSample)
     : testimonials.filter((t) => t.isPublished);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
   const [isTabHidden, setIsTabHidden] = useState(false);
   const [isInView, setIsInView] = useState(true);
@@ -30,6 +29,16 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
 
   const containerRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const currentIndexRef = useRef(0);
+  const isTransitioningRef = useRef(false);
+
+  // For seamless infinite looping, clone the items list
+  const displayItems =
+    items.length > 0
+      ? items.length >= 6
+        ? [...items, ...items]
+        : [...items, ...items, ...items, ...items]
+      : [];
 
   // Check prefers-reduced-motion
   useEffect(() => {
@@ -64,43 +73,98 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
     return () => observer.disconnect();
   }, []);
 
-  const totalItems = items.length;
+  const totalOriginal = items.length;
 
   const scrollToIndex = useCallback(
-    (index: number) => {
+    (index: number, behavior: ScrollBehavior = "smooth") => {
       if (!trackRef.current) return;
       const track = trackRef.current;
       const cards = Array.from(track.children) as HTMLElement[];
-      const safeIndex = Math.max(0, Math.min(index, totalItems - 1));
+      const safeIndex = Math.max(0, Math.min(index, cards.length - 1));
 
       if (cards[safeIndex]) {
         const targetCard = cards[safeIndex];
         track.scrollTo({
           left: targetCard.offsetLeft - track.offsetLeft,
-          behavior: prefersReducedMotion ? "auto" : "smooth",
+          behavior: prefersReducedMotion ? "auto" : behavior,
         });
-        setActiveIndex(safeIndex);
+        currentIndexRef.current = safeIndex;
+        setActiveIndex(safeIndex % totalOriginal);
       }
     },
-    [totalItems, prefersReducedMotion]
+    [totalOriginal, prefersReducedMotion, setActiveIndex]
   );
 
-  const handlePrev = useCallback(() => {
-    const prev = activeIndex <= 0 ? totalItems - 1 : activeIndex - 1;
-    scrollToIndex(prev);
-  }, [activeIndex, totalItems, scrollToIndex]);
-
   const handleNext = useCallback(() => {
-    const next = activeIndex >= totalItems - 1 ? 0 : activeIndex + 1;
-    scrollToIndex(next);
-  }, [activeIndex, totalItems, scrollToIndex]);
+    if (!trackRef.current || totalOriginal <= 1) return;
+    if (isTransitioningRef.current) return;
 
-  // Auto-advance one card every 4 seconds
+    const track = trackRef.current;
+    const cards = Array.from(track.children) as HTMLElement[];
+    const nextIndex = currentIndexRef.current + 1;
+
+    if (nextIndex < cards.length) {
+      isTransitioningRef.current = true;
+      scrollToIndex(nextIndex, "smooth");
+
+      // If we scrolled into the duplicated set, seamlessly wrap back to original set
+      if (nextIndex >= totalOriginal) {
+        setTimeout(() => {
+          if (!trackRef.current) {
+            isTransitioningRef.current = false;
+            return;
+          }
+          const wrappedIndex = nextIndex % totalOriginal;
+          scrollToIndex(wrappedIndex, "instant");
+          isTransitioningRef.current = false;
+        }, 550);
+      } else {
+        setTimeout(() => {
+          isTransitioningRef.current = false;
+        }, 550);
+      }
+    } else {
+      scrollToIndex(0, "instant");
+    }
+  }, [totalOriginal, scrollToIndex]);
+
+  const handlePrev = useCallback(() => {
+    if (!trackRef.current || totalOriginal <= 1) return;
+    if (isTransitioningRef.current) return;
+
+    const currentIndex = currentIndexRef.current;
+
+    if (currentIndex <= 0) {
+      // Jump instantly to the cloned counterpart
+      const jumpIndex = totalOriginal;
+      scrollToIndex(jumpIndex, "instant");
+
+      // Then smoothly scroll to jumpIndex - 1
+      isTransitioningRef.current = true;
+      setTimeout(() => {
+        if (!trackRef.current) {
+          isTransitioningRef.current = false;
+          return;
+        }
+        scrollToIndex(jumpIndex - 1, "smooth");
+        setTimeout(() => {
+          isTransitioningRef.current = false;
+        }, 550);
+      }, 20);
+    } else {
+      isTransitioningRef.current = true;
+      scrollToIndex(currentIndex - 1, "smooth");
+      setTimeout(() => {
+        isTransitioningRef.current = false;
+      }, 550);
+    }
+  }, [totalOriginal, scrollToIndex]);
+
+  // Auto-advance one card every 3.5 seconds
   useEffect(() => {
-    if (totalItems <= 1) return;
+    if (totalOriginal <= 1) return;
     if (
       isHovered ||
-      isFocused ||
       isTouching ||
       isTabHidden ||
       !isInView ||
@@ -111,13 +175,12 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
 
     const timer = setInterval(() => {
       handleNext();
-    }, 4000);
+    }, 3500);
 
     return () => clearInterval(timer);
   }, [
-    totalItems,
+    totalOriginal,
     isHovered,
-    isFocused,
     isTouching,
     isTabHidden,
     isInView,
@@ -127,7 +190,7 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
 
   // Keep active index updated on user manual touch/scroll
   const handleScroll = () => {
-    if (!trackRef.current) return;
+    if (!trackRef.current || totalOriginal <= 0) return;
     const track = trackRef.current;
     const scrollLeft = track.scrollLeft;
     const firstChild = track.firstElementChild as HTMLElement | null;
@@ -135,13 +198,14 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
       const cardWidth = firstChild.getBoundingClientRect().width;
       const gap = 24; // gap-6
       const newIndex = Math.round(scrollLeft / (cardWidth + gap));
-      if (newIndex >= 0 && newIndex < totalItems && newIndex !== activeIndex) {
-        setActiveIndex(newIndex);
+      if (newIndex >= 0 && newIndex !== currentIndexRef.current) {
+        currentIndexRef.current = newIndex;
+        setActiveIndex(newIndex % totalOriginal);
       }
     }
   };
 
-  if (totalItems === 0) {
+  if (totalOriginal === 0) {
     return null;
   }
 
@@ -151,7 +215,6 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
       role="region"
       aria-roledescription="carousel"
       aria-label="What Our Customers Say"
-      tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft") {
           e.preventDefault();
@@ -163,15 +226,14 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
       onTouchStart={() => setIsTouching(true)}
       onTouchEnd={() => setIsTouching(false)}
-      className="w-full relative overflow-hidden outline-none"
+      onTouchCancel={() => setIsTouching(false)}
+      className="w-full relative overflow-hidden outline-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4">
           <div className="space-y-2 max-w-xl">
             <span className="badge-brand text-xs font-bold tracking-wider uppercase">
               Customer Experiences
@@ -213,31 +275,31 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
           <div
             ref={trackRef}
             onScroll={handleScroll}
-            className="flex gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar py-2 px-0.5 min-h-65 sm:min-h-60 items-stretch"
+            className="flex gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar py-2 px-0.5 items-stretch"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
             }}
           >
-            {items.map((item) => (
+            {displayItems.map((item, index) => (
               <div
-                key={item.id}
+                key={`${item.id}-${index}`}
                 className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] shrink-0 snap-start flex flex-col min-w-0"
               >
-                <div className="card-soft h-full flex flex-col justify-between bg-white p-5 sm:p-6 rounded-2xl border border-blush/80 shadow-xs hover:border-pink-light transition-all duration-300 relative min-w-0">
-                  <div className="space-y-3.5 min-w-0">
-                    {/* Top Row: Stars + Quote Icon + Sample Tag */}
+                <div className="card-soft h-full flex flex-col justify-between bg-white p-3.5 sm:py-3.5 sm:px-4.5 rounded-2xl border border-blush/80 shadow-xs hover:border-pink-light transition-all duration-300 relative min-w-0">
+                  <div className="space-y-1.5 min-w-0">
+                    {/* Top Row: Stars + Quote Icon */}
                     <div className="flex items-center justify-between gap-2 min-w-0">
                       {/* Star Rating with WCAG aria-label */}
                       <div
-                        className="flex items-center gap-1 shrink-0"
+                        className="flex items-center gap-0.5 shrink-0"
                         role="img"
                         aria-label={`${item.rating} out of 5`}
                       >
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            className={`w-3.5 h-3.5 ${
+                            className={`w-3 h-3 ${
                               star <= item.rating
                                 ? "fill-amber-400 text-amber-400"
                                 : "fill-slate-200 text-slate-200"
@@ -246,20 +308,20 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
                         ))}
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <Quote className="w-4 h-4 text-brand/30" />
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Quote className="w-3 h-3 text-brand/30" />
                       </div>
                     </div>
 
-                    {/* Review Body (line-clamp-5) */}
-                    <p className="text-xs sm:text-sm text-ink-muted leading-relaxed line-clamp-5 min-w-0">
+                    {/* Review Body */}
+                    <p className="text-xs sm:text-[13px] text-ink-muted leading-relaxed line-clamp-3 min-w-0">
                       &ldquo;{item.body}&rdquo;
                     </p>
                   </div>
 
                   {/* Customer Meta */}
-                  <div className="pt-4 mt-4 border-t border-blush flex items-baseline justify-between gap-2 min-w-0">
-                    <span className="font-heading font-semibold text-xs sm:text-sm text-ink truncate min-w-0">
+                  <div className="pt-2 mt-2 border-t border-blush/60 flex items-baseline justify-between gap-2 min-w-0">
+                    <span className="font-heading font-semibold text-xs sm:text-[13px] text-ink truncate min-w-0">
                       {item.name}
                     </span>
                     {item.city && (
@@ -273,24 +335,6 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
             ))}
           </div>
         </div>
-
-        {/* Dot Indicators */}
-        {totalItems > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-6 sm:mt-8">
-            {items.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => scrollToIndex(i)}
-                aria-label={`Go to slide ${i + 1} of ${totalItems}`}
-                className={`transition-all duration-300 rounded-full ${
-                  activeIndex === i
-                    ? "w-6 h-2 bg-brand"
-                    : "w-2 h-2 bg-pink-light hover:bg-brand/50"
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </section>
   );
