@@ -247,12 +247,6 @@ export function ReviewsCarousel({ testimonials }: ReviewsCarouselProps) {
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
-                        {/* Outside production, sample reviews have a small Sample badge */}
-                        {!isProduction && item.isSample && (
-                          <span className="bg-blush text-brand border border-pink-light/80 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            Sample
-                          </span>
-                        )}
                         <Quote className="w-4 h-4 text-brand/30" />
                       </div>
                     </div>

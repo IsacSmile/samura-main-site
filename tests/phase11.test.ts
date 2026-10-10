@@ -213,16 +213,16 @@ async function runPhase11TestSuite() {
     // 1. Dry run
     const dryRunRes = await removeSampleProducts(false);
     assert(dryRunRes.totalDeletedCount === 0, `Dry-run deletes 0 records (got totalDeletedCount = ${dryRunRes.totalDeletedCount})`);
-    assert(dryRunRes.sampleTestimonials.length === 6, `Dry-run identifies all 6 sample testimonials (got ${dryRunRes.sampleTestimonials.length})`);
+    assert(dryRunRes.sampleTestimonials.length === 21, `Dry-run identifies all 21 sample testimonials (got ${dryRunRes.sampleTestimonials.length})`);
     assert(dryRunRes.sampleProducts.length === 8, `Dry-run identifies all 8 sample products (got ${dryRunRes.sampleProducts.length})`);
 
     const testimonialsAfterDryRun = await db.select().from(testimonials);
     assert(testimonialsAfterDryRun.some((t) => t.id === clientTestimonialId), "Client non-sample testimonial exists after dry-run");
-    assert(testimonialsAfterDryRun.filter((t) => t.isSample).length === 6, "All 6 sample testimonials exist after dry-run");
+    assert(testimonialsAfterDryRun.filter((t) => t.isSample).length === 21, "All 21 sample testimonials exist after dry-run");
 
     // 2. Confirmed run
     const confirmRes = await removeSampleProducts(true);
-    assert(confirmRes.deletedTestimonialsCount === 6, `Confirmed run deleted all 6 sample testimonials (got ${confirmRes.deletedTestimonialsCount})`);
+    assert(confirmRes.deletedTestimonialsCount === 21, `Confirmed run deleted all 21 sample testimonials (got ${confirmRes.deletedTestimonialsCount})`);
     assert(confirmRes.deletedProductsCount === 8, `Confirmed run deleted all 8 sample products (got ${confirmRes.deletedProductsCount})`);
 
     const testimonialsAfterConfirm = await db.select().from(testimonials);
