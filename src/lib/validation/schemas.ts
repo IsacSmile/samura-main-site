@@ -69,7 +69,7 @@ export const contactEnquirySchema = z.object({
       "Institutional/CSR",
     ])
     .default("General"),
-  subject: z.string().min(3, "Subject must be at least 3 characters"),
+  subject: z.string().min(3, "Subject must be at least 3 characters").optional().or(z.literal("")),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
@@ -80,7 +80,11 @@ export const submitReviewSchema = z.object({
   productId: z.string().min(1),
   userName: z.string().min(2, "Name is required"),
   rating: z.number().int().min(1).max(5, "Rating must be between 1 and 5"),
-  comment: z.string().min(5, "Review comment must be at least 5 characters"),
+  title: z.string().max(100).optional().nullable(),
+  comment: z
+    .string()
+    .min(10, "Review comment must be at least 10 characters")
+    .max(1000, "Review comment must be under 1000 characters"),
 });
 
 // -----------------------------------------------------------------------------

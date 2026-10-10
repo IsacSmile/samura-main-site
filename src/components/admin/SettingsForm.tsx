@@ -153,6 +153,18 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             />
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-ink mb-1.5">
+              Contact Response-Time Promise Text
+            </label>
+            <Input
+              value={settings.contact_response_time_text || ""}
+              onChange={(e) => handleChange("contact_response_time_text", e.target.value)}
+              placeholder="e.g. We usually reply within 24 hours (leave empty to hide)"
+              className="text-xs"
+            />
+          </div>
+
           <div className="md:col-span-2">
             <label className="block text-xs font-semibold text-ink mb-1.5">
               Registered Physical Address

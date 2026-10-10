@@ -15,7 +15,7 @@ export async function submitEnquiryAction(formData: FormData) {
     // Bot detected: return simulated success, bypassing processing
     return {
       success: true,
-      message: "Thank you! Your message has been received.",
+      message: "Thanks, we have received your message.",
     };
   }
 
@@ -32,25 +32,41 @@ export async function submitEnquiryAction(formData: FormData) {
     };
   }
 
-  // 3. Zod validation
+  // 3. Server-side subject derivation & Zod validation
+  const formTopic = (formData.get("topic") as string) || "General";
+  const rawSubject = formData.get("subject");
+  const derivedSubject =
+    rawSubject && String(rawSubject).trim().length > 0
+      ? String(rawSubject).trim()
+      : `Enquiry regarding ${formTopic}`;
+
   const rawData = {
     name: formData.get("name"),
     email: formData.get("email"),
     phone: formData.get("phone") || undefined,
-    topic: formData.get("topic") || "General",
-    subject: formData.get("subject"),
+    topic: formTopic,
+    subject: derivedSubject,
     message: formData.get("message"),
   };
 
   const parsed = contactEnquirySchema.safeParse(rawData);
   if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0];
+      if (typeof field === "string" && !fieldErrors[field]) {
+        fieldErrors[field] = issue.message;
+      }
+    }
     return {
       success: false,
       message: parsed.error.issues[0]?.message || "Please check the form inputs.",
+      fieldErrors,
     };
   }
 
   const { name, email, phone, topic, subject, message } = parsed.data;
+  const finalSubject = subject || derivedSubject;
 
   try {
     // 4. Store in database
@@ -61,7 +77,7 @@ export async function submitEnquiryAction(formData: FormData) {
       email,
       phone: phone || null,
       topic: topic || "General",
-      subject,
+      subject: finalSubject,
       message,
       status: "new",
       createdAt: new Date(),
@@ -73,13 +89,13 @@ export async function submitEnquiryAction(formData: FormData) {
       email,
       phone: phone || null,
       topic: topic || "General",
-      subject,
+      subject: finalSubject,
       message,
     });
 
     return {
       success: true,
-      message: "Thank you! Your enquiry has been received. Our care team will reply to your email shortly.",
+      message: "Thanks, we have received your message.",
     };
   } catch (error) {
     console.error("submitEnquiryAction error:", error);

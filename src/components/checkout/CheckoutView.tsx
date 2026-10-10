@@ -507,7 +507,7 @@ export function CheckoutView() {
                       id="checkout-email-input"
                       value={formData.customerEmail}
                       onChange={(e) => setFormData({ ...formData, customerEmail: e.target.value })}
-                      placeholder="priya@example.com"
+                      placeholder="you@example.com"
                       className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none transition-all ${
                         formErrors.customerEmail
                           ? "border-red-400 bg-red-50/20"

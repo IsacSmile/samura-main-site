@@ -65,12 +65,35 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [cartBumped, setCartBumped] = useState(false);
 
+  const headerRef = useRef<HTMLElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
+
   const items = useCartStore((state) => state.items);
   const validItemCount = useCartStore((state) => state.validItemCount);
   const isPricingLoading = useCartStore((state) => state.isPricingLoading);
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const openCart = useCartStore((state) => state.openCart);
   const prevCountRef = useRef(cartItemCount);
+
+  // Measure bottom edge of header into CSS variable
+  const updateHeaderBottom = () => {
+    if (headerRef.current) {
+      const rect = headerRef.current.getBoundingClientRect();
+      const bottom = Math.round(rect.bottom);
+      document.documentElement.style.setProperty("--header-bottom", `${bottom}px`);
+    }
+  };
+
+  useEffect(() => {
+    updateHeaderBottom();
+    window.addEventListener("resize", updateHeaderBottom);
+    window.addEventListener("scroll", updateHeaderBottom, { passive: true });
+    return () => {
+      window.removeEventListener("resize", updateHeaderBottom);
+      window.removeEventListener("scroll", updateHeaderBottom);
+    };
+  }, []);
 
   // Trigger cart bump animation when item count increases
   useEffect(() => {
@@ -83,10 +106,92 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
     prevCountRef.current = cartItemCount;
   }, [cartItemCount]);
 
+  // Route change resets mobile menu and search overlay during render
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setIsMobileMenuOpen(false);
+    setIsSearchOpen(false);
+    setIsCategoryOpen(false);
+  }
+
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
     setIsCategoryOpen(false);
+    document.body.style.overflow = "";
+    toggleButtonRef.current?.focus();
   };
+
+  const toggleMobileMenu = () => {
+    if (!isMobileMenuOpen) {
+      updateHeaderBottom();
+      setIsMobileMenuOpen(true);
+    } else {
+      closeMobileMenu();
+    }
+  };
+
+  // Handle body scroll lock & Escape / focus trap for mobile menu
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+      updateHeaderBottom();
+      // Focus first interactive element inside menu
+      const timer = setTimeout(() => {
+        const firstFocusable = menuPanelRef.current?.querySelector<HTMLElement>(
+          'input[type="text"], a[href], button:not([disabled])'
+        );
+        firstFocusable?.focus();
+      }, 50);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = "";
+      };
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeMobileMenu();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const panel = menuPanelRef.current;
+        if (!panel) return;
+        const focusable = panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        const focusableArr = Array.from(focusable).filter(
+          (el) => el.offsetParent !== null
+        );
+        if (focusableArr.length === 0) return;
+
+        const first = focusableArr[0];
+        const last = focusableArr[focusableArr.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first || !panel.contains(document.activeElement)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last || !panel.contains(document.activeElement)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMobileMenuOpen]);
 
   // Subtle shadow on scroll
   useEffect(() => {
@@ -98,47 +203,51 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
   }, []);
 
   return (
-    <header
-      className={`sticky top-0 z-40 bg-white/95 backdrop-blur-md transition-all duration-300 border-b ${
-        isScrolled ? "border-pink-light shadow-sm" : "border-blush"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-2">
-          {/* Mobile menu trigger */}
-          <div className="flex items-center xl:hidden shrink-0">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-all duration-300 focus:outline-none"
-              aria-label="Toggle Navigation Menu"
-              aria-expanded={isMobileMenuOpen}
-            >
-              <div className="relative w-5 h-5 flex items-center justify-center">
-                <Menu
-                  className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
-                    isMobileMenuOpen ? "rotate-90 opacity-0 scale-75" : "rotate-0 opacity-100 scale-100"
-                  }`}
-                  strokeWidth={1.75}
-                />
-                <X
-                  className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
-                    isMobileMenuOpen ? "rotate-0 opacity-100 scale-100" : "-rotate-90 opacity-0 scale-75"
-                  }`}
-                  strokeWidth={1.75}
-                />
-              </div>
-            </button>
-          </div>
+    <>
+      <header
+        ref={headerRef}
+        className={`sticky top-0 z-header bg-white/95 backdrop-blur-md transition-all duration-300 border-b ${
+          isScrolled ? "border-pink-light shadow-sm" : "border-blush"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2">
+            {/* Mobile menu trigger */}
+            <div className="flex items-center xl:hidden shrink-0">
+              <button
+                ref={toggleButtonRef}
+                type="button"
+                onClick={toggleMobileMenu}
+                className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-all duration-300 focus:outline-none touch-manipulation"
+                aria-label="Toggle Navigation Menu"
+                aria-expanded={isMobileMenuOpen}
+              >
+                <div className="relative w-5 h-5 flex items-center justify-center">
+                  <Menu
+                    className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
+                      isMobileMenuOpen ? "rotate-90 opacity-0 scale-75" : "rotate-0 opacity-100 scale-100"
+                    }`}
+                    strokeWidth={1.75}
+                  />
+                  <X
+                    className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
+                      isMobileMenuOpen ? "rotate-0 opacity-100 scale-100" : "-rotate-90 opacity-0 scale-75"
+                    }`}
+                    strokeWidth={1.75}
+                  />
+                </div>
+              </button>
+            </div>
 
-          {/* Brand Logo */}
-          <div className="shrink min-w-0 flex items-center">
+            {/* Brand Logo */}
+            <div className="shrink min-w-0 flex items-center overflow-hidden">
             <Link href="/" className="inline-flex items-center group min-w-0">
-              <div className="relative h-8 sm:h-10 w-32 sm:w-40 transition-transform duration-300 group-hover:scale-102 shrink-0">
+              <div className="relative h-8 sm:h-10 w-28 sm:w-40 transition-transform duration-300 group-hover:scale-102 shrink-0">
                 <Image
                   src="/samura-main-site-logo.png"
                   alt="Samaura Healthcare"
                   fill
-                  sizes="(max-width: 640px) 128px, 160px"
+                  sizes="(max-width: 640px) 112px, 160px"
                   className="object-contain object-left"
                   priority
                 />
@@ -228,7 +337,7 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
                       setIsSearchOpen(false);
                     }
                   }}
-                  className="flex items-center bg-blush border border-pink-light rounded-full px-3 py-1.5 shadow-inner"
+                  className="hidden sm:flex items-center bg-blush border border-pink-light rounded-full px-3 py-1.5 shadow-inner"
                 >
                   <Search className="w-4 h-4 text-ink-muted mr-1.5 shrink-0" strokeWidth={1.75} />
                   <input
@@ -242,16 +351,17 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
                   <button
                     type="button"
                     onClick={() => setIsSearchOpen(false)}
-                    className="text-muted hover:text-ink p-1 ml-1"
-                    aria-label="Close search"
+                    className="text-muted hover:text-ink p-1 ml-1 touch-manipulation"
+                    aria-label="Close search dropdown"
                   >
                     <X className="w-3.5 h-3.5" strokeWidth={1.75} />
                   </button>
                 </form>
               ) : (
                 <button
+                  type="button"
                   onClick={() => setIsSearchOpen(true)}
-                  className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-colors"
+                  className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-colors touch-manipulation"
                   title="Search products"
                   aria-label="Search products"
                 >
@@ -263,7 +373,7 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
             {/* Account Link */}
             <Link
               href="/account"
-              className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-colors"
+              className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-colors touch-manipulation"
               title="My Account"
               aria-label="My Account"
             >
@@ -272,8 +382,9 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
 
             {/* Cart Button */}
             <button
+              type="button"
               onClick={openCart}
-              className="relative w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-colors group shrink-0"
+              className="relative w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-ink hover:bg-blush transition-colors group shrink-0 touch-manipulation"
               aria-label="View Shopping Cart"
             >
               <ShoppingBag
@@ -294,106 +405,162 @@ export function Navbar({ offersBadge = "Offers" }: NavbarProps) {
                 )
               )}
             </button>
-
-
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu (<1280px / xl) */}
-      <div
-        className={`xl:hidden grid transition-all duration-300 ease-in-out bg-white border-pink-light ${
-          isMobileMenuOpen
-            ? "grid-rows-[1fr] opacity-100 border-t pt-4 pb-6 px-4"
-            : "grid-rows-[0fr] opacity-0 border-t-0 pt-0 pb-0 px-4 pointer-events-none"
-        }`}
-      >
-        <div className="overflow-hidden min-h-0 space-y-2">
-          <div className="max-h-[calc(100vh-6rem)] overflow-y-auto space-y-2 pr-0.5">
-            {/* Quick Search in Mobile Menu */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (searchQuery.trim()) {
-                  router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
-                  closeMobileMenu();
-                }
-              }}
-              className="flex items-center bg-blush border border-pink-light rounded-2xl px-3.5 py-2.5 mb-3"
-            >
-              <Search className="w-4 h-4 text-ink-muted mr-2 shrink-0" strokeWidth={1.75} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search menstrual cups, gifts, guides..."
-                className="bg-transparent text-sm text-ink focus:outline-none w-full placeholder:text-muted"
-              />
-            </form>
-
-            <Link
-              href="/shop"
-              onClick={closeMobileMenu}
-              className="block px-3.5 py-3 rounded-2xl text-base font-semibold text-ink hover:bg-blush"
-            >
-              Shop
-            </Link>
-
-            <div className="pt-2 pb-1 border-t border-blush">
-              <span className="px-3 text-xs font-bold uppercase tracking-wider text-muted">
-                Explore
-              </span>
-              <div className="mt-2 space-y-1">
-                <Link
-                  href="/learn"
-                  onClick={closeMobileMenu}
-                  className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
-                >
-                  Learn Before You Transition
-                </Link>
-                <Link
-                  href="/awareness"
-                  onClick={closeMobileMenu}
-                  className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
-                >
-                  Awareness & Support
-                </Link>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-blush space-y-1">
-              <Link
-                href="/gifts"
-                onClick={closeMobileMenu}
-                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-              >
-                Gift Collections
-              </Link>
-              <Link
-                href="/about"
-                onClick={closeMobileMenu}
-                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-              >
-                About Us
-              </Link>
-              <Link
-                href="/contact"
-                onClick={closeMobileMenu}
-                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-              >
-                Contact
-              </Link>
-              <Link
-                href="/account"
-                onClick={closeMobileMenu}
-                className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
-              >
-                My Account / Orders
-              </Link>
-            </div>
-          </div>
+      {/* Mobile Full-Bleed Search Bar (<640px) */}
+      {isSearchOpen && (
+        <div className="sm:hidden absolute inset-0 bg-white z-20 px-3 flex items-center gap-2 border-b border-pink-light">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                setIsSearchOpen(false);
+              }
+            }}
+            className="flex-1 flex items-center bg-blush border border-pink-light rounded-full px-3 py-1.5 shadow-inner"
+          >
+            <Search className="w-4 h-4 text-ink-muted mr-1.5 shrink-0" strokeWidth={1.75} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search cups, gifts, guides..."
+              className="bg-transparent text-xs text-ink focus:outline-none w-full placeholder:text-muted"
+              autoFocus
+            />
+          </form>
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(false)}
+            className="w-11 h-11 min-w-11 min-h-11 flex items-center justify-center rounded-full text-muted hover:text-ink touch-manipulation"
+            aria-label="Close search"
+          >
+            <X className="w-5 h-5" strokeWidth={1.75} />
+          </button>
         </div>
-      </div>
+      )}
+
     </header>
+
+      {/* Mobile Menu Backdrop */}
+      <div
+        onClick={closeMobileMenu}
+        aria-hidden="true"
+        className={`xl:hidden fixed inset-x-0 bottom-0 z-drawer-backdrop bg-ink/20 backdrop-blur-xs transition-opacity duration-200 motion-reduce:transition-none ${
+          isMobileMenuOpen
+            ? "opacity-100 pointer-events-auto visible"
+            : "opacity-0 pointer-events-none invisible"
+        }`}
+        style={{
+          top: "var(--header-bottom, 64px)",
+        }}
+      />
+
+      {/* Mobile Menu Overlay Panel */}
+      <div
+        ref={menuPanelRef}
+        role="dialog"
+        aria-modal={isMobileMenuOpen ? "true" : undefined}
+        aria-label="Navigation Menu"
+        inert={!isMobileMenuOpen}
+        className={`xl:hidden fixed inset-x-0 z-drawer bg-white border-b border-pink-light overflow-y-auto transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
+          isMobileMenuOpen
+            ? "opacity-100 translate-y-0 visible pointer-events-auto"
+            : "opacity-0 -translate-y-2 invisible pointer-events-none"
+        }`}
+        style={{
+          top: "var(--header-bottom, 64px)",
+          height: "calc(100dvh - var(--header-bottom, 64px))",
+          visibility: isMobileMenuOpen ? "visible" : "hidden",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 pb-8 space-y-3">
+          {/* Quick Search in Mobile Menu */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                closeMobileMenu();
+              }
+            }}
+            className="flex items-center bg-blush border border-pink-light rounded-2xl px-3.5 py-2.5 mb-2"
+          >
+            <Search className="w-4 h-4 text-ink-muted mr-2 shrink-0" strokeWidth={1.75} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search menstrual cups, gifts, guides..."
+              className="bg-transparent text-sm text-ink focus:outline-none w-full placeholder:text-muted"
+            />
+          </form>
+
+          <Link
+            href="/shop"
+            onClick={closeMobileMenu}
+            className="block px-3.5 py-3 rounded-2xl text-base font-semibold text-ink hover:bg-blush"
+          >
+            Shop
+          </Link>
+
+          <div className="pt-2 pb-1 border-t border-blush">
+            <span className="px-3 text-xs font-bold uppercase tracking-wider text-muted">
+              Explore
+            </span>
+            <div className="mt-2 space-y-1">
+              <Link
+                href="/learn"
+                onClick={closeMobileMenu}
+                className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
+              >
+                Learn Before You Transition
+              </Link>
+              <Link
+                href="/awareness"
+                onClick={closeMobileMenu}
+                className="block px-3 py-2 rounded-xl text-sm font-medium text-ink hover:bg-blush"
+              >
+                Awareness & Support
+              </Link>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-blush space-y-1">
+            <Link
+              href="/gifts"
+              onClick={closeMobileMenu}
+              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
+            >
+              Gift Collections
+            </Link>
+            <Link
+              href="/about"
+              onClick={closeMobileMenu}
+              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
+            >
+              About Us
+            </Link>
+            <Link
+              href="/contact"
+              onClick={closeMobileMenu}
+              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/account"
+              onClick={closeMobileMenu}
+              className="block px-3.5 py-2.5 rounded-2xl text-sm font-medium text-ink hover:bg-blush"
+            >
+              My Account / Orders
+            </Link>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

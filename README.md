@@ -81,9 +81,8 @@ npm run db:migrate
 npm run db:seed
 ```
 
-Default Admin Credentials:
-- **Email**: `admin@samaura.com`
-- **Password**: `Admin@123456`
+Admin Credentials:
+Configured via `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in your `.env` file (or randomly generated in local dev seed console).
 
 ### Step 4: Run Development Server
 ```bash
@@ -141,7 +140,7 @@ Seed the production catalog, shipping rules, and admin user:
 NODE_ENV="production" \
 DATABASE_URL="libsql://samaura-prod-yourorg.turso.io" \
 DATABASE_AUTH_TOKEN="<your-auth-token>" \
-SEED_ADMIN_EMAIL="admin@samaura.com" \
+SEED_ADMIN_EMAIL="admin@yourdomain.com" \
 SEED_ADMIN_PASSWORD="YourStrongAdminPassword123!" \
 npm run db:seed
 ```
@@ -249,7 +248,7 @@ The Content-Security-Policy header in `next.config.ts` includes the required Raz
 | `RAZORPAY_WEBHOOK_SECRET` | When online enabled | Razorpay Webhook Secret for HMAC verification |
 | `RESEND_API_KEY` | Optional | Resend API Key (`re_...`). Logs to console if unset |
 | `RESEND_FROM_EMAIL` | Optional | Outbound authorized sender (`orders@samaura.com`) |
-| `ADMIN_ALERT_EMAIL` | Optional | Recipient for new order admin alerts (`admin@samaura.com`) |
+| `ADMIN_ALERT_EMAIL` | Optional | Recipient for new order admin alerts (`alerts@yourdomain.com`) |
 | `STORAGE_PROVIDER` | Optional | `local` (default) or `cloudinary` |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary only | Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | Cloudinary only | Cloudinary API key |

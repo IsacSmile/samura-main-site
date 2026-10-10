@@ -81,8 +81,7 @@ Last updated: Phase 1 (Foundation) Complete.
 - [x] Database seed executed (`src/db/seed/index.ts`):
   - 4 categories: Sanitary Pads, Panty Liners, Menstrual Cups, Intimate Care
   - 8 demo products with variants (size, pack count, stock, paise prices)
-  - 2 coupons: `WELCOME15` (15% off), `SAMAURA10` (10% off)
-  - 1 admin user: `admin@samaura.com` (`Admin@123456`) + demo customer `priya@example.com`
+  - 1 admin user (seeded via SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD) + demo customer
 
 ### 4. Base UI Kit (`src/components/ui/`)
 - [x] `Button` (pill, variants: primary / secondary / ghost / blush / outline, sizes: sm/md/lg, loading spinner)
@@ -267,7 +266,7 @@ Last updated: Phase 1 (Foundation) Complete.
   - Non-admin (customer role) requests to `/admin` redirect with HTTP 302 to `/`.
   - Server actions directly invoke `requireAdmin()` and throw error if called without admin privileges.
 - [x] **Admin Authenticated Access**:
-  - Admin login with `admin@samaura.com` / `Admin@123456` grants full access (HTTP 200) to `/admin`, `/admin/products`, `/admin/categories`, `/admin/reviews`, `/admin/products/new`, and `/admin/products/[id]/edit`.
+  - Admin login with seeded admin credentials grants full access (HTTP 200) to `/admin`, `/admin/products`, `/admin/categories`, `/admin/reviews`, `/admin/products/new`, and `/admin/products/[id]/edit`.
 
 ---
 

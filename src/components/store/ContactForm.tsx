@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { Send } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Toast } from "@/components/ui/Toast";
+import { CheckCircle, AlertCircle } from "lucide-react";
 import { submitEnquiryAction } from "@/app/actions/enquiry";
 
 interface ContactFormProps {
@@ -15,55 +12,52 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [topic, setTopic] = useState(initialTopic);
   const [isPending, startTransition] = useTransition();
-  const [toast, setToast] = useState<{
-    type: "success" | "error";
-    title: string;
-    message: string;
-  } | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError(null);
+    setFieldErrors({});
+
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
       const res = await submitEnquiryAction(formData);
       if (res.success) {
-        setToast({
-          type: "success",
-          title: "Message Sent",
-          message: res.message,
-        });
-        formRef.current?.reset();
-        setTopic(initialTopic);
+        setIsSuccess(true);
       } else {
-        setToast({
-          type: "error",
-          title: "Submission Error",
-          message: res.message,
-        });
+        setFormError(res.message);
+        if (res.fieldErrors) {
+          setFieldErrors(res.fieldErrors);
+        }
       }
     });
   };
 
-  return (
-    <div className="bg-white rounded-3xl p-8 sm:p-12 border border-pink-light shadow-xs max-w-2xl mx-auto space-y-6">
-      {toast && (
-        <Toast
-          type={toast.type}
-          title={toast.title}
-          message={toast.message}
-          onClose={() => setToast(null)}
-        />
-      )}
-
-      <div className="space-y-1 text-center">
-        <h2 className="font-heading font-bold text-2xl text-ink">
-          Send us an Enquiry
+  if (isSuccess) {
+    return (
+      <div className="bg-white border border-pink-light rounded-2xl p-8 sm:p-12 text-center space-y-3">
+        <CheckCircle className="w-8 h-8 text-brand mx-auto" strokeWidth={1.75} />
+        <h2 className="font-heading font-semibold text-lg sm:text-xl text-ink">
+          Thanks, we have received your message.
         </h2>
-        <p className="text-xs text-muted">
-          Our team usually responds within 2 to 4 business hours.
+        <p className="text-xs sm:text-sm text-muted">
+          Our team will review your enquiry and get back to you soon.
         </p>
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl p-6 sm:p-8 border border-pink-light space-y-5">
+      {formError && (
+        <div className="flex items-center gap-2 p-3 text-xs bg-red-50 text-red-700 border border-red-200 rounded-xl">
+          <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+          <span>{formError}</span>
+        </div>
+      )}
 
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
         {/* Anti-spam Honeypot field (hidden from genuine users) */}
@@ -78,14 +72,17 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
         </div>
 
         {/* Topic Selector */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-ink">Topic</label>
+        <div className="space-y-1.5">
+          <label htmlFor="contact-topic" className="block text-xs font-medium text-ink">
+            Topic
+          </label>
           <select
+            id="contact-topic"
             name="topic"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             disabled={isPending}
-            className="w-full appearance-none bg-blush/40 hover:bg-blush/70 focus:bg-white border border-pink-light rounded-2xl py-2.5 px-4 text-xs sm:text-sm text-ink transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:opacity-50 cursor-pointer"
+            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand disabled:opacity-50 cursor-pointer"
           >
             <option value="General">General</option>
             <option value="Menstrual cup">Menstrual cup</option>
@@ -93,67 +90,97 @@ export function ContactForm({ initialTopic = "General" }: ContactFormProps) {
             <option value="Gift pack">Gift pack</option>
             <option value="Institutional/CSR">Institutional/CSR</option>
           </select>
+          {fieldErrors.topic && (
+            <p className="text-xs text-red-600 mt-1">{fieldErrors.topic}</p>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-ink">Full Name</label>
-            <Input name="name" placeholder="Your Name" required disabled={isPending} />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-ink">Email Address</label>
-            <Input
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-              disabled={isPending}
-            />
-          </div>
+        {/* Full Name */}
+        <div className="space-y-1.5">
+          <label htmlFor="contact-name" className="block text-xs font-medium text-ink">
+            Full name
+          </label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            required
+            autoComplete="name"
+            disabled={isPending}
+            placeholder="Your name"
+            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
+          />
+          {fieldErrors.name && (
+            <p className="text-xs text-red-600 mt-1">{fieldErrors.name}</p>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-ink">Phone Number (Optional)</label>
-            <Input
-              name="phone"
-              type="tel"
-              placeholder="10-digit mobile number"
-              disabled={isPending}
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-ink">Subject</label>
-            <Input
-              name="subject"
-              placeholder="e.g. Sizing guidance or workshop request"
-              required
-              disabled={isPending}
-            />
-          </div>
+        {/* Email */}
+        <div className="space-y-1.5">
+          <label htmlFor="contact-email" className="block text-xs font-medium text-ink">
+            Email
+          </label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            disabled={isPending}
+            placeholder="you@example.com"
+            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
+          />
+          {fieldErrors.email && (
+            <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
+          )}
         </div>
 
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-ink">Message</label>
+        {/* Phone (Optional) */}
+        <div className="space-y-1.5">
+          <label htmlFor="contact-phone" className="block text-xs font-medium text-ink">
+            Phone (optional)
+          </label>
+          <input
+            id="contact-phone"
+            name="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            disabled={isPending}
+            placeholder="Mobile number"
+            className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50"
+          />
+          {fieldErrors.phone && (
+            <p className="text-xs text-red-600 mt-1">{fieldErrors.phone}</p>
+          )}
+        </div>
+
+        {/* Message */}
+        <div className="space-y-1.5">
+          <label htmlFor="contact-message" className="block text-xs font-medium text-ink">
+            Message
+          </label>
           <textarea
+            id="contact-message"
             name="message"
             rows={4}
             required
             disabled={isPending}
-            placeholder="How can we assist you today?"
-            className="w-full rounded-2xl border border-pink-light bg-blush/20 p-3.5 text-xs sm:text-sm text-ink placeholder:text-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/10 transition-all resize-none"
+            placeholder="How can we help you?"
+            className="w-full min-h-[110px] bg-white border border-pink-light rounded-xl p-3.5 text-xs sm:text-sm text-ink transition-colors focus:outline-none focus:border-brand placeholder:text-muted/60 disabled:opacity-50 resize-y"
           />
+          {fieldErrors.message && (
+            <p className="text-xs text-red-600 mt-1">{fieldErrors.message}</p>
+          )}
         </div>
 
-        <Button
+        <button
           type="submit"
-          size="lg"
           disabled={isPending}
-          leftIcon={<Send className="w-4 h-4 shrink-0" />}
-          className="w-full shadow-md text-xs sm:text-sm font-semibold py-3"
+          className="w-full min-h-[44px] rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm py-2.5 px-4 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
         >
-          {isPending ? "Sending Message..." : "Send Confidential Message"}
-        </Button>
+          {isPending ? "Sending message..." : "Send message"}
+        </button>
       </form>
     </div>
   );

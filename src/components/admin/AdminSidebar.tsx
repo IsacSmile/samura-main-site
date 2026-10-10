@@ -213,7 +213,7 @@ export function AdminSidebar({ userEmail, userName }: AdminSidebarProps) {
                 {userName || "Administrator"}
               </div>
               <div className="text-[10px] text-muted truncate">
-                {userEmail || "admin@samaura.com"}
+                {userEmail || "admin@example.local"}
               </div>
             </div>
           </div>
@@ -231,7 +231,7 @@ export function AdminSidebar({ userEmail, userName }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile topbar toggle */}
-      <div className="lg:hidden sticky top-0 z-30 bg-white border-b border-pink-light px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden sticky top-0 z-sticky bg-white border-b border-pink-light px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsOpen(true)}
@@ -260,9 +260,9 @@ export function AdminSidebar({ userEmail, userName }: AdminSidebarProps) {
 
       {/* Mobile Drawer Modal */}
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-drawer flex">
           <div
-            className="fixed inset-0 bg-ink/40 backdrop-blur-xs"
+            className="fixed inset-0 z-drawer-backdrop bg-ink/40 backdrop-blur-xs"
             onClick={() => setIsOpen(false)}
           />
           <div className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">

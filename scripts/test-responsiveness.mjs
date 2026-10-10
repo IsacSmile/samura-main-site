@@ -28,8 +28,10 @@ async function run() {
   // First, log in as admin to test /admin in an authenticated state
   console.log("Authenticating as admin...");
   await page.goto("http://localhost:3000/login");
-  await page.fill('input[type="email"]', "admin@samaura.com");
-  await page.fill('input[type="password"]', "Admin@123456");
+  const testAdminEmail = process.env.SEED_ADMIN_EMAIL || "admin@example.local";
+  const testAdminPassword = process.env.SEED_ADMIN_PASSWORD || "TestAdminPass123!";
+  await page.fill('input[type="email"]', testAdminEmail);
+  await page.fill('input[type="password"]', testAdminPassword);
   await page.click('button[type="submit"]');
   await page.waitForTimeout(1500);
 

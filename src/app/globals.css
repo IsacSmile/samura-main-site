@@ -29,6 +29,15 @@
   --shadow-sm: 0 2px 8px -1px rgba(245, 163, 183, 0.22);
   --shadow-md: 0 6px 20px -2px rgba(245, 163, 183, 0.32);
   --shadow-lg: 0 12px 32px -4px rgba(245, 163, 183, 0.4);
+  /* Unified z-index scale tokens:
+     content < sticky bars < header < drawer backdrop < drawer < modal < toast */
+  --z-content: 10;
+  --z-sticky: 30;
+  --z-header: 50;
+  --z-drawer-backdrop: 60;
+  --z-drawer: 70;
+  --z-modal: 80;
+  --z-toast: 90;
 }
 
 :root {
@@ -36,12 +45,36 @@
   --foreground: #2C1820;
   --top-notch-height: 36px;
   --header-height: 64px;
+  --header-bottom: 64px;
+
+  /* Unified z-index scale tokens */
+  --z-content: 10;
+  --z-sticky: 30;
+  --z-header: 50;
+  --z-drawer-backdrop: 60;
+  --z-drawer: 70;
+  --z-modal: 80;
+  --z-toast: 90;
 }
 
 @media (min-width: 640px) {
   :root {
     --header-height: 80px;
+    --header-bottom: 80px;
   }
+}
+
+/* Semantic z-index utility classes */
+.z-content { z-index: var(--z-content); }
+.z-sticky { z-index: var(--z-sticky); }
+.z-header { z-index: var(--z-header); }
+.z-drawer-backdrop { z-index: var(--z-drawer-backdrop); }
+.z-drawer { z-index: var(--z-drawer); }
+.z-modal { z-index: var(--z-modal); }
+.z-toast { z-index: var(--z-toast); }
+
+.touch-manipulation {
+  touch-action: manipulation;
 }
 
 .hero-banner-height {
@@ -57,8 +90,8 @@
 
 @media (min-width: 768px) {
   .shop-hero-banner-height {
-    height: calc(80vh - var(--header-height) - var(--top-notch-height));
-    height: calc(80dvh - var(--header-height) - var(--top-notch-height));
+    height: calc(60vh - var(--header-height) - var(--top-notch-height));
+    height: calc(60dvh - var(--header-height) - var(--top-notch-height));
     min-height: 440px;
     aspect-ratio: auto;
   }

@@ -79,6 +79,14 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; description: stri
     value: "samaurahealthcare@gmail.com",
     description: "Customer support helpline email address",
   },
+  contact_response_time_text: {
+    value: "",
+    description: "Contact form response-time text promise (empty to hide)",
+  },
+  helpline_hours: {
+    value: "",
+    description: "Support helpline hours schedule (empty to hide)",
+  },
   support_email: {
     value: "samaurahealthcare@gmail.com",
     description: "General support email address",

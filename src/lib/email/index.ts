@@ -166,7 +166,7 @@ export async function sendNewOrderAdminAlertEmail(props: {
   const adminNotificationEmail =
     (await getSetting("admin_notification_email")) ||
     process.env.ADMIN_NOTIFICATION_EMAIL ||
-    "admin@samaura.com";
+    "info@samaura.com";
 
   const safeOrderNumber = escapeHtml(orderNumber);
   const safeName = escapeHtml(customerName);
@@ -391,7 +391,7 @@ export async function sendNewEnquiryAdminEmail(
   props: EnquiryEmailProps
 ): Promise<{ success: boolean; simulated?: boolean; error?: unknown }> {
   const { name, email, phone, topic, subject, message } = props;
-  const adminEmail = (await getSetting("contact_email")) || "admin@samaura.com";
+  const adminEmail = (await getSetting("contact_email")) || "info@samaura.com";
 
   if (!resend || !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_test_placeholder") {
     console.log(

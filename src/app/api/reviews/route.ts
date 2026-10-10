@@ -28,7 +28,7 @@ const reviewSubmissionSchema = z.object({
   title: z.string().max(100, "Title must be under 100 characters").optional().nullable(),
   body: z
     .string()
-    .min(5, "Review details must be at least 5 characters")
+    .min(10, "Review details must be at least 10 characters")
     .max(1000, "Review must be under 1000 characters"),
   // Honeypot field (hidden in UI)
   hp_website: z.string().optional().nullable(),

@@ -4,9 +4,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { ArrowRight, ShieldCheck, Sparkles, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -15,6 +13,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,127 +43,106 @@ function LoginForm() {
     }
   };
 
-  const setDemoCredentials = (role: "admin" | "customer") => {
-    if (role === "admin") {
-      setEmail("admin@samaura.com");
-      setPassword("Admin@123456");
-    } else {
-      setEmail("priya@example.com");
-      setPassword("Customer@123456");
-    }
-    setError(null);
-  };
-
   return (
-    <div className="bg-linear-to-b from-blush/40 via-white to-white min-h-screen py-12 sm:py-20 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-3xl border border-pink-light shadow-lg">
+    <div className="bg-white min-h-[calc(100vh-var(--header-height)-var(--top-notch-height))] py-12 sm:py-20 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-pink-light space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 bg-blush text-brand text-xs font-semibold px-3 py-1 rounded-full">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Samaura Account</span>
-          </div>
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-ink">
-            Welcome Back
+        <div className="text-left sm:text-center space-y-1.5">
+          <h1 className="font-heading font-semibold text-2xl sm:text-3xl text-ink tracking-tight">
+            Sign in
           </h1>
-          <p className="text-xs text-muted">
-            Sign in to track orders, manage saved delivery addresses, and repeat purchases.
+          <p className="text-xs sm:text-sm text-muted">
+            Sign in to track orders, manage saved addresses, and repeat purchases.
           </p>
         </div>
 
-        {/* Demo Credentials Box (Non-production only) */}
-        {process.env.NODE_ENV !== "production" && (
-          <div className="bg-blush/70 border border-pink-light rounded-2xl p-3.5 space-y-2 text-xs">
-            <div className="flex items-center justify-between text-ink font-semibold">
-              <span>Quick Demo Sign-In (Dev Only):</span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setDemoCredentials("customer")}
-                className="flex-1 bg-white hover:bg-pink-light/40 border border-pink-light text-brand py-1.5 px-2 rounded-xl text-xs font-medium transition-colors"
-              >
-                Demo Customer
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials("admin")}
-                className="flex-1 bg-white hover:bg-pink-light/40 border border-pink-light text-ink py-1.5 px-2 rounded-xl text-xs font-medium transition-colors"
-              >
-                Demo Admin
-              </button>
-            </div>
-          </div>
-        )}
-
         {error && (
-          <div className="flex items-center gap-2 p-3 text-xs bg-red-50 text-red-700 border border-red-200 rounded-2xl">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-2 p-3 text-xs bg-red-50 text-red-700 border border-red-200 rounded-xl">
+            <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={1.75} />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-ink">Email Address</label>
-            <Input
+          <div className="space-y-1.5">
+            <label htmlFor="login-email" className="block text-xs font-medium text-ink">
+              Email
+            </label>
+            <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
+              autoComplete="email"
+              className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand transition-colors placeholder:text-muted/60"
             />
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-ink">Password</label>
+              <label htmlFor="login-password" className="block text-xs font-medium text-ink">
+                Password
+              </label>
               <Link
                 href="/forgot-password"
-                className="text-[11px] font-medium text-brand hover:underline"
+                className="text-xs font-medium text-brand hover:underline"
               >
                 Forgot password?
               </Link>
             </div>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input
+                id="login-password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+                className="w-full min-h-[44px] bg-white border border-pink-light rounded-xl pl-3.5 pr-11 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-brand transition-colors placeholder:text-muted/60"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-muted hover:text-ink transition-colors touch-manipulation"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" strokeWidth={1.75} />
+                ) : (
+                  <Eye className="w-4 h-4" strokeWidth={1.75} />
+                )}
+              </button>
+            </div>
           </div>
 
-          <Button
+          <button
             type="submit"
-            size="lg"
-            isLoading={loading}
-            className="w-full shadow-md mt-2 text-sm sm:text-base"
-            rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
+            disabled={loading}
+            className="w-full min-h-[44px] rounded-full bg-brand hover:bg-brand-dark text-white font-medium text-xs sm:text-sm py-2.5 px-4 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
           >
-            Sign In to Account
-          </Button>
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
 
-          <p className="text-center text-xs text-muted pt-2">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-brand font-semibold hover:underline">
-              Create an account
-            </Link>
-          </p>
+          <div className="text-center text-xs text-muted pt-2 space-y-2">
+            <p>
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="text-brand font-medium hover:underline">
+                Create an account
+              </Link>
+            </p>
+            <div>
+              <Link
+                href="/shop"
+                className="text-muted hover:text-ink transition-colors inline-block pt-2"
+              >
+                Continue as guest
+              </Link>
+            </div>
+          </div>
         </form>
-
-        <div className="pt-4 border-t border-blush text-center space-y-2">
-          <Link
-            href="/shop"
-            className="text-xs font-medium text-muted hover:text-brand transition-colors block"
-          >
-            ← Continue shopping as guest
-          </Link>
-          <p className="text-[11px] text-muted flex items-center justify-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-success" />
-            256-bit encrypted secure sign-in
-          </p>
-        </div>
       </div>
     </div>
   );
@@ -174,7 +152,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand" />
         </div>
       }

@@ -1,4 +1,5 @@
 import "dotenv/config";
+import crypto from "crypto";
 import { db } from "../index";
 import {
   users,
@@ -32,10 +33,12 @@ export async function runSeed() {
 
   const adminEmail =
     process.env.SEED_ADMIN_EMAIL ||
-    (process.env.NODE_ENV !== "production" ? "admin@samaura.com" : "");
-  const adminPassword =
-    process.env.SEED_ADMIN_PASSWORD ||
-    (process.env.NODE_ENV !== "production" ? "Admin@123456" : "");
+    (process.env.NODE_ENV !== "production" ? "admin@example.local" : "");
+  let adminPassword = process.env.SEED_ADMIN_PASSWORD || "";
+  if (!adminPassword && process.env.NODE_ENV !== "production") {
+    adminPassword = crypto.randomBytes(6).toString("hex") + "!Aa9";
+    console.log(`   [DEV SEED] Admin user generated with random password (local console only): ${adminPassword}`);
+  }
 
   if (!adminEmail || !adminPassword) {
     throw new Error("Admin email and password must not be empty.");
@@ -56,12 +59,18 @@ export async function runSeed() {
   ];
 
   if (process.env.NODE_ENV !== "production") {
-    console.log("   (Non-production environment detected: seeding demo customer Priya Sharma)...");
-    const customerPasswordHash = await bcrypt.hash("Customer@123456", 10);
+    console.log("   (Non-production environment detected: seeding demo customer)...");
+    const customerEmail = process.env.SEED_CUSTOMER_EMAIL || "customer@example.local";
+    let customerPassword = process.env.SEED_CUSTOMER_PASSWORD || "";
+    if (!customerPassword) {
+      customerPassword = crypto.randomBytes(6).toString("hex") + "!Cc9";
+      console.log(`   [DEV SEED] Customer user generated with random password (local console only): ${customerPassword}`);
+    }
+    const customerPasswordHash = await bcrypt.hash(customerPassword, 10);
     initialUsers.push({
       id: "usr_customer_001",
-      name: "Priya Sharma",
-      email: "priya@example.com",
+      name: "Demo Customer",
+      email: customerEmail,
       passwordHash: customerPasswordHash,
       role: "customer",
       phone: "9811223344",
