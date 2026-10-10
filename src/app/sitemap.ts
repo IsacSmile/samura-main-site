@@ -2,9 +2,10 @@ import { MetadataRoute } from "next";
 import { db } from "@/db";
 import { products, categories, posts } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getSiteUrl } from "@/lib/utils";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.samaurahealthcare.com";
+  const siteUrl = getSiteUrl();
 
   // Static core routes
   const staticRoutes: MetadataRoute.Sitemap = [

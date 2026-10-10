@@ -22,9 +22,12 @@ const inter = Inter({
 });
 
 import { getAllSettings } from "@/lib/services/settings";
+import { getSiteUrl } from "@/lib/utils";
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.samaurahealthcare.com"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Samaura Healthcare | Menstrual Health Education & Menstrual Cups",
     template: "%s | Samaura Healthcare",
@@ -76,7 +79,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const settings = await getAllSettings();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.samaurahealthcare.com";
 
   const structuredData = [
     {

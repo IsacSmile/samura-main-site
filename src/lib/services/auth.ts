@@ -6,6 +6,7 @@ import crypto from "node:crypto";
 import { linkGuestOrdersToUser } from "@/lib/services/orders";
 import { sendPasswordResetEmail, sendEmailVerificationEmail } from "@/lib/email";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getSiteUrl } from "@/lib/utils";
 
 export interface RegisterCustomerInput {
   name: string;
@@ -82,7 +83,7 @@ export async function registerCustomer(input: RegisterCustomerInput) {
     expiresAt,
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const verifyUrl = `${siteUrl}/verify-email?token=${rawToken}`;
 
   // Send verification email
@@ -152,7 +153,7 @@ export async function resendEmailVerification(email: string, clientIp?: string) 
     expiresAt,
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const verifyUrl = `${siteUrl}/verify-email?token=${rawToken}`;
 
   sendEmailVerificationEmail({
@@ -271,7 +272,7 @@ export async function requestPasswordReset(email: string, clientIp?: string) {
     expiresAt,
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const resetUrl = `${siteUrl}/reset-password?token=${rawToken}`;
 
   // Send password reset email

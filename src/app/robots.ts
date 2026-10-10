@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/utils";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://samaura.com";
+  const siteUrl = getSiteUrl();
 
   return {
     rules: [

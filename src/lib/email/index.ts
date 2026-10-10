@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { getSetting } from "@/lib/services/settings";
 import { formatPaymentMethod } from "@/lib/utils/statusLabels";
+import { getSiteUrl } from "@/lib/utils";
 
 const resendApiKey = process.env.RESEND_API_KEY || "";
 if (process.env.NODE_ENV === "production" && !resendApiKey) {
@@ -67,7 +68,7 @@ export async function sendOrderConfirmationEmail(props: OrderEmailProps): Promis
   const safeTotal = escapeHtml(totalRupees);
   const safePaymentMethod = escapeHtml(formatPaymentMethod(paymentMethod));
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const orderUrl = publicToken ? `${siteUrl}/order/${publicToken}` : `${siteUrl}/account`;
 
   if (!resend || !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_test_placeholder") {
@@ -195,7 +196,7 @@ export async function sendNewOrderAdminAlertEmail(props: {
           <p><strong>Payment Method:</strong> ${escapeHtml(paymentMethod)}</p>
           <p><strong>Items:</strong> ${itemCount}</p>
           <p style="margin-top: 20px;">
-            <a href="${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/admin/orders" style="background-color: #3B1F2B; color: white; padding: 10px 16px; text-decoration: none; border-radius: 8px; font-size: 13px;">Manage in Admin Portal</a>
+            <a href="${getSiteUrl()}/admin/orders" style="background-color: #3B1F2B; color: white; padding: 10px 16px; text-decoration: none; border-radius: 8px; font-size: 13px;">Manage in Admin Portal</a>
           </p>
         </div>
       `,
@@ -220,7 +221,7 @@ export async function sendOrderStatusUpdateEmail(props: StatusUpdateEmailProps):
   const safeTracking = escapeHtml(trackingNumber || "N/A");
   const safeReason = escapeHtml(cancelReason || "Cancelled upon request");
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const orderUrl = publicToken ? `${siteUrl}/order/${publicToken}` : `${siteUrl}/account`;
 
   let subject = `Order #${safeOrderNumber} Status Update | Samaura Healthcare`;

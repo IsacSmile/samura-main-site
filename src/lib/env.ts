@@ -3,7 +3,16 @@ import { z } from "zod";
 const productionEnvSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   AUTH_SECRET: z.string().min(1, "AUTH_SECRET is required"),
-  NEXT_PUBLIC_SITE_URL: z.string().url("NEXT_PUBLIC_SITE_URL must be a valid URL"),
+  NEXT_PUBLIC_SITE_URL: z
+    .string()
+    .min(1, "NEXT_PUBLIC_SITE_URL is required")
+    .transform((val) => {
+      const trimmed = val.trim();
+      return trimmed.startsWith("http://") || trimmed.startsWith("https://")
+        ? trimmed
+        : `https://${trimmed}`;
+    })
+    .pipe(z.string().url("NEXT_PUBLIC_SITE_URL must be a valid URL")),
 });
 
 export const seedAdminEnvSchema = z.object({

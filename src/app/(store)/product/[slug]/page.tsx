@@ -10,6 +10,7 @@ import { ProductReviews } from "@/components/product/ProductReviews";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { ChevronRight, ShieldCheck, Heart, Leaf, Award } from "lucide-react";
 import { calculatePercentSavings } from "@/lib/utils/money";
+import { getSiteUrl } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -86,7 +87,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       : null;
 
   // JSON-LD Product Schema
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.samaurahealthcare.com";
+  const siteUrl = getSiteUrl();
   const jsonLd = {
     "@context": "https://schema.org/",
     "@type": "Product",
