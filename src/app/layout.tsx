@@ -72,6 +72,7 @@ export const metadata: Metadata = {
 };
 
 import { CookieNotice } from "@/components/common/CookieNotice";
+import { StorefrontChrome } from "@/components/layout/StorefrontChrome";
 
 export default async function RootLayout({
   children,
@@ -123,13 +124,24 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-white text-muted font-body selection:bg-pink-light selection:text-ink">
-        <AnnouncementBar />
-        <Navbar offersBadge={settings.nav_offers_badge || ""} />
-        <main className="flex-1 pb-12 sm:pb-16">{children}</main>
-        <Footer />
-        <CartDrawer />
-        <WhatsAppButton phoneNumber={settings.whatsapp_number} />
-        <CookieNotice />
+        <StorefrontChrome
+          header={
+            <>
+              <AnnouncementBar />
+              <Navbar offersBadge={settings.nav_offers_badge || ""} />
+            </>
+          }
+          footer={<Footer />}
+          extras={
+            <>
+              <CartDrawer />
+              <WhatsAppButton phoneNumber={settings.whatsapp_number} />
+              <CookieNotice />
+            </>
+          }
+        >
+          {children}
+        </StorefrontChrome>
       </body>
     </html>
   );
