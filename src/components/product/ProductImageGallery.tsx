@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { ZoomIn, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export interface GalleryImage {
   id: string;
@@ -69,15 +69,6 @@ export function ProductImageGallery({
           ) : null}
         </div>
 
-        {/* Zoom Trigger Button */}
-        <button
-          onClick={() => setIsZoomModalOpen(true)}
-          className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white/90 backdrop-blur-xs text-ink hover:text-brand border border-pink-light shadow-xs transition-all hover:scale-110 focus:outline-none"
-          title="Click to view full image"
-          aria-label="Zoom Image"
-        >
-          <ZoomIn className="w-4 h-4" />
-        </button>
 
         {/* Interactive Hover Zoom Area */}
         <div
